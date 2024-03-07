@@ -27,7 +27,7 @@ export default function Editteam() {
 
     const fetchteamData = async () => {
         try {
-            const response = await fetch(`https://mycabinet.onrender.com/api/getteamdata/${teamid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/getteamdata/${teamid}`);
             const json = await response.json();
             
             if (json.Success) {
@@ -47,7 +47,7 @@ export default function Editteam() {
             const updatedteamdata = {
                 ...team
             };
-            const response = await fetch(`https://mycabinet.onrender.com/api/updateteamdata/${teamid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/updateteamdata/${teamid}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

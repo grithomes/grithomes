@@ -60,7 +60,7 @@ export default function Estimatedetail() {
     const fetchestimateData = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/getestimatedata/${estimateid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`);
             const json = await response.json();
             
             setestimateData(json);
@@ -75,7 +75,7 @@ export default function Estimatedetail() {
     const fetchtransactiondata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/gettransactiondata/${estimateid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`);
             const json = await response.json();
 
             // Check if the response contains paidamount
@@ -96,7 +96,7 @@ export default function Estimatedetail() {
     const fetchsignupdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/getsignupdata/${userid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`);
             const json = await response.json();
             
             // if (Array.isArray(json)) {
@@ -273,7 +273,7 @@ const handleEditContent = (estimateData) => {
 
 const handleRemove = async (estimateid) => {
     try {
-      const response = await fetch(`https://mycabinet.onrender.com/api/delestimatedata/${estimateid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
         method: 'GET'
       });
   
@@ -309,7 +309,7 @@ const handleRemove = async (estimateid) => {
       const contentAsPdf = await generatePdfFromHtml();
       try {
         const finalContent = content.trim() || 'Thank you for your business.'; // If content is empty, use default value
-        const response = await fetch('https://mycabinet.onrender.com/api/send-estimate-email', {
+        const response = await fetch('https://grithomes.onrender.com/api/send-estimate-email', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -350,7 +350,7 @@ const handleRemove = async (estimateid) => {
       const content = document.getElementById('invoiceContent').innerHTML;
   const opt = {
     filename:     'myfile.pdf',
-    html2canvas:  { scale: 3 }, // Increase scale for better resolution
+    html2canvas:  { scale: 3, useCORS: true  }, // Increase scale for better resolution
     jsPDF:        { unit: 'in', format: 'A4', orientation: 'portrait' },
     userUnit: 450 / 210 
   };

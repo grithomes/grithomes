@@ -67,7 +67,7 @@ export default function Dashboard() {
     const fetchUserEntries = async (start, end) => {
       try {
         const userid = localStorage.getItem('userid');
-        const response = await fetch(`https://mycabinet.onrender.com/api/userEntries/${userid}`);
+        const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${userid}`);
         const data = await response.json();
         
         // Filter userEntries to include only entries for the current month
@@ -96,7 +96,7 @@ export default function Dashboard() {
     const fetchsignupdata = async () => {
       try {
           const userid =  localStorage.getItem("userid");
-          const response = await fetch(`https://mycabinet.onrender.com/api/getsignupdata/${userid}`);
+          const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`);
           const json = await response.json();
           
           // if (Array.isArray(json)) {
@@ -110,14 +110,14 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
         const userid = localStorage.getItem("userid");
-        const response = await fetch(`https://mycabinet.onrender.com/api/invoicedata/${userid}`);
+        const response = await fetch(`https://grithomes.onrender.com/api/invoicedata/${userid}`);
         const json = await response.json();
 
         if (Array.isArray(json)) {
             setinvoices(json);
 
             const transactionPromises = json.map(async (invoice) => {
-                const response = await fetch(`https://mycabinet.onrender.com/api/gettransactiondata/${invoice._id}`);
+                const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`);
                 const transactionJson = await response.json();
                 return transactionJson.map(transaction => ({
                     ...transaction,

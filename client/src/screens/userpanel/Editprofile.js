@@ -71,7 +71,7 @@ export default function Editprofile() {
     const fetchsignupdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/getsignupdata/${userid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`);
             const json = await response.json();
             
             // if (Array.isArray(json)) {
@@ -107,7 +107,7 @@ export default function Editprofile() {
                 }
             });
     
-            const response = await fetch(`https://mycabinet.onrender.com/api/updatesignupdatadata/${userid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/updatesignupdatadata/${userid}`, {
                 method: 'POST',
                 body: formData,
             });
@@ -130,7 +130,7 @@ export default function Editprofile() {
     //         const updatedsignupdata = {
     //             ...signupdata
     //         };
-    //         const response = await fetch(`https://mycabinet.onrender.com/api/updatesignupdatadata/${userid}`, {
+    //         const response = await fetch(`https://grithomes.onrender.com/api/updatesignupdatadata/${userid}`, {
     //             method: 'POST',
     //             headers: {
     //                 'Content-Type': 'application/json'

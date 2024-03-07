@@ -53,7 +53,7 @@ export default function Createestimate() {
     const fetchLastEstimateNumber = async () => {
         try {
             const userid = localStorage.getItem('userid');
-            const response = await fetch(`https://mycabinet.onrender.com/api/lastEstimateNumber/${userid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`);
             const json = await response.json();
     
             // let nextEstimateNumber = 1;
@@ -74,7 +74,7 @@ export default function Createestimate() {
     const fetchcustomerdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/customers/${userid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`);
             const json = await response.json();
             
             if (Array.isArray(json)) {
@@ -88,7 +88,7 @@ export default function Createestimate() {
     const fetchitemdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/itemdata/${userid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`);
             const json = await response.json();
             
             if (Array.isArray(json)) {
@@ -314,7 +314,7 @@ const handleSubmit = async (e) => {
   
   
       // Sending estimate data to the backend API
-      const response = await fetch('https://mycabinet.onrender.com/api/savecreateestimate', {
+      const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

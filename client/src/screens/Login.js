@@ -20,7 +20,7 @@ export default function Login() {
 //   const handleSubmit = async(e) => {
 //     e.preventDefault();
 //     setloginbtnloader(true);
-//     const response = await fetch("https://mycabinet.onrender.com/api/login",{
+//     const response = await fetch("https://grithomes.onrender.com/api/login",{
 //         method:'POST',
 //         headers: {
 //             'Content-Type':'application/json'
@@ -66,7 +66,7 @@ const handleSubmit = async (e) => {
   setloginbtnloader(true);
 
   try {
-    const response = await fetch("https://mycabinet.onrender.com/api/login", {
+    const response = await fetch("https://grithomes.onrender.com/api/login", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'

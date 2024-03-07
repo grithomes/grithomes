@@ -24,7 +24,7 @@ export default function Teamhistory() {
     const fetchAllEntries = async () => {
         try {
             const teamid = localStorage.getItem('userid');
-          const response = await fetch(`https://mycabinet.onrender.com/api/userEntries/${teamid}`);
+          const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`);
           const data = await response.json();
     
           setUserEntries(data.userEntries);

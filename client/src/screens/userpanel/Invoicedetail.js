@@ -182,7 +182,7 @@ export default function Invoicedetail() {
       };
 
       try {
-        const response = await fetch('https://mycabinet.onrender.com/api/addpayment', {
+        const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -239,7 +239,7 @@ export default function Invoicedetail() {
       try {
         if ((savedDepositData != null || savedDepositData != "") && savedDepositData._id != undefined) {
           // If savedDepositData exists and has an ID, update the existing record
-          const response = await fetch(`https://mycabinet.onrender.com/api/updatedeposit/${savedDepositData._id}`, {
+          const response = await fetch(`https://grithomes.onrender.com/api/updatedeposit/${savedDepositData._id}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -258,7 +258,7 @@ export default function Invoicedetail() {
       
           if (data.Success) {
             console.log('Deposit updated successfully:', data.deposit);
-            const savedDepositResponse = await fetch(`https://mycabinet.onrender.com/api/deposit/${data.deposit._id}`);
+            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
             const savedDepositDatad = await savedDepositResponse.json();
             setsavedDepositData(savedDepositDatad.deposit);
             // You may update the state here if required
@@ -267,7 +267,7 @@ export default function Invoicedetail() {
           }
         } else {
           // If savedDepositData is empty or does not have an ID, add a new record
-          const response = await fetch('https://mycabinet.onrender.com/api/deposit', {
+          const response = await fetch('https://grithomes.onrender.com/api/deposit', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -285,7 +285,7 @@ export default function Invoicedetail() {
           const data = await response.json();
       
           if (data.success) {
-            const savedDepositResponse = await fetch(`https://mycabinet.onrender.com/api/deposit/${data.deposit._id}`);
+            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
             const savedDepositDatad = await savedDepositResponse.json();
             setsavedDepositData(savedDepositDatad.deposit);
             console.log('New deposit added successfully:', data.deposit);
@@ -305,7 +305,7 @@ export default function Invoicedetail() {
       try {
         if ((savedDepositData != null || savedDepositData != "") && savedDepositData._id != undefined) {
           // If savedDepositData exists and has an ID, update the existing record
-          const response = await fetch(`https://mycabinet.onrender.com/api/updatedeposit/${savedDepositData._id}`, {
+          const response = await fetch(`https://grithomes.onrender.com/api/updatedeposit/${savedDepositData._id}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -324,7 +324,7 @@ export default function Invoicedetail() {
       
           if (data.Success) {
             console.log('Deposit updated successfully:', data.deposit);
-            const savedDepositResponse = await fetch(`https://mycabinet.onrender.com/api/deposit/${data.deposit._id}`);
+            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
             const savedDepositDatad = await savedDepositResponse.json();
             setsavedDepositData(savedDepositDatad.deposit);
             setShowSendEmailModal(true);
@@ -334,7 +334,7 @@ export default function Invoicedetail() {
           }
         } else {
           // If savedDepositData is empty or does not have an ID, add a new record
-          const response = await fetch('https://mycabinet.onrender.com/api/deposit', {
+          const response = await fetch('https://grithomes.onrender.com/api/deposit', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -352,7 +352,7 @@ export default function Invoicedetail() {
           const data = await response.json();
       
           if (data.success) {
-            const savedDepositResponse = await fetch(`https://mycabinet.onrender.com/api/deposit/${data.deposit._id}`);
+            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
             const savedDepositDatad = await savedDepositResponse.json();
             setsavedDepositData(savedDepositDatad.deposit);
             console.log('New deposit added successfully:', data.deposit);
@@ -381,7 +381,7 @@ export default function Invoicedetail() {
     const fetchinvoicedata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/getinvoicedata/${invoiceid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/getinvoicedata/${invoiceid}`);
             const json = await response.json();
             
             setInvoiceData(json);
@@ -396,7 +396,7 @@ export default function Invoicedetail() {
     const fetchdepositdata = async () => {
         try {
           const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/getdepositdata/${userid}/${invoiceid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/getdepositdata/${userid}/${invoiceid}`);
             const json = await response.json();
             
             setsavedDepositData(json);
@@ -408,7 +408,7 @@ export default function Invoicedetail() {
     const fetchtransactiondata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/gettransactiondata/${invoiceid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoiceid}`);
             const json = await response.json();
 
             // Check if the response contains paidamount
@@ -429,7 +429,7 @@ export default function Invoicedetail() {
     const fetchsignupdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/getsignupdata/${userid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`);
             const json = await response.json();
             
             // if (Array.isArray(json)) {
@@ -499,7 +499,7 @@ export default function Invoicedetail() {
     setexceedpaymenterror("");
   }
     try {
-      const response = await fetch('https://mycabinet.onrender.com/api/addpayment', {
+      const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -711,7 +711,7 @@ const handleEditContent = (invoiceData) => {
 
 const handleRemove = async (invoiceid) => {
     try {
-      const response = await fetch(`https://mycabinet.onrender.com/api/deldata/${invoiceid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
         method: 'GET'
       });
   
@@ -770,7 +770,7 @@ const handleFormSubmit = async (event) => {
     const contentAsPdf = await generatePdfFromHtml();
     try {
       const finalContent = content.trim() || 'Thank you for your business.'; // If content is empty, use default value
-      const response = await fetch('https://mycabinet.onrender.com/api/send-invoice-email', {
+      const response = await fetch('https://grithomes.onrender.com/api/send-invoice-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -807,7 +807,7 @@ const handleDepositFormSubmit = async (event) => {
     const contentAsPdf = await generatePdfFromHtml();
     try {
       const finalContent = content.trim() || 'Thank you for your business.'; // If content is empty, use default value
-      const response = await fetch('https://mycabinet.onrender.com/api/send-deposit-email', {
+      const response = await fetch('https://grithomes.onrender.com/api/send-deposit-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

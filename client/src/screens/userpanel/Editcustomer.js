@@ -36,7 +36,7 @@ export default function Editcustomer() {
 
     const fetchCustomerData = async () => {
         try {
-            const response = await fetch(`https://mycabinet.onrender.com/api/getcustomers/${customerId}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/getcustomers/${customerId}`);
             const json = await response.json();
             
             if (json.Success) {
@@ -56,7 +56,7 @@ export default function Editcustomer() {
             const updatedcustomerdata = {
                 ...customer
             };
-            const response = await fetch(`https://mycabinet.onrender.com/api/updatecostomerdata/${customerId}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/updatecostomerdata/${customerId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

@@ -49,7 +49,7 @@ export default function Editinvoice() {
     const fetchdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/geteditinvoicedata/${invoiceid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/geteditinvoicedata/${invoiceid}`);
             const json = await response.json();
             
             if (json.Success) {
@@ -66,7 +66,7 @@ export default function Editinvoice() {
     const fetchcustomerdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/customers/${userid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`);
             const json = await response.json();
             
             if (Array.isArray(json)) {
@@ -101,7 +101,7 @@ export default function Editinvoice() {
     const fetchitemdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/itemdata/${userid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`);
             const json = await response.json();
             
             if (Array.isArray(json)) {
@@ -125,7 +125,7 @@ export default function Editinvoice() {
                 tax: calculateTaxAmount(), 
             };
     
-            const response = await fetch(`https://mycabinet.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -231,7 +231,7 @@ export default function Editinvoice() {
                 return;
             }
     
-            const response = await fetch(`https://mycabinet.onrender.com/api/delinvoiceitem/${invoiceData._id}/${itemId}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/delinvoiceitem/${invoiceData._id}/${itemId}`, {
                 method: 'GET'
             });
     

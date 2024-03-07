@@ -45,7 +45,7 @@ export default function Addcustomer() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     let userid = localStorage.getItem('userid');
-    const response = await fetch('https://mycabinet.onrender.com/api/addcustomer', {
+    const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

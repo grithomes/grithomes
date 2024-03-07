@@ -31,7 +31,7 @@ export default function Addteam() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     let userid = localStorage.getItem('userid');
-    const response = await fetch('https://mycabinet.onrender.com/api/addteammember', {
+    const response = await fetch('https://grithomes.onrender.com/api/addteammember', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

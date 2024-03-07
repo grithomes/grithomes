@@ -41,7 +41,7 @@ export default function Customerlist() {
     const fetchdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://mycabinet.onrender.com/api/customers/${userid}`);
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`);
             const json = await response.json();
             
             if (Array.isArray(json)) {
@@ -60,7 +60,7 @@ export default function Customerlist() {
 
     const handleDeleteClick = async (customerId) => {
         try {
-            const response = await fetch(`https://mycabinet.onrender.com/api/delcustomers/${customerId}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/delcustomers/${customerId}`, {
                 method: 'GET'
             });
     
