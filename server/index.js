@@ -11,16 +11,36 @@ mongoDB();
 app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
-app.use((req,res,next)=>{
-  // res.setHeader("Access-Control-Allow-Origin","https://grit.homes");
-  res.setHeader("Access-Control-Allow-Origin","https://grithomes.vercel.app");
-  // res.setHeader("Access-Control-Allow-Origin","http://localhost:3000");
+// app.use((req,res,next)=>{
+//   // res.setHeader("Access-Control-Allow-Origin","https://grit.homes");
+//   res.setHeader("Access-Control-Allow-Origin","https://grithomes.vercel.app");
+//   // res.setHeader("Access-Control-Allow-Origin","http://localhost:3000");
+//   res.header(
+//     "Access-Control-Allow-Headers",
+//     "Origin, X-Requested-With, Content-Type, Accept"
+//   );
+//   next();
+// })
+app.use((req, res, next) => {
+  // Allow multiple domains
+  const allowedOrigins = [
+    "https://grithomes.vercel.app",
+    "https://grit.homes",
+  ];
+
+  const origin = req.headers.origin;
+
+  if (allowedOrigins.includes(origin)) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
   res.header(
     "Access-Control-Allow-Headers",
     "Origin, X-Requested-With, Content-Type, Accept"
   );
+
   next();
-})
+});
 
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
