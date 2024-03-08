@@ -25,7 +25,7 @@ app.use((req, res, next) => {
   // Allow multiple domains
   const allowedOrigins = [
     "https://grithomes.vercel.app",
-    "https://grit.homes",
+    "https://www.grit.homes",
   ];
 
   const origin = req.headers.origin;
