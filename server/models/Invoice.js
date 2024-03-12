@@ -25,6 +25,9 @@ const InvoiceSchema = new Schema({
     description: {
         type: String,
     },
+    job: {
+        type: String,
+    },
     items: [],
     subtotal: {
         type: Number,

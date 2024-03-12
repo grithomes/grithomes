@@ -1183,9 +1183,12 @@ router.post("/addcustomer",
 
     // Create a new invoice
 router.post('/savecreateinvoice', async (req, res) => {
+    const invoiceSchemaDefinition = Invoice.schema.obj;
+console.log('Invoice Schema:', invoiceSchemaDefinition);
         try {
             const { userid, invoiceData } = req.body; // Extracting invoiceData from the request body
             console.log('Received userid:', userid);
+            console.log('Received invoiceData:', invoiceData); // Add this line to log the entire invoiceData
 
             // Check if the invoice number already exists for the given user ID
         const existingInvoice = await Invoice.findOne({
@@ -1211,7 +1214,7 @@ router.post('/savecreateinvoice', async (req, res) => {
       
           // Save the new invoice to the database
           const savedInvoice = await newInvoice.save();
-      
+          console.log('Received savedInvoice:', savedInvoice); // Add this line to log the entire invoiceData
           res.status(201).json({
             success: true,
             message: 'Invoice saved successfully!',

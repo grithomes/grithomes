@@ -162,6 +162,7 @@ export default function Invoice() {
                         <td>
                           <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
                           <p className='my-0'>{invoice.InvoiceNumber}</p>
+                          <p className='my-0'>Job: {invoice.job}</p>
                         </td>
                         <td>
                           <span className='clrtrxtstatus'>{getStatus(invoice)}</span>

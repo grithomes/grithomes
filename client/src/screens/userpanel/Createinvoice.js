@@ -31,7 +31,7 @@ export default function Createinvoice() {
     const [taxPercentage, setTaxPercentage] = useState(10);
     const [invoiceData, setInvoiceData] = useState({
         customername: '',itemname: '',customeremail: '',invoice_id: '', InvoiceNumber:'',purchaseorder: '',
-        date: '',duedate: '',description: '',itemquantity: '', price: '',discount: '',
+        date: '', job: '', duedate: '',description: '',itemquantity: '', price: '',discount: '',
         amount: '',tax: '',taxpercentage:'',subtotal: '',total: '',amountdue: '',information: '',
     });
     const [editorData, setEditorData] = useState("<p></p>");
@@ -308,6 +308,7 @@ const handleSubmit = async (e) => {
         invoice_id: invoiceData.invoice_id, 
         InvoiceNumber: invoiceData.InvoiceNumber, 
         purchaseorder: invoiceData.purchaseorder,
+        job: invoiceData.job || 'No Job',
         information: editorData, 
         date: invoiceData.date,
         items: invoiceItems,
@@ -318,7 +319,7 @@ const handleSubmit = async (e) => {
         taxpercentage: taxPercentageValue , 
         amountdue: amountdue
       };
-  
+  console.log(data, "Invoice Data ====");
   
       // Sending invoice data to the backend API
       const response = await fetch('https://grithomes.onrender.com/api/savecreateinvoice', {
@@ -328,13 +329,17 @@ const handleSubmit = async (e) => {
         },
         body: JSON.stringify({ userid, invoiceData: data }),
       });
+
+      console.log( "After Invoice Data:" ,data,);
+     
   
       if (response.ok) {
         const responseData = await response.json();
         if (responseData.success) {
            const invoiceid =  responseData.invoice._id;
+           console.log( "After Invoice responseData:" ,responseData);
         navigate('/userpanel/Invoicedetail', { state: { invoiceid } });
-          console.log('Invoice saved successfully!');
+          console.log(responseData, 'Invoice saved successfully!');
         } else {
           console.error('Failed to save the invoice.');
         }
@@ -389,20 +394,24 @@ const onchange = (event) => {
     setitems(updatedItems);
 };
 
-const onChangeDescription = (event, itemId) => {
-    const newDescription = event.target.value;
-    // Update the item's description in the items array
-    const updatedItems = items.map(item => {
+const onChangeDescription = (event, editor, itemId) => {
+    const value = editor.getData();
+
+    // Update the items array in the state with the new description for the specified item
+    const updatedItems = items.map((item) => {
         if (item._id === itemId) {
             return {
                 ...item,
-                description: newDescription
+                description: value,
             };
         }
         return item;
     });
+
+    // Update the state with the updated items array
     setitems(updatedItems);
 };
+
 
   return (
     <div className='bg'>
@@ -541,6 +550,23 @@ const onChangeDescription = (event, itemId) => {
                                         </div>
                                         <div className="col-lg-6">
                                             <div className="mb-3">
+                                                <label htmlFor="Job" className="form-label">
+                                                Job
+                                                </label>
+                                                <input
+                                                type="text"
+                                                name="job"
+                                                className="form-control"
+                                                value={invoiceData.job} 
+                                                onChange={onchange}
+                                                // placeholder="Date"
+                                                id="job"
+                                                required
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-lg-6">
+                                            <div className="mb-3">
                                                 <label htmlFor="duedate" className="form-label">
                                                     Due Date
                                                 </label>
@@ -555,6 +581,7 @@ const onChangeDescription = (event, itemId) => {
                                                 />
                                             </div>
                                         </div>
+                                       
                                     </div>
                                 </div>    
                             </div>
@@ -595,7 +622,7 @@ const onChangeDescription = (event, itemId) => {
                                     </button>
                                 </div>
                                 <div className="row">
-                                    <div className="col-8">
+                                    <div className="col">
                                         <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
                                         {/* <textarea
                                             className="form-control mb-3"
@@ -605,7 +632,19 @@ const onChangeDescription = (event, itemId) => {
                                             rows="3"
                                             value={selectedItem?.description || ''}
                                         ></textarea> */}
-                                        <textarea
+                                        <CKEditor
+                                            editor={ClassicEditor}
+                                            data={selectedItem?.description || ''}
+                                            name={`description-${itemId}`}
+                                            onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
+                                            onBlur={(event, editor) => {
+                                                console.log('Blur.', editor);
+                                            }}
+                                            onFocus={(event, editor) => {
+                                                console.log('Focus.', editor);
+                                            }}
+                                        />
+                                        {/* <textarea
                                             className="form-control"
                                             name={`description-${itemId}`}
                                             value={selectedItem?.description || ''}
@@ -613,7 +652,7 @@ const onChangeDescription = (event, itemId) => {
                                             id={`description-${itemId}`}
                                             rows="3"
                                             placeholder="Item Description"
-                                        ></textarea>
+                                        ></textarea> */}
                                     </div>
                                     <div className="col-4">
                                         <label htmlFor={`discount-${itemId}`} className="form-label">Discount</label>
