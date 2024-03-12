@@ -111,6 +111,10 @@ export default function Createestimate() {
         const data = editor.getData();
         setEditorData(data);
     };
+    const handleEditorChange1 = (event, editor) => {
+        const data = editor.getData();
+        setEditorData(data);
+    };
 
     // const onChangeQuantity = (event, itemId) => {
     //     const newQuantity = event.target.value ? parseInt(event.target.value) : 1;
@@ -376,9 +380,8 @@ const handleSubmit = async (e) => {
     // Update the state with the updated items array
     setitems(updatedItems);
 };
-
-const onChangeDescription = (event, itemId) => {
-    const { value } = event.target;
+const onChangeDescription = (event, editor, itemId) => {
+    const value = editor.getData();
 
     // Update the items array in the state with the new description for the specified item
     const updatedItems = items.map((item) => {
@@ -394,7 +397,6 @@ const onChangeDescription = (event, itemId) => {
     // Update the state with the updated items array
     setitems(updatedItems);
 };
-
 
 
   return (
@@ -597,14 +599,26 @@ const onChangeDescription = (event, itemId) => {
                                             rows="3"
                                             value={selectedItem?.description || ''}
                                         ></textarea> */}
-                                         <textarea
+                                        <CKEditor
+    editor={ClassicEditor}
+    data={selectedItem?.description || ''}
+    name={`description-${itemId}`}
+    onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
+    onBlur={(event, editor) => {
+        console.log('Blur.', editor);
+    }}
+    onFocus={(event, editor) => {
+        console.log('Focus.', editor);
+    }}
+/>
+                                         {/* <textarea
                                             className="form-control"
                                             name={`description-${itemId}`}  // Use a unique identifier for each item
                                             value={selectedItem?.description || ''}
                                             onChange={(event) => onChangeDescription(event, itemId)}  // Add onChange handler for description
                                             rows="3"
                                             id={`description-${itemId}`}
-                                        ></textarea>
+                                        ></textarea> */}
                                     </div>
                                     <div className="col">
                                         <label htmlFor={`discount-${itemId}`} className="form-label">Discount</label>
@@ -748,10 +762,6 @@ const onChangeDescription = (event, itemId) => {
                                 <CKEditor
                                     editor={ ClassicEditor }
                                     data={editorData}
-                                    // onReady={ editor => {
-                                    //     console.log( 'Editor is ready to use!', editor );
-                                    // } }
-                                    
                                     onChange={handleEditorChange}
                                     onBlur={ ( event, editor ) => {
                                         console.log( 'Blur.', editor );
