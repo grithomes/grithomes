@@ -26,6 +26,7 @@ app.use((req, res, next) => {
   const allowedOrigins = [
     "https://grithomes.vercel.app",
     "https://www.grit.homes",
+    "http://localhost:3000"
   ];
 
   const origin = req.headers.origin;
