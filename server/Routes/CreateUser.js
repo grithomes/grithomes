@@ -377,6 +377,7 @@ router.post("/createuser", [
     body('LastName').isLength({ min: 3 }),
     body('password').isLength({ min: 5 }),
     body('address').isLength(),
+    body("gstNumber").isLength(),
 ], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -415,6 +416,7 @@ router.post("/createuser", [
                 email: req.body.email,
                 address: req.body.address,
                 companyImageUrl: req.body.companyImageUrl,
+                gstNumber: req.body.gstNumber,
             });
 
             sendWelcomeEmail(req.body.email, req.body.FirstName, true);
@@ -948,7 +950,6 @@ router.post('/clockin', async (req, res) => {
     }
 });
 
-
 router.post('/clockout', async (req, res) => {
     const { userid,username,userEmail,isTeamMember } = req.body;
     const endTime = new Date();
@@ -962,15 +963,18 @@ router.post('/clockout', async (req, res) => {
         mostRecentClockEntry.endTime = formattedEndTime;
         const startTime = new Date(mostRecentClockEntry.startTime);
         const endTime = new Date(mostRecentClockEntry.endTime);
-        const totalTimeWorked = (endTime - startTime)
+        const totalTimeWorked = (endTime - startTime);
+        const timeInSeconds = Math.floor(totalTimeWorked / 1000);
 
+        // Update the timeInSeconds field
+        mostRecentClockEntry.timeInSeconds = timeInSeconds;
 
         // Convert the time difference to hours, minutes, and seconds
-    const hours = Math.floor(totalTimeWorked / 3600000); // 1 hour = 3600000 milliseconds
-    const minutes = Math.floor((totalTimeWorked % 3600000) / 60000); // 1 minute = 60000 milliseconds
-    const seconds = Math.floor((totalTimeWorked % 60000) / 1000); // 1 second = 1000 milliseconds
+        const hours = Math.floor(totalTimeWorked / 3600000); // 1 hour = 3600000 milliseconds
+        const minutes = Math.floor((totalTimeWorked % 3600000) / 60000); // 1 minute = 60000 milliseconds
+        const seconds = Math.floor((totalTimeWorked % 60000) / 1000); // 1 second = 1000 milliseconds
 
-    mostRecentClockEntry.totalTime = `${hours} hours ${minutes} minutes ${seconds} seconds`;
+        mostRecentClockEntry.totalTime = `${hours} hours ${minutes} minutes ${seconds} seconds`;
         await mostRecentClockEntry.save();
 
         res.json({ message: 'Clock-out successful', endTime: formattedEndTime,totalTimeWorked: mostRecentClockEntry.totalTime });
@@ -993,9 +997,9 @@ router.get('/userEntries/:userid', async (req, res) => {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
     }
-  });
+});
 
-  router.get('/allEntries', async (req, res) => {
+router.get('/allEntries', async (req, res) => {
   try {
     const allEntries = await Timeschema.find().sort({ startTime: 1 });
 
@@ -1969,6 +1973,33 @@ router.get('/customers/:userid', async (req, res) => {
                 updatedsignupdata.companyImageUrl = req.file.path;
             }
         
+            const result = await User.findByIdAndUpdate(userid, updatedsignupdata, { new: true });
+        
+            if (result) {
+                res.json({
+                    Success: true,
+                    message: "Signupdata updated successfully",
+                    signupdata: result
+                });
+            } else {
+                res.status(404).json({
+                    Success: false,
+                    message: "Signupdata not found"
+                });
+            }
+        } catch (error) {
+            console.error("Error updating Signupdata:", error);
+            res.status(500).json({
+                Success: false,
+                message: "Failed to update Signupdata"
+            });
+        }
+    });
+
+    router.post('/updatesignupdata/:userid', async (req, res) => {
+        try {
+            const userid = req.params.userid; // Fix here
+            const updatedsignupdata = req.body;
             const result = await User.findByIdAndUpdate(userid, updatedsignupdata, { new: true });
         
             if (result) {

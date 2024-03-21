@@ -13,6 +13,8 @@ export default function Estimate() {
     const estimateid = location.state?.estimateid;
     const navigate = useNavigate();
     const [convertedEstimates, setConvertedEstimates] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);
+    const entriesPerPage = 10;
 
     useEffect(() => {
         if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
@@ -79,6 +81,27 @@ export default function Estimate() {
       }
   };
 
+   // Pagination functions
+   const getPageCount = () => Math.ceil(estimates.length / entriesPerPage);
+
+   const getCurrentPageEstimates = () => {
+     const startIndex = currentPage * entriesPerPage;
+     const endIndex = startIndex + entriesPerPage;
+     return estimates.slice(startIndex, endIndex);
+   };
+ 
+   const handlePrevPage = () => {
+     if (currentPage > 0) {
+       setCurrentPage(currentPage - 1);
+     }
+   };
+ 
+   const handleNextPage = () => {
+     if ((currentPage + 1) * entriesPerPage < estimates.length) {
+       setCurrentPage(currentPage + 1);
+     }
+   };
+
   return (
     <div className='bg'>
     {
@@ -133,13 +156,13 @@ export default function Estimate() {
                     </tr>
                   </thead>
                   <tbody>
-                    {estimates.map((estimate, index) => (
+                    {getCurrentPageEstimates().map((estimate, index) => (
                       estimate.convertedToInvoice != true && (
                       <tr key={index}>
                         <td>
                           <p className='my-0 fw-bold clrtrxtstatus'>{estimate.customername}</p>
                           <p className='my-0'>{estimate.EstimateNumber}</p>
-                          <p className='my-0'>{estimate.job}</p>
+                          <p className='my-0'>Job: {estimate.job}</p>
                         </td>
                         <td>
                           <span className='clrtrxtstatus'>
@@ -166,8 +189,55 @@ export default function Estimate() {
                       </tr>
                         )
                       ))}
+                    {/* {estimates.map((estimate, index) => (
+                      estimate.convertedToInvoice != true && (
+                      <tr key={index}>
+                        <td>
+                          <p className='my-0 fw-bold clrtrxtstatus'>{estimate.customername}</p>
+                          <p className='my-0'>{estimate.EstimateNumber}</p>
+                          <p className='my-0'>Job: {estimate.job}</p>
+                        </td>
+                        <td>
+                          <span className='clrtrxtstatus'>
+                            <i class="fa-solid fa-circle fs-12 mx-2 saved"></i> Saved
+                          </span>
+                        </td>
+                        <td>
+                          <div className=''>
+                            <div className='d-flex'>
+                              <p className='issue px-1 my-1'>Issued</p>
+                              <p className='datetext my-1'>{formatCustomDate(estimate.date)}</p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className='text-center'>
+                          <a role='button' className='text-black text-center' onClick={() => handleViewClick(estimate)}>
+                            <i className='fa-solid fa-eye'></i>
+                          </a>
+                        </td>
+                        <td className='text-center'>
+                          <a role='button' className='btn text-black text-center converbtn' onClick={() => handleConvertToInvoice(estimate._id)} >Convert</a>
+                        </td>
+                        <td><CurrencySign />{estimate.total}</td>
+                      </tr>
+                        )
+                      ))} */}
                   </tbody>
                 </table>
+              </div>
+              {/* Pagination buttons */}
+              <div className='row mt-3'>
+                <div className='col-12'>
+                  <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
+                    Previous Page
+                  </button>
+                  <button
+                    onClick={handleNextPage}
+                    disabled={(currentPage + 1) * entriesPerPage >= estimates.length}
+                  >
+                    Next Page
+                  </button>
+                </div>
               </div>
             </div>
           </div>

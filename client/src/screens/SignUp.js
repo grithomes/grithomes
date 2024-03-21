@@ -248,8 +248,12 @@ export default function SignUp() {
                             <textarea type="message" className="form-control" name="address" value={credentails.address} onChange={onchange} placeholder="Address" id="exampleInputaddress" required />
                         </div>
                     </div>
-                    
-                    
+                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
+                        <div className="form-group mb-3 pt-3">
+                            <label htmlFor="gstNumber" className="form-label">GST Number</label>
+                            <input type="text" className="form-control" name="gstNumber" value={credentails.gstNumber} onChange={onchange} placeholder="GST Number" />                        
+                        </div>
+                    </div>
                 </div>
                 <div class="form-group mb-3 ">
                     {message == true ? 

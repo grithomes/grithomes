@@ -14,6 +14,8 @@ export default function Invoice() {
     const invoiceid = location.state?.invoiceid;
     const navigate = useNavigate();
     const [transactions, setTransactions] = useState([]);
+    const [currentPage, setCurrentPage] = useState(0);
+    const entriesPerPage = 10; 
 
     useEffect(() => {
         if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
@@ -102,6 +104,27 @@ export default function Invoice() {
             return "Payment Pending";
         }
     };
+
+    // Pagination functions
+  const getPageCount = () => Math.ceil(invoices.length / entriesPerPage);
+
+  const getCurrentPageInvoices = () => {
+    const startIndex = currentPage * entriesPerPage;
+    const endIndex = startIndex + entriesPerPage;
+    return invoices.slice(startIndex, endIndex);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if ((currentPage + 1) * entriesPerPage < invoices.length) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
     
 
   return (
@@ -157,7 +180,7 @@ export default function Invoice() {
                     </tr>
                   </thead>
                   <tbody>
-                    {invoices.map((invoice, index) => (
+                    {getCurrentPageInvoices().map((invoice, index) => (
                       <tr key={index}>
                         <td>
                           <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
@@ -190,6 +213,20 @@ export default function Invoice() {
                   </tbody>
                 </table>
               </div>
+              {/* Pagination buttons */}
+              <div className='row mt-3'>
+                  <div className='col-12'>
+                    <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
+                      Previous Page
+                    </button>
+                    <button
+                      onClick={handleNextPage}
+                      disabled={(currentPage + 1) * entriesPerPage >= invoices.length}
+                    >
+                      Next Page
+                    </button>
+                  </div>
+                </div>
             </div>
           </div>
         </div>

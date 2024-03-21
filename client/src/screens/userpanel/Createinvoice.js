@@ -10,6 +10,8 @@ import VirtualizedSelect from 'react-virtualized-select';
 import 'react-virtualized-select/styles.css';
 import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
+import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
+import "@davzon/react-country-state-city/dist/react-country-state-city.css";
 
 export default function Createinvoice() {
     const [ loading, setloading ] = useState(true);
@@ -35,6 +37,18 @@ export default function Createinvoice() {
         amount: '',tax: '',taxpercentage:'',subtotal: '',total: '',amountdue: '',information: '',
     });
     const [editorData, setEditorData] = useState("<p></p>");
+  const [credentials, setCredentials] = useState({
+    name: '',
+    email: '',
+    number: '',
+    citydata: '',
+    statedata: '',
+    countrydata: '',
+    information: '',
+    address1: '',
+    address2: '',
+    post: '',
+  });
 
     useEffect(() => {
         const fetchData = async () => {
@@ -50,6 +64,17 @@ export default function Createinvoice() {
         setloading(false);
     }, [])
     let navigate = useNavigate();
+
+    const [countryid, setcountryid] = useState(false);
+    const [stateid, setstateid] = useState(false);
+    const [cityid, setcityid] = useState(false);
+  
+    const [country, setcountry] = useState(false);
+    const [state, setstate] = useState(false);
+    const [city, setcity] = useState(false);
+
+    const [message1, setMessage1] = useState(false);
+
 
     const fetchLastInvoiceNumber = async () => {
         try {
@@ -412,6 +437,67 @@ const onChangeDescription = (event, editor, itemId) => {
     setitems(updatedItems);
 };
 
+const handleAddCustomer = async (e) => {
+    e.preventDefault();
+    let userid = localStorage.getItem('userid');
+    const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userid: userid,
+        name: credentials.name,
+        email: credentials.email,
+        information: credentials.information,
+        number: credentials.number,
+        city: city,
+        state: state,
+        country: country,
+        citydata: credentials.citydata,
+        statedata: credentials.statedata,
+        countrydata: credentials.countrydata,
+        cityid: cityid,
+        stateid: stateid,
+        countryid: countryid,
+        address1: credentials.address1,
+        address2: credentials.address2,
+        post: credentials.post,
+      }),
+    });
+
+    const json = await response.json();
+    console.log(json);
+
+    if (json.Success) {
+      setCredentials({
+        name: '',
+        email: '',
+        number: '',
+        citydata: '',
+        statedata: '',
+        countrydata: '',
+        information: '',
+        address1: '',
+        address2: '',
+        post: '',
+      });
+
+      setMessage1(true);
+      setAlertShow(json.message);
+      window.location.reload();
+    //   navigate('/userpanel/Customerlist');
+    }
+
+    else{
+        alert("This Customer Email already exist")
+    }
+  };
+
+  const onchangeaddcustomer = (event) => {
+    setCredentials({ ...credentials, [event.target.name]: event.target.value });
+  };
+
 
   return (
     <div className='bg'>
@@ -474,18 +560,28 @@ const onChangeDescription = (event, editor, itemId) => {
                                         ) : (
                                         <div className="search-container forms">
                                             <p className='fs-20 mb-0'>Select Customers</p>
-                                            <VirtualizedSelect
-                                                id="searchitems" 
-                                                name="customername"
-                                                className="form-control zindex op pl-0"
-                                                placeholder="" 
-                                                onChange={onChangecustomer}
-                                                required
-                                                options={ customers.map((customer,index)=>
-                                                    ({label: customer.name, value: customer._id})
-            
-                                                )}
-                                            />
+                                            <div className="row">
+                                                <div className="col-6">
+                                                    <VirtualizedSelect
+                                                        id="searchitems" 
+                                                        name="customername"
+                                                        className="form-control zindex op pl-0"
+                                                        placeholder="" 
+                                                        onChange={onChangecustomer}
+                                                        required
+                                                        options={ customers.map((customer,index)=>
+                                                            ({label: customer.name, value: customer._id})
+                    
+                                                        )}
+                                                    />
+
+                                                </div>
+                                                <div className="col-3">
+                                                    <a role='button' className="btn btn-success btn-sm me-2 text-white mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal1">
+                                                        <i class="fa-solid fa-plus"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
                                         </div>
                                     )}
                                     
@@ -899,7 +995,217 @@ const onChangeDescription = (event, editor, itemId) => {
                     </div>
                 </div>
             </div>
-        </form>
+</form>
+
+{/* add customer */}
+
+<form action="">
+            <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-lg">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">Add Customer</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                        <div className="row">
+                            <div className="col-12 col-sm-6 col-lg-4">
+                                <div className="mb-3">
+                                <label htmlFor="exampleInputtext1" className="form-label">
+                                Customer Name
+                                </label>
+                                <input
+                                type="text"
+                                className="form-control"
+                                name="name"
+                                value={credentials.name}
+                                onChange={onchangeaddcustomer}
+                                placeholder="Customer Name"
+                                id="exampleInputtext1"
+                                required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-4">
+                          <div className="mb-3">
+                            <label htmlFor="exampleInputEmail1" className="form-label">
+                              Contact Email
+                            </label>
+                            <input
+                              type="email"
+                              className="form-control"
+                              name="email"
+                              value={credentials.email}
+                              onChange={onchangeaddcustomer}
+                              placeholder="Contact Email"
+                              id="email"
+                              aria-describedby="emailHelp"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-4">
+                          <div className="mb-3">
+                            <label htmlFor="Number" className="form-label">
+                              Phone Number
+                            </label>
+                            <input
+                              type="text"
+                              name="number"
+                              className="form-control"
+                              onChange={onchangeaddcustomer}
+                              placeholder="Phone Number"
+                              id="phonenumber"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-12 col-lg-12">
+                          <div className="mb-3">
+                            <label htmlFor="information" className="form-label">
+                            Additional Information
+                            </label>
+                            <textarea
+                              type="text"
+                              className="form-control"
+                              name="information"
+                              onChange={onchangeaddcustomer}
+                              placeholder="Information"
+                              id="information"
+                              
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="Address1" className="form-label">
+                              Address 1
+                            </label>
+                            <input
+                              type="message"
+                              name="address1"
+                              onChange={onchangeaddcustomer}
+                              className="form-control"
+                              placeholder="Address 1"
+                              id="Address1"
+                              
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="Address2" className="form-label">
+                              Address 2
+                            </label>
+                            <input
+                              type="message"
+                              name="address2"
+                              onChange={onchangeaddcustomer}
+                              className="form-control"
+                              placeholder="Address 2"
+                              id="Address2"
+                              
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="Country" className="form-label">
+                              Country
+                            </label>
+                            <CountrySelect
+                              name="country"
+                              value={credentials.countryid}
+                              onChange={(val) => {
+                                console.log(val);
+                                setcountryid(val.id);
+                                setcountry(val.name);
+                                    // setCredentials({ ...credentials, country: val.name })
+                                    // setCredentials({ ...credentials, countryid: val.id })
+                                    setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
+                                  
+                              }}
+                              valueType="short"
+                              class="form-control" 
+                              placeHolder="Select Country"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="State" className="form-label">
+                              State
+                            </label>
+                            <StateSelect
+                                name="state"
+                                countryid={countryid} // Set the country selected in the CountryDropdown
+                                onChange={(val) => {
+                                    console.log(val);
+                                    setstateid(val.id);
+                                    setstate(val.name);
+                                    // setCredentials({ ...credentials, state: val.name })
+                                    // setCredentials({ ...credentials, stateid: val.id })
+                                    setCredentials({ ...credentials, statedata: JSON.stringify(val) })
+                                }}
+                                placeHolder="Select State"
+                                />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="City" className="form-label">
+                              City
+                            </label>
+                            <CitySelect
+                                countryid={countryid}
+                                stateid={stateid}
+                                onChange={(val) => {
+                                console.log(val);
+                                setcityid(val.id);
+                                setcity(val.name);
+                                // setCredentials({ ...credentials, city: val.name })
+                                // setCredentials({ ...credentials, cityid: val.id })
+                                setCredentials({ ...credentials, citydata: JSON.stringify(val) })
+                                }}
+                                placeHolder="Select City"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="post" className="form-label">
+                            Post Code
+                            </label>
+                            <input
+                              type="text"
+                              name="post"
+                              onChange={onchangeaddcustomer}
+                              className="form-control"
+                              placeholder="Post Code"
+                              id="post"
+                           
+                            />
+                          </div>
+                        </div>
+                      </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</form>
 
     </div>
   )

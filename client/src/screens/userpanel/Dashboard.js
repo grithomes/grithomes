@@ -10,6 +10,8 @@ export default function Dashboard() {
   const location = useLocation();
   const invoiceid = location.state?.invoiceid;
   const [transactions, setTransactions] = useState([]);
+  const [currentPage, setCurrentPage] = useState(0);
+  const entriesPerPage = 10;
     useEffect(() => {
         if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
         {
@@ -181,7 +183,28 @@ const formatCustomDate = (dateString) => {
 const handleViewClick = (invoice) => {
   let invoiceid = invoice._id;
   navigate('/userpanel/Invoicedetail', { state: { invoiceid } });
-};      
+}; 
+
+// Pagination functions
+const getPageCount = () => Math.ceil(invoices.length / entriesPerPage);
+
+const getCurrentPageInvoices = () => {
+  const startIndex = currentPage * entriesPerPage;
+  const endIndex = startIndex + entriesPerPage;
+  return invoices.slice(startIndex, endIndex);
+};
+
+const handlePrevPage = () => {
+  if (currentPage > 0) {
+    setCurrentPage(currentPage - 1);
+  }
+};
+
+const handleNextPage = () => {
+  if ((currentPage + 1) * entriesPerPage < invoices.length) {
+    setCurrentPage(currentPage + 1);
+  }
+};
 
   return (
     <div>
@@ -278,11 +301,12 @@ const handleViewClick = (invoice) => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                        {invoices.map((invoice, index) => (
+                                        {getCurrentPageInvoices().map((invoice, index) => (
                                             <tr key={index}>
                                                 <td>
                                                     <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
                                                     <p className='my-0'>{invoice.InvoiceNumber}</p>
+                                                    <p className='my-0'>Job: {invoice.job}</p>
                                                 </td>
                                                 <td>
                                                     <span className='clrtrxtstatus'>{getStatus(invoice)}</span>
@@ -306,10 +330,53 @@ const handleViewClick = (invoice) => {
                                                 <td><CurrencySign /> {invoice.total}</td>
                                             </tr>
                                         ))}
+                                        {/* {invoices.map((invoice, index) => (
+                                            <tr key={index}>
+                                                <td>
+                                                    <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
+                                                    <p className='my-0'>{invoice.InvoiceNumber}</p>
+                                                    <p className='my-0'>Job: {invoice.job}</p>
+                                                </td>
+                                                <td>
+                                                    <span className='clrtrxtstatus'>{getStatus(invoice)}</span>
+                                                </td>
+                                                <td>
+                                                    <div className='d-flex'>
+                                                        <p className='issue px-1 my-1'>Issued</p>
+                                                        <p className='datetext my-1'>{formatCustomDate(invoice.date)}</p>
+                                                    </div>
+                                                    <div className='d-flex'>
+                                                        <p className='due px-1'>Due</p>
+                                                        <p className='datetext'>{formatCustomDate(invoice.duedate)}</p>
+                                                    </div>
+                                                </td>
+                                                 
+                                                <td className='text-center'>
+                                                    <a role="button" className='text-black text-center' onClick={ () => handleViewClick(invoice)}>
+                                                        <i class="fa-solid fa-eye"></i>
+                                                    </a>
+                                                </td>
+                                                <td><CurrencySign /> {invoice.total}</td>
+                                            </tr>
+                                        ))} */}
                                     </tbody>
                             </table>
                         </div>
+                        
+                        {/* Pagination buttons */}
+                        <div className='row mt-3'>
+                          <div className='col-12'>
+                            <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
+                              Previous Page
+                            </button>
+                            <button onClick={handleNextPage} disabled={(currentPage + 1) * entriesPerPage >= invoices.length}>
+                              Next Page
+                            </button>
+                          </div>
                         </div>
+                        </div>
+
+            
 
         </div>
       </div>

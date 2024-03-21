@@ -12,6 +12,8 @@ export default function Itemlist() {
     const [selecteditems, setselecteditems] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
+    const [currentPage, setCurrentPage] = useState(0);
+    const entriesPerPage = 10;
 
     useEffect(() => {
         if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
@@ -74,6 +76,27 @@ export default function Itemlist() {
     const filteredItems = items.filter(item =>
         item.itemname.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    // Pagination functions
+    const getPageCount = () => Math.ceil(items.length / entriesPerPage);
+  
+    const getCurrentPageItems = () => {
+      const startIndex = currentPage * entriesPerPage;
+      const endIndex = startIndex + entriesPerPage;
+      return items.slice(startIndex, endIndex);
+    };
+  
+    const handlePrevPage = () => {
+      if (currentPage > 0) {
+        setCurrentPage(currentPage - 1);
+      }
+    };
+  
+    const handleNextPage = () => {
+      if ((currentPage + 1) * entriesPerPage < items.length) {
+        setCurrentPage(currentPage + 1);
+      }
+    };
 
   return (
     <div className='bg'>
@@ -143,7 +166,7 @@ export default function Itemlist() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                            {filteredItems.map((item, index) => (
+                                            {getCurrentPageItems().map((item, index) => (
                                                 <tr key={index}>
                                                     <th scope="row">{index + 1}</th>
                                                     <td>{item.itemname}</td>
@@ -161,6 +184,24 @@ export default function Itemlist() {
                                                     </td>
                                                 </tr>
                                             ))}
+                                            {/* {filteredItems.map((item, index) => (
+                                                <tr key={index}>
+                                                    <th scope="row">{index + 1}</th>
+                                                    <td>{item.itemname}</td>
+                                                    <td><CurrencySign />{item.price}</td>
+                                                    <td>{formatDate(item.createdAt)}</td>
+                                                    <td>
+                                                        <div className="d-flex">
+                                                            <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={() => handleEditClick(item)}>
+                                                                <i className="fa-solid fa-pen"></i>
+                                                            </a>
+                                                            <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(item._id)}>
+                                                                <i className="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))} */}
                                         </tbody>
                                 {/* <tbody>
                                         {items.map((item, index) => (
@@ -184,6 +225,20 @@ export default function Itemlist() {
                                 </tbody> */}
                             </table>
                         </div>
+                        {/* Pagination buttons */}
+                <div className='row mt-3'>
+                  <div className='col-12'>
+                    <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
+                      Previous Page
+                    </button>
+                    <button
+                      onClick={handleNextPage}
+                      disabled={(currentPage + 1) * entriesPerPage >= items.length}
+                    >
+                      Next Page
+                    </button>
+                  </div>
+                </div>
                     </div>
                 </div>
             </div>

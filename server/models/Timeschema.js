@@ -17,9 +17,8 @@ const TimeSchema = new Schema({
     },
     startTime: { type: String },
     endTime: { type: String },
-    
-    
   totalTime: Object, 
+  timeInSeconds: { type: String },
 });
 
 module.exports = mongoose.model('timeschema',TimeSchema)

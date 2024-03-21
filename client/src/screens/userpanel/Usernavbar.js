@@ -88,6 +88,11 @@ export default function Usernavbar() {
                       </Link>
                     </li>
                     <li>
+                      <Link to="/userpanel/Imageupload" className='nav-link scrollto icones text-black' >
+                        <i class="fa-solid fa-house me-2 dashclr"></i> <span>Logo Upload</span>
+                      </Link>
+                    </li>
+                    <li>
                       <Link to="/userpanel/Editprofile" className='nav-link scrollto icones text-black' >
                         <i class="fa-solid fa-house me-2 dashclr"></i> <span>Profile</span>
                       </Link>

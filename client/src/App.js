@@ -25,6 +25,7 @@ import Estimatedetail from './screens/userpanel/Estimatedetail';
 import Editestimate from './screens/userpanel/Editestimate';
 import Estimate from './screens/userpanel/Estimate';
 import Teamhistory from './screens/Teammemberpanel/Teamhistory';
+import Imageupload from './screens/userpanel/Imageupload';
 import Editprofile from './screens/userpanel/Editprofile';
 // import { InvoiceProvider } from './components/InvoiceContext';
 import {
@@ -63,6 +64,7 @@ function App() {
             <Route exact path='/userpanel/Estimatedetail' element={<Estimatedetail/>} />
             <Route exact path='/userpanel/Editestimate' element={<Editestimate/>} />
             <Route exact path='/userpanel/Estimate' element={<Estimate/>} />
+            <Route exact path='/userpanel/Imageupload' element={<Imageupload/>} />
             <Route exact path='/userpanel/Editprofile' element={<Editprofile/>} />
             <Route exact path='/Timeschemahistory' element={<Timeschemahistory/>} />
             <Route exact path='/Teammemberpanel/Teammenberdashboard' element={<Teammenberdashboard/>} />

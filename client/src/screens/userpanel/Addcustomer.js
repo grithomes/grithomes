@@ -33,6 +33,7 @@ export default function Addcustomer() {
 
   const [message, setMessage] = useState(false);
   const [alertShow, setAlertShow] = useState('');
+  const [alertmessageShow, setAlertmessageShow] = useState('');
 
   useEffect(() => {
     if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
@@ -94,7 +95,7 @@ export default function Addcustomer() {
     }
 
     else{
-        alert("This Customer Email already exist")
+      setAlertmessageShow("This Customer Email already exist")
     }
   };
 
@@ -347,6 +348,7 @@ export default function Addcustomer() {
                     </div>
                   </div>
                 </div>
+                {/* <p>{alertmessageShow}</p> */}
                 <div className="row pt-4 pe-2">
                   <div className="col-3 me-auto"></div>
                   <div className="col-4 col-sm-2">

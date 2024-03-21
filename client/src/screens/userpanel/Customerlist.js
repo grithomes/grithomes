@@ -13,6 +13,8 @@ export default function Customerlist() {
     const [selectedcustomers, setselectedcustomers] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const navigate = useNavigate();
+    const [currentPage, setCurrentPage] = useState(0);
+    const entriesPerPage = 10;
 
     useEffect(() => {
         if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
@@ -80,6 +82,29 @@ export default function Customerlist() {
     const filteredCustomers = customers.filter(customer =>
         customer.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
+
+    
+
+  // Pagination functions
+  const getPageCount = () => Math.ceil(customers.length / entriesPerPage);
+
+  const getCurrentPageCustomers = () => {
+    const startIndex = currentPage * entriesPerPage;
+    const endIndex = startIndex + entriesPerPage;
+    return customers.slice(startIndex, endIndex);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if ((currentPage + 1) * entriesPerPage < customers.length) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <div className='bg'>
@@ -150,7 +175,7 @@ export default function Customerlist() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                {filteredCustomers.map((customer, index) => (
+                                {getCurrentPageCustomers().map((customer, index) => (
                                     <tr key={index}>
                                         <th scope="row">{index + 1}</th>
                                         <td>{customer.name}</td>
@@ -169,6 +194,25 @@ export default function Customerlist() {
                                         </td>
                                     </tr>
                                 ))}
+                                {/* {filteredCustomers.map((customer, index) => (
+                                    <tr key={index}>
+                                        <th scope="row">{index + 1}</th>
+                                        <td>{customer.name}</td>
+                                        <td>{customer.email}</td>
+                                        <td>{formatDate(customer.createdAt)}</td>
+                                        <td>{customer.number}</td>
+                                        <td>
+                                            <div className="d-flex">
+                                                <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={() => handleEditClick(customer)}>
+                                                    <i className="fa-solid fa-pen"></i>
+                                                </a>
+                                                <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(customer._id)}>
+                                                    <i className="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))} */}
                             </tbody>
                                 {/* <tbody>
                                         {customers.map((customer, index) => (
@@ -193,6 +237,20 @@ export default function Customerlist() {
                                     </tbody> */}
                             </table>
                         </div>
+                        {/* Pagination buttons */}
+                <div className='row mt-3'>
+                  <div className='col-12'>
+                    <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
+                      Previous Page
+                    </button>
+                    <button
+                      onClick={handleNextPage}
+                      disabled={(currentPage + 1) * entriesPerPage >= customers.length}
+                    >
+                      Next Page
+                    </button>
+                  </div>
+                </div>
                     </div>
                 </div>
             </div>

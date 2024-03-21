@@ -21,6 +21,9 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 //   );
 //   next();
 // })
+
+
+
 app.use((req, res, next) => {
   // Allow multiple domains
   const allowedOrigins = [

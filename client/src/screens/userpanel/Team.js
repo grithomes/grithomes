@@ -11,6 +11,8 @@ export default function Team() {
     const [selectedteammembers, setselectedteammembers] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [ loading, setloading ] = useState(true);
+    const [currentPage, setCurrentPage] = useState(0);
+    const entriesPerPage = 10;
     
     const navigate = useNavigate();
 
@@ -82,6 +84,26 @@ export default function Team() {
         team.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
+    const getPageCount = () => Math.ceil(teammembers.length / entriesPerPage);
+
+  const getCurrentPageItems = () => {
+    const startIndex = currentPage * entriesPerPage;
+    const endIndex = startIndex + entriesPerPage;
+    return teammembers.slice(startIndex, endIndex);
+  };
+
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if ((currentPage + 1) * entriesPerPage < teammembers.length) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
     <div className='bg'>
         <div className='container-fluid'>
@@ -152,7 +174,7 @@ export default function Team() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                            {filteredTeamMembers.map((team, index) => (
+                                            {getCurrentPageItems().map((team, index) => (
                                                 <tr key={index}>
                                                     <th scope="row">{index + 1}</th>
                                                     <td>{team.name}</td>
@@ -175,6 +197,29 @@ export default function Team() {
                                                     </td>
                                                 </tr>
                                             ))}
+                                            {/* {filteredTeamMembers.map((team, index) => (
+                                                <tr key={index}>
+                                                    <th scope="row">{index + 1}</th>
+                                                    <td>{team.name}</td>
+                                                    <td>{team.email}</td>
+                                                    <td>{team.number}</td>
+                                                    <td className='text-center'>
+                                                        <a role="button" className='text-black text-center' onClick={() => handleTimeViewClick(team)}>
+                                                            <i className="fa-solid fa-eye"></i>
+                                                        </a>
+                                                    </td>
+                                                    <td>
+                                                        <div className="d-flex">
+                                                            <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={() => handleEditClick(team)}>
+                                                                <i className="fa-solid fa-pen"></i>
+                                                            </a>
+                                                            <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(team._id)}>
+                                                                <i className="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            ))} */}
                                         </tbody>
                                 {/* <tbody>
                                         {teammembers.map((team, index) => (
@@ -202,7 +247,20 @@ export default function Team() {
                                         ))}
                                 </tbody> */}
                             </table>
+
                         </div>
+                         {/* Pagination buttons */}
+            <div className='col-12'>
+              <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
+                Previous Page
+              </button>
+              <button
+                onClick={handleNextPage}
+                disabled={(currentPage + 1) * entriesPerPage >= teammembers.length}
+              >
+                Next Page
+              </button>
+            </div>
                     </div>
                 </div>
             </div>

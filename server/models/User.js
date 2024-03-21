@@ -29,6 +29,9 @@ const UserSchema = new Schema({
       companyImageUrl: {
           type: String // Store the file path of the profile image
       },
+      gstNumber: {
+        type: String, // GST number field
+      },
       resetPasswordToken: String,
 });
 

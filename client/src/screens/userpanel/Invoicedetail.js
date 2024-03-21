@@ -987,8 +987,10 @@ const convertToPdf = () => {
                                         <div className="col-6">
                                             <div className="row text-end right">
                                                 <p className='h4 fw-bold'>Invoice</p>
+                                                <p className='fw-bold'>{signupdata.companyname}</p>
                                                 <p className='fw-bold'>{signupdata.address}</p>
                                                 <p className='fw-bold'>{signupdata.email}</p>
+                                                <p className='fw-bold'>{signupdata.gstNumber}</p>
                                             </div>
                                         </div>   
                                         <div className='clear'></div> 
@@ -996,7 +998,7 @@ const convertToPdf = () => {
 
                                     <div className='row py-4 pb-90 px-4 mx-0 mb-4 detailbg'>
                                         <div bgcolor="#333" className="col-12 col-lg-6 col-md-6 col-sm-6 customerdetail">
-                                        <p className='pt-3'>Job: {invoiceData.job}</p>
+                                        
                                             <p className='fw-bold pt-2'>BILL TO</p>
                                             <p className='my-0'>{invoiceData.customername}</p>
                                             <p className='my-0'>{invoiceData.customeremail}</p>
@@ -1008,12 +1010,14 @@ const convertToPdf = () => {
                                                   <p className='pt-3'>Invoice #</p>
                                                   <p className='my-0'>Date</p>
                                                   <p className='my-0'>Due date</p>
+                                                  <p className='my-0'>Job</p>
                                               </div>
                                               {console.log(invoiceData, "invoiceData")}
                                               <div className='col-6'>
                                               <p className='pt-3'>{invoiceData.InvoiceNumber}</p>
                                               <p className='my-0'>{formatCustomDate(invoiceData.date)}</p>
                                               <p className='my-0'>{formatCustomDate(invoiceData.duedate)}</p>
+                                              <p className='my-0'>{invoiceData.job}</p>
 
                                               </div>
                                               
@@ -1061,6 +1065,9 @@ const convertToPdf = () => {
                                               </div>
                                             </div>
                                         ))}
+                                        <hr />
+                                        {/* <div dangerouslySetInnerHTML={{ __html: invoiceData.information }} /> */}
+                                        <div className="row padding-20 invoice-content">Note: {invoiceData.information.replace(/<\/?[^>]+(>|$)/g, '')}</div>
                                         <hr />
 
                                           <div className="row padding-20">
