@@ -794,6 +794,18 @@ const handleFormSubmit = async (event) => {
         console.log('Email sent successfully!');
         // setShowModal(false);
         setShowEmailAlert(true);
+          // Update the database with emailsent status
+            const updatedData = { ...invoiceData, emailsent: 'yes' }; // Update emailsent status
+            await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            });
+
+            // Fetch updated invoice data
+            fetchinvoicedata();
       } else {
         console.error('Failed to send email.');
       }
