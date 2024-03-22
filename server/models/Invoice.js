@@ -13,6 +13,10 @@ const InvoiceSchema = new Schema({
     customeremail: {
         type: String,
     },
+     emailsent: {
+        type: String,
+        default:'no'
+    },
     purchaseorder: {
         type: String,
     },
