@@ -175,7 +175,8 @@ export default function Invoice() {
                       <th scope='col'>INVOICE </th>
                       <th scope='col'>STATUS </th>
                       <th scope='col'>DATE </th>
-                      <th scope='col'>View </th>
+          <th scope='col'>EMAIL STATUS </th>
+                      <th scope='col'>VIEW </th>
                       <th scope='col'>AMOUNT </th>
                     </tr>
                   </thead>
@@ -202,6 +203,9 @@ export default function Invoice() {
                             </div>
                           </div>
                         </td>
+          <td className='text-center'>
+           <p className='datetext'>{invoice.emailsent}</p>
+          </td>
                         <td className='text-center'>
                           <a role='button' className='text-black text-center' onClick={() => handleViewClick(invoice)}>
                             <i className='fa-solid fa-eye'></i>
