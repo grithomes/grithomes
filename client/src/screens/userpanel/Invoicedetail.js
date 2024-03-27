@@ -994,6 +994,10 @@ const convertToPdf = () => {
                                             <img src={signupdata.companyImageUrl} className='w-50 logoimage'  alt="testing imahe"  /> :
                                             <p className='h4 fw-bold'>{signupdata.companyname}</p>
                                           }
+
+                                          <div className='ps-3 pt-2'>
+                                              <p className='fw-bold'>{signupdata.FirstName} {signupdata.User1_Mobile_Number} | {signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</p>
+                                          </div>
                                             {/* <p className='h4 fw-bold'>{signupdata.companyname}</p> */}
                                         </div>    
                                         <div className="col-6">
@@ -1073,7 +1077,7 @@ const convertToPdf = () => {
                                                   <p> <CurrencySign />{item.amount}</p>
                                               </div>
                                               <div className="col-lg-6 col-md-6 col-sm-2 col-4 invoice-contentcol-12">
-                                                <p className='my-0 decwidth'>{item.description}</p>
+                                                <p className='my-0 decwidth'>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</p>
                                               </div>
                                             </div>
                                         ))}

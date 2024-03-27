@@ -466,6 +466,10 @@ export default function Estimatedetail() {
                                 :
                                 <p className='h4 fw-bold'>{signupdata.companyname}</p>
                               }
+
+                              <div className='ps-3 pt-2'>
+                                  <p className='fw-bold'>{signupdata.FirstName} {signupdata.User1_Mobile_Number} | {signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</p>
+                              </div>
                               {/* <p className='h4 fw-bold'>{signupdata.companyname}</p> */}
                             </div>
                             <div className="col-6">
