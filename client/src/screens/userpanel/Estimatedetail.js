@@ -333,6 +333,18 @@ export default function Estimatedetail() {
         console.log('Email sent successfully!');
         // setShowModal(false);
         setShowEmailAlert(true);
+        // Update the database with emailsent status
+        const updatedData = { ...estimateData, emailsent: 'yes' }; // Update emailsent status
+        await fetch(`https://mycabinet.onrender.com/api/updateestimateData/${estimateid}`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(updatedData),
+        });
+
+        // Fetch updated invoice data
+        fetchestimateData();
       } else {
         console.error('Failed to send email.');
       }
@@ -612,7 +624,6 @@ export default function Estimatedetail() {
                             <div className="col-6 text-end">
                               <p><CurrencySign />{estimateData.total}</p>
                             </div>
-
                           </div><hr />
                         </div>
                       </div>

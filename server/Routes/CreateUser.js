@@ -1409,7 +1409,7 @@ router.get('/geteditinvoicedata/:invoiceid', async (req, res) => {
 
             if (emailsent !== undefined) {
             updatedData.emailsent = emailsent;
-        }
+            }
     
             // Perform the update operation in your database here
             const result = await Invoice.findByIdAndUpdate(invoiceid, updatedData, { new: true });
@@ -1438,7 +1438,7 @@ router.get('/geteditinvoicedata/:invoiceid', async (req, res) => {
     router.post('/updateestimateData/:estimateid', async (req, res) => {
         try {
             const estimateid = req.params.estimateid;
-            const { subtotal, total, items, ...updatedestimateData } = req.body; // Ensure this matches your MongoDB schema
+            const { subtotal, total, items,emailsent, ...updatedestimateData } = req.body; // Ensure this matches your MongoDB schema
     
             // Add the updated subtotal and total to the incoming data
             updatedestimateData.subtotal = subtotal;
@@ -1446,6 +1446,10 @@ router.get('/geteditinvoicedata/:invoiceid', async (req, res) => {
 
             // Update or replace the 'items' field
             updatedestimateData.items = items; 
+
+            if (emailsent !== undefined) {
+                updatedestimateData.emailsent = emailsent;
+                }
     
             // Perform the update operation in your database here
             const result = await Estimate.findByIdAndUpdate(estimateid, updatedestimateData, { new: true });
