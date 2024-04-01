@@ -177,6 +177,9 @@ export default function Estimate() {
                             </div>
                           </div>
                         </td>
+          <td className='text-center'>
+           <p className='datetext'>{estimate.emailsent}</p>
+          </td>
                         <td className='text-center'>
                           <a role='button' className='text-black text-center' onClick={() => handleViewClick(estimate)}>
                             <i className='fa-solid fa-eye'></i>

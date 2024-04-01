@@ -153,6 +153,7 @@ export default function Editestimate() {
     
         if (!itemExists) {
             const selectedPrice = items.find((i) => i._id === value)?.price || 0;
+            const selectedDescription = items.find((i) => i._id === value)?.description || "";
             const newItem = {
                 itemId: value,
                 itemname: label,
@@ -160,7 +161,7 @@ export default function Editestimate() {
                 itemquantity: 1, // Set default quantity or whatever value you prefer
                 discount: 0, // Set default discount or whatever value you prefer
                 amount: selectedPrice, // Initially set amount same as price
-                description: '', // Set the description if needed
+                description: selectedDescription, // Set the description if needed
             };
             // Add the selected item to estimateData.items
             setestimateData({
@@ -386,8 +387,8 @@ export default function Editestimate() {
         setestimateData({ ...estimateData, items: updatedItems });
     };
     
-    const handleDescriptionChange = (event, itemId) => {
-        const { value } = event.target;
+    const handleDescriptionChange = (editor, itemId) => {
+        const value = editor.getData();
         const updatedItems = estimateData.items.map((item) => {
             if (item.itemId === itemId) {
                 return { ...item, description: value };
@@ -398,6 +399,10 @@ export default function Editestimate() {
     };
     
     
+    const handledescChange = (event, editor) => {
+        const data = editor.getData();
+        setestimateData({ ...estimateData, description: data });
+    };
 
 
   return (
@@ -602,25 +607,10 @@ export default function Editestimate() {
                                     <div className="col-2">
                                         <p><CurrencySign />{item.amount}</p>
                                     </div>
-                                    {/* <div className="col-5">
-                                                <div class="mb-3">
-                                                    <label htmlFor="description" className="form-label">Description</label>
-                                                    <textarea
-                                                        class="form-control"
-                                                        name='description'
-                                                        id='description'
-                                                        placeholder='Item Description'
-                                                        value={item.description}
-                                                        rows="3"
-                                                        readOnly
-                                                    >
-                                                    </textarea>
-                                                </div>
-                                    </div> */}
                                     <div className="col-5">
                                         <div className="mb-3">
                                             <label htmlFor={`description-${item.itemId}`} className="form-label">Description</label>
-                                            <textarea
+                                            {/* <textarea
                                                 className="form-control"
                                                 name={`description-${item.itemId}`}
                                                 id={`description-${item.itemId}`}
@@ -628,7 +618,25 @@ export default function Editestimate() {
                                                 value={item.description}
                                                 onChange={(event) => handleDescriptionChange(event, item.itemId)} // Add onChange handler
                                                 rows="3"
-                                            />
+                                            /> */}
+                                            <CKEditor
+                                                        editor={ ClassicEditor }
+                                                        data={item.description}
+                                                        // onReady={ editor => {
+                                                        //     console.log( 'Editor is ready to use!', editor );
+                                                        // } }
+                                                        
+                                                        onChange={( event, editor ) => {
+                                                            handleDescriptionChange(editor, item.itemId);
+                                                        }
+                                                        }
+                                                        onBlur={ ( event, editor ) => {
+                                                            console.log( 'Blur.', editor );
+                                                        } }
+                                                        onFocus={ ( event, editor ) => {
+                                                            console.log( 'Focus.', editor );
+                                                        } }
+                                                    />
                                         </div>
                                     </div>
                                             
@@ -707,7 +715,7 @@ export default function Editestimate() {
                                             <div className="col-5">
                                                 <div class="mb-3">
                                                     <label htmlFor="description" className="form-label">Description</label>
-                                                    <textarea
+                                                    {/* <textarea
                                                         class="form-control"
                                                         name='description'
                                                         id={`item-description-${itemId}`}
@@ -716,7 +724,23 @@ export default function Editestimate() {
                                                         value={selectedItem?.description || ''}
                                                         readOnly
                                                     >
-                                                    </textarea>
+                                                    </textarea> */}
+                                                    
+                                                    <CKEditor
+                                                        editor={ ClassicEditor }
+                                                        data={estimateData.description}
+                                                        // onReady={ editor => {
+                                                        //     console.log( 'Editor is ready to use!', editor );
+                                                        // } }
+                                                        
+                                                        onChange={handledescChange}
+                                                        onBlur={ ( event, editor ) => {
+                                                            console.log( 'Blur.', editor );
+                                                        } }
+                                                        onFocus={ ( event, editor ) => {
+                                                            console.log( 'Focus.', editor );
+                                                        } }
+                                                    />
                                                 </div>
                                             </div>
                                             

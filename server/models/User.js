@@ -17,6 +17,21 @@ const UserSchema = new Schema({
       LastName: {
         type: String,
       },
+      User2FirstName: {
+        type: String,
+      },
+      User2LastName: {
+        type: String,
+      },
+      User2email: {
+        type: String,
+      },
+      User1_Mobile_Number: {
+        type: String,
+      },
+      User2_Mobile_Number: {
+        type: String,
+      },
       password:{
           type:String,
       },

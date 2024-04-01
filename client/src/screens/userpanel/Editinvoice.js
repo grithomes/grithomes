@@ -153,6 +153,7 @@ export default function Editinvoice() {
     
         if (!itemExists) {
             const selectedPrice = items.find((i) => i._id === value)?.price || 0;
+            const selectedDescription = items.find((i) => i._id === value)?.description || "";
             const newItem = {
                 itemId: value,
                 itemname: label,
@@ -160,7 +161,7 @@ export default function Editinvoice() {
                 itemquantity: 1, // Set default quantity or whatever value you prefer
                 discount: 0, // Set default discount or whatever value you prefer
                 amount: selectedPrice, // Initially set amount same as price
-                description: '', // Set the description if needed
+                description: selectedDescription, // Set the description if needed
             };
             // Add the selected item to invoiceData.items
             setInvoiceData({
@@ -402,15 +403,16 @@ export default function Editinvoice() {
         }));
       };
       
-      const handleDescriptionChange = (event, itemId) => {
-        const { value } = event.target;
-        setInvoiceData((prevData) => ({
-          ...prevData,
-          items: prevData.items.map((item) =>
-            item.itemId === itemId ? { ...item, description: value } : item
-          ),
-        }));
-      };
+      const handleDescriptionChange = (editor, itemId) => {
+        const value = editor.getData();
+        const updatedItems = invoiceData.items.map((item) => {
+            if (item.itemId === itemId) {
+                return { ...item, description: value };
+            }
+            return item;
+        });
+        setInvoiceData({ ...invoiceData, items: updatedItems });
+    };
       
 
 
@@ -616,20 +618,8 @@ export default function Editinvoice() {
                                     <div className="col-5">
                                                 <div class="mb-3">
                                                     <label htmlFor="description" className="form-label">Description</label>
-                                                    <CKEditor
-                                            editor={ClassicEditor}
-                                            data={item.description || ''}
-                                            name={`description-${item.itemId}`}
-                                            // onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
-                                            onChange={(event,editor) => handleDescriptionChange(event, item.itemId)}
-                                            onBlur={(event, editor) => {
-                                                console.log('Blur.', editor);
-                                            }}
-                                            onFocus={(event, editor) => {
-                                                console.log('Focus.', editor);
-                                            }}
-                                        />
-                                                    <textarea
+                                                    
+                                                    {/* <textarea
                                                         className="form-control"
                                                         name="description"
                                                         id={`description-${item.itemId}`}
@@ -637,6 +627,21 @@ export default function Editinvoice() {
                                                         rows="3"
                                                         value={item.description}
                                                         onChange={(event) => handleDescriptionChange(event, item.itemId)}
+                                                    /> */}
+                                                    
+                                                    <CKEditor
+                                                        editor={ClassicEditor}
+                                                        data={item.description} // Make sure item.description is a valid string
+                                                        onChange={(event, editor) => {
+                                                            // Ensure handleDescriptionChange receives editor instance
+                                                            handleDescriptionChange(editor, item.itemId);
+                                                        }}
+                                                        onBlur={(event, editor) => {
+                                                            console.log('Blur.', editor);
+                                                        }}
+                                                        onFocus={(event, editor) => {
+                                                            console.log('Focus.', editor);
+                                                        }}
                                                     />
                                                 </div>
                                             </div>
@@ -659,7 +664,7 @@ export default function Editinvoice() {
                                     
                                     </div>
                                         ))}
-                                {searchitemResults.map((item) => {
+                                {/* {searchitemResults.map((item) => {
                                     const selectedItem = items.find((i) => i._id === item.value);
                                     const itemPrice = selectedItem?.price || 0;
                                     const itemId = item.value;
@@ -667,8 +672,7 @@ export default function Editinvoice() {
                                     const discount = discountMap[itemId] || 0;
                                     const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
                                     const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
-                                    // style: 'currency',
-                                    // currency: 'INR',
+                                    
                                     });
 
                                     return (
@@ -696,14 +700,6 @@ export default function Editinvoice() {
                                             </div>
                                             <div className="col-2">
                                                 <div className="mb-3">
-                                                    {/* <input
-                                                        type="number"
-                                                        name="price"
-                                                        className="form-control"
-                                                        value={itemPrice}
-                                                        id="price"
-                                                        required
-                                                    /> */}
                                                     <input
                                                         type="number"
                                                         name="price"
@@ -724,16 +720,21 @@ export default function Editinvoice() {
                                             <div className="col-5">
                                                 <div class="mb-3">
                                                     <label htmlFor="description" className="form-label">Description</label>
-                                                    <textarea
-                                                        class="form-control"
-                                                        name='description'
-                                                        id={`item-description-${itemId}`}
-                                                        placeholder='Item Description'
-                                                        rows="3"
-                                                        value={selectedItem?.description || ''}
-                                                        readOnly
-                                                    >
-                                                    </textarea>
+                                                    
+                                                    <CKEditor
+                                                        editor={ClassicEditor}
+                                                        data={item.description} // Make sure item.description is a valid string
+                                                        onChange={(event, editor) => {
+                                                            // Ensure handleDescriptionChange receives editor instance
+                                                            handleDescriptionChange(editor, item.itemId);
+                                                        }}
+                                                        onBlur={(event, editor) => {
+                                                            console.log('Blur.', editor);
+                                                        }}
+                                                        onFocus={(event, editor) => {
+                                                            console.log('Focus.', editor);
+                                                        }}
+                                                    />
                                                 </div>
                                             </div>
                                             
@@ -754,7 +755,7 @@ export default function Editinvoice() {
                                             </div>
                                         </div>
         );
-      })}
+      })} */}
                                 </div>
                                 <hr />
 
