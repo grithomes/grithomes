@@ -112,7 +112,7 @@ export default function Dashboard() {
   const fetchData = async () => {
     try {
         const userid = localStorage.getItem("userid");
-        const response = await fetch(`https://grithomes.onrender.com/api/invoicedata/${userid}`);
+        const response = await fetch(`https://grithomes.onrender.com/api/invoicedataten/${userid}`);
         const json = await response.json();
 
         if (Array.isArray(json)) {

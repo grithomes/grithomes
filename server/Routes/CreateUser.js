@@ -1272,15 +1272,19 @@ router.post('/savecreateestimate', async (req, res) => {
         }
       });
 
-router.get('/invoicedata/:userid', async (req, res) => {
-        try {
-            let userid = req.params.userid;
-            const invoicedata = (await Invoice.find({ userid: userid}));
-            res.json(invoicedata);
-        } catch (error) {
-            console.error(error);
-            res.status(500).json({ message: 'Internal server error' });
-        }
+router.get('/invoicedataten/:userid', async (req, res) => {
+    try {
+        const userid = req.params.userid;
+        const invoicedata = await Invoice.find({ userid: userid });
+
+        // Retrieve the top 10 entries
+        const topEntries = await Invoice.find({ userid: userid }).sort({ createdAt: -1 }).limit(10);
+
+        res.json({ invoicedata, topEntries }); // Return both invoice data and top entries
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
 });
 
 router.post('/converttoinvoice/:estimateid', async (req, res) => {
