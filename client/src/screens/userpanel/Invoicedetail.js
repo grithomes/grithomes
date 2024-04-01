@@ -1073,7 +1073,8 @@ const convertToPdf = () => {
                                                   <p> <CurrencySign />{item.amount}</p>
                                               </div>
                                               <div className="col-lg-6 col-md-6 col-sm-2 col-4 invoice-contentcol-12">
-                                                <p className='my-0 decwidth'>{item.description}</p>
+                                        
+                                                <p className='my-0 decwidth'>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</p>
                                               </div>
                                             </div>
                                         ))}

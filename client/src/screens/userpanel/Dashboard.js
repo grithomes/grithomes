@@ -33,60 +33,60 @@ export default function Dashboard() {
     const currentMonth = format(currentDate, 'MMMM');
 
 
-    useEffect(() => {
-      const localstarttime = localStorage.getItem("startTime");
-      if(localstarttime != undefined && localstarttime != null && localstarttime != "")
-      {
-        setStartTime(localstarttime);
-        setIsClockedIn(true);
-      }
+    // useEffect(() => {
+    //   const localstarttime = localStorage.getItem("startTime");
+    //   if(localstarttime != undefined && localstarttime != null && localstarttime != "")
+    //   {
+    //     setStartTime(localstarttime);
+    //     setIsClockedIn(true);
+    //   }
 
-      if (isClockedIn && startTime) {
-        const interval = setInterval(() => {
-          const currentTimestamp = new Date().getTime();
-          const startTimestamp = new Date(startTime).getTime();
-          const timeDifference = currentTimestamp - startTimestamp;
-          const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-          const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-          const seconds = Math.floor((timeDifference / 1000) % 60);
-          setTotalTime(`${hours} hrs ${minutes} mins ${seconds} secs`);
-        }, 1000);
+    //   if (isClockedIn && startTime) {
+    //     const interval = setInterval(() => {
+    //       const currentTimestamp = new Date().getTime();
+    //       const startTimestamp = new Date(startTime).getTime();
+    //       const timeDifference = currentTimestamp - startTimestamp;
+    //       const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+    //       const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
+    //       const seconds = Math.floor((timeDifference / 1000) % 60);
+    //       setTotalTime(`${hours} hrs ${minutes} mins ${seconds} secs`);
+    //     }, 1000);
         
-        return () => clearInterval(interval);
-      } 
-      else {
-        setTotalTime('0 hrs 0 mins 0 secs');
-      }
-        // Calculate the start and end timestamps for the current month
-        const currentMonthIndex = currentDate.getMonth(); // Get the current month (0-indexed)
-        const currentYear = currentDate.getFullYear();
-        const startOfMonth = new Date(currentYear, currentMonthIndex, 1, 0, 0, 0);
-        const endOfMonth = new Date(currentYear, currentMonthIndex + 1, 0, 23, 59, 59);
+    //     return () => clearInterval(interval);
+    //   } 
+    //   else {
+    //     setTotalTime('0 hrs 0 mins 0 secs');
+    //   }
+    //     // Calculate the start and end timestamps for the current month
+    //     const currentMonthIndex = currentDate.getMonth(); // Get the current month (0-indexed)
+    //     const currentYear = currentDate.getFullYear();
+    //     const startOfMonth = new Date(currentYear, currentMonthIndex, 1, 0, 0, 0);
+    //     const endOfMonth = new Date(currentYear, currentMonthIndex + 1, 0, 23, 59, 59);
 
-        fetchUserEntries(startOfMonth, endOfMonth);
-    }, [isClockedIn, startTime]);
+    //     fetchUserEntries(startOfMonth, endOfMonth);
+    // }, [isClockedIn, startTime]);
 
-    const fetchUserEntries = async (start, end) => {
-      try {
-        const userid = localStorage.getItem('userid');
-        const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${userid}`);
-        const data = await response.json();
+    // const fetchUserEntries = async (start, end) => {
+    //   try {
+    //     const userid = localStorage.getItem('userid');
+    //     const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${userid}`);
+    //     const data = await response.json();
         
-        // Filter userEntries to include only entries for the current month
-        const filteredEntries = data.userEntries.filter((entry) => {
-          const entryTime = new Date(entry.startTime).getTime();
-          return entryTime >= start.getTime() && entryTime <= end.getTime();
-        });
+    //     // Filter userEntries to include only entries for the current month
+    //     const filteredEntries = data.userEntries.filter((entry) => {
+    //       const entryTime = new Date(entry.startTime).getTime();
+    //       return entryTime >= start.getTime() && entryTime <= end.getTime();
+    //     });
         
-        setUserEntries(filteredEntries);
+    //     setUserEntries(filteredEntries);
         
-        setTimeout(() => {
-          setloading(false);
-        }, 2000);
-      } catch (error) {
-        console.error(error);
-      }
-    };
+    //     setTimeout(() => {
+    //       setloading(false);
+    //     }, 2000);
+    //   } catch (error) {
+    //     console.error(error);
+    //   }
+    // };
 
     const handleAddinvoiceClick = () => {
       navigate('/userpanel/Createinvoice');
@@ -118,18 +118,18 @@ export default function Dashboard() {
         if (Array.isArray(json)) {
             setinvoices(json);
 
-            const transactionPromises = json.map(async (invoice) => {
-                const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`);
-                const transactionJson = await response.json();
-                return transactionJson.map(transaction => ({
-                    ...transaction,
-                    invoiceId: invoice._id // Attach invoiceId to each transaction
-                }));
-            });
+            // const transactionPromises = json.map(async (invoice) => {
+            //     const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`);
+            //     const transactionJson = await response.json();
+            //     return transactionJson.map(transaction => ({
+            //         ...transaction,
+            //         invoiceId: invoice._id // Attach invoiceId to each transaction
+            //     }));
+            // });
 
-            const transactionsData = await Promise.all(transactionPromises);
-            const flattenedTransactions = transactionsData.flat(); // Flatten the transactions array
-            setTransactions(flattenedTransactions);
+            // const transactionsData = await Promise.all(transactionPromises);
+            // const flattenedTransactions = transactionsData.flat(); // Flatten the transactions array
+            // setTransactions(flattenedTransactions);
         }
         setloading(false);
     } catch (error) {

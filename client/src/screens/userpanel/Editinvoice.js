@@ -616,15 +616,19 @@ export default function Editinvoice() {
                                     <div className="col-5">
                                                 <div class="mb-3">
                                                     <label htmlFor="description" className="form-label">Description</label>
-                                                    {/* <textarea
-                                                        class="form-control"
-                                                        name='description'
-                                                        id='description'
-                                                        placeholder='Item Description'
-                                                        value={item.description}
-                                                        rows="3"
-                                                    >
-                                                    </textarea> */}
+                                                    <CKEditor
+                                            editor={ClassicEditor}
+                                            data={item.description || ''}
+                                            name={`description-${item.itemId}`}
+                                            // onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
+                                            onChange={(event,editor) => handleDescriptionChange(event, item.itemId)}
+                                            onBlur={(event, editor) => {
+                                                console.log('Blur.', editor);
+                                            }}
+                                            onFocus={(event, editor) => {
+                                                console.log('Focus.', editor);
+                                            }}
+                                        />
                                                     <textarea
                                                         className="form-control"
                                                         name="description"

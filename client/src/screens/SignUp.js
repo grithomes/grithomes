@@ -85,7 +85,7 @@ export default function SignUp() {
         console.log("imgurl: ", companyFormData);
 
 
-        // const companyUploadResponse = await fetch("https://grithomes.onrender.com/api/upload-image", {
+        // const companyUploadResponse = await fetch("https://mycabinet.onrender.com/api/upload-image", {
         // method: 'POST',
         // body: companyFormData,
         // });
@@ -93,7 +93,7 @@ export default function SignUp() {
         // console.log('Uploaded company image:', uploadedCompanyImage);
         // const companyImageUrl = uploadedCompanyImage.companyImageUrl || '';
     
-        const response = await fetch("https://grithomes.onrender.com/api/createuser", {
+        const response = await fetch("https://mycabinet.onrender.com/api/createuser", {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -250,8 +250,8 @@ export default function SignUp() {
                     </div>
                     <div className="col-12 col-sm-12 col-md-6 col-lg-6">
                         <div className="form-group mb-3 pt-3">
-                            <label htmlFor="gstNumber" className="form-label">GST Number</label>
-                            <input type="text" className="form-control" name="gstNumber" value={credentails.gstNumber} onChange={onchange} placeholder="GST Number" />                        
+                            <label htmlFor="gstNumber" className="form-label">Abn</label>
+                            <input type="text" className="form-control" name="gstNumber" value={credentails.gstNumber} onChange={onchange} placeholder="Abn" />                        
                         </div>
                     </div>
                 </div>
