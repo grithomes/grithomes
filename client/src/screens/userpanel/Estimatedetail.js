@@ -8,6 +8,7 @@ import 'react-multi-email/dist/style.css'
 import html2pdf from 'html2pdf.js';
 import he from 'he';
 import CurrencySign from '../../components/CurrencySign ';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Estimatedetail() {
   const [loading, setloading] = useState(true);
@@ -36,6 +37,7 @@ export default function Estimatedetail() {
   const [content, setContent] = useState('Thank you for your business.');
   const [showModal, setShowModal] = useState(false);
   const [showEmailAlert, setShowEmailAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
 
   useEffect(() => {
@@ -60,13 +62,29 @@ export default function Estimatedetail() {
   const fetchestimateData = async () => {
     try {
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`);
-      const json = await response.json();
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
 
-      setestimateData(json);
-      if (Array.isArray(json.items)) {
-        setitems(json.items);
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0,0);
+        return; // Stop further execution
       }
+      else{
+        const json = await response.json();
+
+        setestimateData(json);
+        if (Array.isArray(json.items)) {
+          setitems(json.items);
+        }
+      }
+      
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -75,19 +93,35 @@ export default function Estimatedetail() {
   const fetchtransactiondata = async () => {
     try {
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`);
-      const json = await response.json();
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
 
-      // Check if the response contains paidamount
-      if (Array.isArray(json)) {
-        setTransactions(json);
-        //   const totalPaidAmount = payments.reduce((total, payment) => total + payment.paidamount, 0);
-
-
-      } else {
-        console.error('Invalid data structure for transactions:', json);
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0,0);
+        return; // Stop further execution
       }
-      setloading(false);
+      else{
+        const json = await response.json();
+
+        // Check if the response contains paidamount
+        if (Array.isArray(json)) {
+          setTransactions(json);
+          //   const totalPaidAmount = payments.reduce((total, payment) => total + payment.paidamount, 0);
+
+
+        } else {
+          console.error('Invalid data structure for transactions:', json);
+        }
+        setloading(false);
+      }
+      
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -96,12 +130,28 @@ export default function Estimatedetail() {
   const fetchsignupdata = async () => {
     try {
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`);
-      const json = await response.json();
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
 
-      // if (Array.isArray(json)) {
-      setsignupdata(json);
-      // }
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0,0);
+        return; // Stop further execution
+      }
+      else{
+        const json = await response.json();
+
+        // if (Array.isArray(json)) {
+        setsignupdata(json);
+        // }
+      }
+      
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -273,18 +323,33 @@ export default function Estimatedetail() {
 
   const handleRemove = async (estimateid) => {
     try {
+      const authToken = localStorage.getItem('authToken');
       const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+          'Authorization': authToken,
+        }
       });
 
-      const json = await response.json();
-
-      if (json.success) {
-        console.log('Data removed successfully!');
-        navigate('/userpanel/Userdashboard');
-      } else {
-        console.error('Error deleting Invoice:', json.message);
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0,0);
+        return; // Stop further execution
       }
+      else{
+        const json = await response.json();
+
+        if (json.success) {
+          console.log('Data removed successfully!');
+          navigate('/userpanel/Userdashboard');
+        } else {
+          console.error('Error deleting Invoice:', json.message);
+        }
+      }
+
+      
     } catch (error) {
       console.error('Error deleting Invoice:', error);
     }
@@ -333,18 +398,18 @@ export default function Estimatedetail() {
         console.log('Email sent successfully!');
         // setShowModal(false);
         setShowEmailAlert(true);
-        // Update the database with emailsent status
-        const updatedData = { ...estimateData, emailsent: 'yes' }; // Update emailsent status
-        await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedData),
-        });
+            // Update the database with emailsent status
+            const updatedData = { ...estimateData, emailsent: 'yes' }; // Update emailsent status
+            await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedData),
+            });
 
-        // Fetch updated invoice data
-        fetchestimateData();
+            // Fetch updated invoice data
+            fetchestimateData();
       } else {
         console.error('Failed to send email.');
       }
@@ -441,6 +506,9 @@ export default function Estimatedetail() {
                       <div className="col-lg-1">
                         <a className='btn rounded-pill btn-danger text-white fw-bold' data-bs-toggle="modal" data-bs-target="#sendEmailModal">Send</a>
                       </div>
+                      <div className='my-2'>
+                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                        </div>
                     </div>
 
                     {showAlert && (
@@ -489,6 +557,7 @@ export default function Estimatedetail() {
                                 <p className='h4 fw-bold'>Estimate</p>
                                 <p className='fw-bold'>{signupdata.address}</p>
                                 <p className='fw-bold'>{signupdata.email}</p>
+                                <p className='fw-bold'>{signupdata.gstNumber}</p>
                               </div>
                             </div>
                             <div className='clear'></div>
@@ -503,7 +572,7 @@ export default function Estimatedetail() {
                             <div className="col-12 col-lg-6 col-md-6 col-sm-6 text-md-end text-lg-end">
                               <div className='row'>
                                 <div className='col-6  fw-bold'>
-                                  <p className='pt-3'>Invoice #</p>
+                                  <p className='pt-3'>Estimate #</p>
                                   <p className='my-0'>Date</p>
                                   <p className='pt-3'>Job</p>
                                 </div>
@@ -624,6 +693,7 @@ export default function Estimatedetail() {
                             <div className="col-6 text-end">
                               <p><CurrencySign />{estimateData.total}</p>
                             </div>
+
                           </div><hr />
                         </div>
                       </div>

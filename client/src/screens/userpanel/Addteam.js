@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import Usernavbar from './Usernavbar';
 import { ColorRing } from  'react-loader-spinner'
 import Usernav from './Usernav';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Addteam() {
   const navigate = useNavigate();
   const [message, setMessage] = useState(false);
   const [alertShow, setAlertShow] = useState('');
   const [ loading, setloading ] = useState(true);
+  const [alertMessage, setAlertMessage] = useState('');
   const [credentials, setCredentials] = useState({
     name: '',
     email: '',
@@ -31,10 +33,12 @@ export default function Addteam() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     let userid = localStorage.getItem('userid');
+    const authToken = localStorage.getItem('authToken');
     const response = await fetch('https://grithomes.onrender.com/api/addteammember', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': authToken,
       },
       body: JSON.stringify({
         userid: userid,
@@ -44,29 +48,39 @@ export default function Addteam() {
         password: credentials.password,
       }),
     });
-
-    const json = await response.json();
-    console.log(json);
-
-    if (json.success) {
-      setCredentials({
-        name: '',
-        email: '',
-        number: '',
-        password: '',
-      });
-
-      setMessage(true);
-      setAlertShow(json.message);
-      navigate('/userpanel/Team');
-    
-    } 
-
-    else{
-        alert("This Email already exist")
-        setMessage(true)
-        setAlertShow(json.message)
+    if (response.status === 401) {
+      const json = await response.json();
+      setAlertMessage(json.message);
+      setloading(false);
+      window.scrollTo(0,0);
+      return; // Stop further execution
     }
+    else{
+      const json = await response.json();
+      console.log(json);
+
+      if (json.success) {
+        setCredentials({
+          name: '',
+          email: '',
+          number: '',
+          password: '',
+        });
+
+        setMessage(true);
+        setAlertShow(json.message);
+        navigate('/userpanel/Team');
+      
+      } 
+
+      else{
+          alert("This Email already exist")
+          setMessage(true)
+          setAlertShow(json.message)
+      }
+    }
+
+    
   };
 
   const onchange = (event) => {
@@ -100,6 +114,9 @@ export default function Addteam() {
           <div className="col-lg-10 col-md-9 col-12 mx-auto">
             <div className="d-lg-none d-md-none d-block mt-2">
               <Usernav/>
+            </div>
+            <div className='mt-4 mx-4'>
+              {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
             </div>
             <form onSubmit={handleSubmit}>
               <div className="bg-white my-5 p-4 box mx-4">

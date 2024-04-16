@@ -3,6 +3,7 @@ import { ColorRing } from 'react-loader-spinner';
 import Teamnav from './Teamnav'
 import Teamnavbar from './Teamnavbar'
 import { useNavigate, useLocation } from 'react-router-dom';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Teamhistory() {
     const [loading, setloading] = useState(true);
@@ -13,6 +14,7 @@ export default function Teamhistory() {
     const [currentPageByMonth, setCurrentPageByMonth] = useState({});
     const [entriesPerPage] = useState(10);
     const userid = location.state?.userid;
+    const [alertMessage, setAlertMessage] = useState('');
 
     useEffect(() => {
         // if (!localStorage.getItem('authToken') || localStorage.getItem("isTeamMember") == "true") {
@@ -24,8 +26,22 @@ export default function Teamhistory() {
     const fetchAllEntries = async () => {
         try {
             const teamid = localStorage.getItem('userid');
-          const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`);
-          const data = await response.json();
+            const authToken = localStorage.getItem('authToken');
+          const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`, {
+            headers: {
+              'Authorization': authToken,
+            }
+          });
+
+          if (response.status === 401) {
+            const data = await response.json();
+            setAlertMessage(data.message);
+            setloading(false);
+            window.scrollTo(0,0);
+            return; // Stop further execution
+          }
+          else{
+            const data = await response.json();
     
           setUserEntries(data.userEntries);
           // Extract unique months from the entries
@@ -41,6 +57,8 @@ export default function Teamhistory() {
           setTimeout(() => {
             setloading(false);
           }, 2000);
+          }
+          
         } catch (error) {
           console.error(error);
         }
@@ -83,6 +101,9 @@ export default function Teamhistory() {
             <div className="d-lg-none d-md-none d-block mt-2">
               <Teamnav/>
             </div>
+            <div className='mt-4 mx-4'>
+                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                        </div>
             <div className="row my-4 mx-3">
               <div className="text">
                 <p className='fs-4'>History</p>

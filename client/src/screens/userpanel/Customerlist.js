@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 // import Nav from './Nav';
 import { format } from 'date-fns';
 import Usernav from './Usernav';
+import Alertauthtoken from '../../components/Alertauthtoken';
 import { ColorRing } from  'react-loader-spinner'
 
 
@@ -12,6 +13,7 @@ export default function Customerlist() {
     const [customers, setcustomers] = useState([]);
     const [selectedcustomers, setselectedcustomers] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(0);
     const entriesPerPage = 10;
@@ -43,13 +45,29 @@ export default function Customerlist() {
     const fetchdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (Array.isArray(json)) {
-                setcustomers(json);
-            }
-            setloading(false);
+                if (Array.isArray(json)) {
+                    setcustomers(json);
+                }
+                setloading(false);
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -62,17 +80,32 @@ export default function Customerlist() {
 
     const handleDeleteClick = async (customerId) => {
         try {
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/delcustomers/${customerId}`, {
-                method: 'GET'
+                method: 'GET',
+                headers: {
+                    'Authorization': authToken,
+                  }
             });
-    
-            const json = await response.json();
-    
-            if (json.Success) {
-                fetchdata(); // Refresh the customers list
-            } else {
-                console.error('Error deleting customer:', json.message);
+
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
+            else{
+                const json = await response.json();
+    
+                if (json.Success) {
+                    fetchdata(); // Refresh the customers list
+                } else {
+                    console.error('Error deleting customer:', json.message);
+                }  
+            }
+    
+            
         } catch (error) {
             console.error('Error deleting customer:', error);
         }
@@ -134,6 +167,9 @@ export default function Customerlist() {
                     <div className='d-lg-none d-md-none d-block mt-2'>
                         <Usernav/>
                     </div>
+                    <div className='mt-4 mx-4'>
+                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                        </div>
                     <div className="bg-white my-5 p-4 box mx-4">
                         <div className='row py-2'>
                             <div className="col-lg-4 col-md-6 col-sm-6 col-7 me-auto">

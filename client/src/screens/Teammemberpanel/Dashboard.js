@@ -1,7 +1,8 @@
 import React,{useState,useEffect} from 'react'
 import { format } from 'date-fns';
 import {useNavigate} from 'react-router-dom'
-import { ColorRing } from  'react-loader-spinner'
+import { ColorRing } from  'react-loader-spinner';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Dashboard() {
   const [ loading, setloading ] = useState(true);
@@ -20,6 +21,7 @@ export default function Dashboard() {
     const [startTime, setStartTime] = useState(null);
     const [totalTime, setTotalTime] = useState(0);
     const [userEntries, setUserEntries] = useState([]);
+    const [alertMessage, setAlertMessage] = useState('');
     const userid = localStorage.getItem('userid');
     const currentDate = new Date(); // Get the current date
   
@@ -31,11 +33,13 @@ export default function Dashboard() {
           let username = localStorage.getItem('username');
           let userEmail = localStorage.getItem('userEmail');
           let isTeamMember = localStorage.getItem('isTeamMember');
+          const authToken = localStorage.getItem('authToken');
 
             const response = await fetch('https://grithomes.onrender.com/api/clockin', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
+                'Authorization': authToken,
               },
               body: JSON.stringify(
                 {
@@ -45,10 +49,21 @@ export default function Dashboard() {
                 isTeamMember:isTeamMember
               }),
             });
-            const data = await response.json();
-            setIsClockedIn(true);
-            setStartTime(data.startTime);
-            localStorage.setItem("startTime", data.startTime);
+
+            if (response.status === 401) {
+              const data = await response.json();
+              setAlertMessage(data.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
+            }
+            else{
+              const data = await response.json();
+              setIsClockedIn(true);
+              setStartTime(data.startTime);
+              localStorage.setItem("startTime", data.startTime);
+            }
+            
           } catch (error) {
             console.error(error);
           }
@@ -60,10 +75,12 @@ export default function Dashboard() {
               let username = localStorage.getItem('username');
               let userEmail = localStorage.getItem('userEmail');
               let isTeamMember = localStorage.getItem('isTeamMember');
+              const authToken = localStorage.getItem('authToken');
               const response = await fetch('https://grithomes.onrender.com/api/clockout', {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
+                  'Authorization': authToken,
                 },
                 body: JSON.stringify(
                   {
@@ -73,19 +90,30 @@ export default function Dashboard() {
                   isTeamMember:isTeamMember
                 }),
               });
-              const data = await response.json();
-              setIsClockedIn(false);
-              localStorage.setItem("startTime", "");
-        
-              if (startTime) {
-                const startTimestamp = new Date(startTime).getTime();
-                const endTimestamp = new Date(data.endTime).getTime();
-                const timeDifference = endTimestamp - startTimestamp;
-                const hours = Math.floor(timeDifference / (1000 * 60 * 60));
-                const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
-                const seconds = Math.floor((timeDifference / 1000) % 60);
-                setTotalTime(`${hours} hrs ${minutes} mins ${seconds} secs`);
+
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
               }
+              else{
+                const data = await response.json();
+                setIsClockedIn(false);
+                localStorage.setItem("startTime", "");
+          
+                if (startTime) {
+                  const startTimestamp = new Date(startTime).getTime();
+                  const endTimestamp = new Date(data.endTime).getTime();
+                  const timeDifference = endTimestamp - startTimestamp;
+                  const hours = Math.floor(timeDifference / (1000 * 60 * 60));
+                  const minutes = Math.floor((timeDifference / (1000 * 60)) % 60);
+                  const seconds = Math.floor((timeDifference / 1000) % 60);
+                  setTotalTime(`${hours} hrs ${minutes} mins ${seconds} secs`);
+                } 
+              }
+              
             } catch (error) {
               console.error(error);
               setloading(false);
@@ -132,17 +160,33 @@ export default function Dashboard() {
           const fetchUserEntries = async (start, end) => {
             try {
               const userid = localStorage.getItem('userid');
-              const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${userid}`);
-              const data = await response.json();
-        
-              // Filter userEntries to include only entries for the current month
-              const filteredEntries = data.userEntries.filter((entry) => {
-                const entryTime = new Date(entry.startTime).getTime();
-                return entryTime >= start.getTime() && entryTime <= end.getTime();
+              const authToken = localStorage.getItem('authToken');
+              const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
               });
+
+              if (response.status === 401) {
+                const data = await response.json();
+                setAlertMessage(data.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const data = await response.json();
         
-              setUserEntries(filteredEntries);
-              setloading(false);
+                // Filter userEntries to include only entries for the current month
+                const filteredEntries = data.userEntries.filter((entry) => {
+                  const entryTime = new Date(entry.startTime).getTime();
+                  return entryTime >= start.getTime() && entryTime <= end.getTime();
+                });
+          
+                setUserEntries(filteredEntries);
+                setloading(false);
+              }
+              
 
             } catch (error) {
               console.error(error);
@@ -222,7 +266,9 @@ const GoToHistory = () => {
       />
         </div>:
       <div className='mx-4'>
-        
+        <div className='my-2'>
+                    {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                  </div>
         <div className=''>
           <div className='txt px-4 py-4'>
             <h2 className='fs-35 fw-bold'>Dashboard</h2>

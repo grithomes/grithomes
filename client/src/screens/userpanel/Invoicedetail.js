@@ -8,6 +8,7 @@ import { ReactMultiEmail } from 'react-multi-email';
 import 'react-multi-email/dist/style.css'
 import html2pdf from 'html2pdf.js';
 import CurrencySign from '../../components/CurrencySign ';
+import Alertauthtoken from '../../components/Alertauthtoken';
 import { PDFViewer,pdf, PDFDownloadLink, Document,Image, Page, Text, Font, View, StyleSheet } from '@react-pdf/renderer';
 
 export default function Invoicedetail() {
@@ -32,6 +33,7 @@ export default function Invoicedetail() {
     const invoiceid = location.state?.invoiceid;
     const [duedepositDate, setDueDepositDate] = useState('')
     const [savedDepositData, setsavedDepositData] = useState('')
+    const [alertMessage, setAlertMessage] = useState('');
     const [transactionData, setTransactionData] = useState({
         paidamount: '',
         paiddate: '',
@@ -167,6 +169,7 @@ export default function Invoicedetail() {
 
     const handleMarkDeposit = async () => {
             const userid =  localStorage.getItem("userid");
+            const authToken = localStorage.getItem('authToken');
       // Add logic to save the deposit in the database
     const depositAmount = parseFloat(savedDepositData.depositamount);
     if (depositAmount > 0) {
@@ -186,6 +189,7 @@ export default function Invoicedetail() {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': authToken,
           },
           body: JSON.stringify({
             paidamount: depositAmount,
@@ -197,32 +201,43 @@ export default function Invoicedetail() {
             depositid: savedDepositData._id,
           }),
         });
-  
-        if (response.ok) {
+
+        if (response.status === 401) {
           const responseData = await response.json();
-          if (responseData.success) {
-            setsavedDepositData('');
-            console.log('Payment added successfully!');
-            // Fetch updated transaction data after payment addition
-          await fetchtransactiondata();
-  
-          // Calculate total paid amount from transactions
-          const totalPaidAmount = transactions.reduce((total, payment) => total + payment.paidamount, 0);
-  
-          // Update amount due by subtracting totalPaidAmount from total invoice amount
-          const updatedAmountDue = invoiceData.total - totalPaidAmount;
-          setInvoiceData({ ...invoiceData, amountdue: updatedAmountDue });
-          // Close the modal after adding payment
-          document.getElementById('closebutton').click();
-          if (modalRef.current) {
-              modalRef.current.hide();
+          setAlertMessage(responseData.message);
+          setloading(false);
+          window.scrollTo(0,0);
+          return; // Stop further execution
+        }
+        else{
+            if (response.ok) {
+            const responseData = await response.json();
+            if (responseData.success) {
+              setsavedDepositData('');
+              console.log('Payment added successfully!');
+              // Fetch updated transaction data after payment addition
+            await fetchtransactiondata();
+    
+            // Calculate total paid amount from transactions
+            const totalPaidAmount = transactions.reduce((total, payment) => total + payment.paidamount, 0);
+    
+            // Update amount due by subtracting totalPaidAmount from total invoice amount
+            const updatedAmountDue = invoiceData.total - totalPaidAmount;
+            setInvoiceData({ ...invoiceData, amountdue: updatedAmountDue });
+            // Close the modal after adding payment
+            document.getElementById('closebutton').click();
+            if (modalRef.current) {
+                modalRef.current.hide();
+              }
+            } else {
+              console.error('Failed to add payment.');
             }
           } else {
             console.error('Failed to add payment.');
           }
-        } else {
-          console.error('Failed to add payment.');
         }
+  
+        
       } catch (error) {
         console.error('Error adding payment:', error);
       }
@@ -235,6 +250,7 @@ export default function Invoicedetail() {
     
     const handleSave = async () => {
       const userid = localStorage.getItem("userid");
+      const authToken = localStorage.getItem('authToken');
       
       try {
         if ((savedDepositData != null || savedDepositData != "") && savedDepositData._id != undefined) {
@@ -243,6 +259,7 @@ export default function Invoicedetail() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': authToken,
             },
             body: JSON.stringify({
               "depositamount": amount, 
@@ -253,24 +270,36 @@ export default function Invoicedetail() {
               "invoiceid": invoiceid, 
             }),
           });
-      
-          const data = await response.json();
-      
-          if (data.Success) {
-            console.log('Deposit updated successfully:', data.deposit);
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
-            const savedDepositDatad = await savedDepositResponse.json();
-            setsavedDepositData(savedDepositDatad.deposit);
-            // You may update the state here if required
-          } else {
-            console.error('Failed to update deposit:', data.error);
+
+          if (response.status === 401) {
+            const data = await response.json();
+            setAlertMessage(data.message);
+            setloading(false);
+            window.scrollTo(0,0);
+            return; // Stop further execution
           }
+          else{
+            const data = await response.json();
+      
+            if (data.Success) {
+              console.log('Deposit updated successfully:', data.deposit);
+              const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
+              const savedDepositDatad = await savedDepositResponse.json();
+              setsavedDepositData(savedDepositDatad.deposit);
+              // You may update the state here if required
+            } else {
+              console.error('Failed to update deposit:', data.error);
+            }
+          }
+      
+          
         } else {
           // If savedDepositData is empty or does not have an ID, add a new record
           const response = await fetch('https://grithomes.onrender.com/api/deposit', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': authToken,
             },
             body: JSON.stringify({
               "depositamount": amount, 
@@ -281,17 +310,37 @@ export default function Invoicedetail() {
               "invoiceid": invoiceid, 
             }),
           });
-      
-          const data = await response.json();
-      
-          if (data.success) {
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
-            const savedDepositDatad = await savedDepositResponse.json();
-            setsavedDepositData(savedDepositDatad.deposit);
-            console.log('New deposit added successfully:', data.deposit);
-            // You may update the state here if required
-          } else {
-            console.error('Failed to add new deposit:', data.error);
+
+          if (response.status === 401) {
+            const data = await response.json();
+            setAlertMessage(data.message);
+            setloading(false);
+            window.scrollTo(0,0);
+            return; // Stop further execution
+          }
+          else{
+            const data = await response.json();
+            if (data.success) {
+              const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+              if (response.status === 401) {
+                const savedDepositDatad = await savedDepositResponse.json();
+                setAlertMessage(savedDepositDatad.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const savedDepositDatad = await savedDepositResponse.json();
+                setsavedDepositData(savedDepositDatad.deposit);
+                console.log('New deposit added successfully:', data.deposit);
+              }
+            } else {
+              console.error('Failed to add new deposit:', data.error);
+            }
           }
         }
       } catch (error) {
@@ -301,6 +350,7 @@ export default function Invoicedetail() {
 
     const handleSaveAndSend = async () => {
       const userid = localStorage.getItem("userid");
+      const authToken = localStorage.getItem('authToken');
       
       try {
         if ((savedDepositData != null || savedDepositData != "") && savedDepositData._id != undefined) {
@@ -309,6 +359,7 @@ export default function Invoicedetail() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': authToken,
             },
             body: JSON.stringify({
               "depositamount": amount, 
@@ -319,18 +370,39 @@ export default function Invoicedetail() {
               "invoiceid": invoiceid, 
             }),
           });
+
+          if (response.status === 401) {
+            const data = await response.json();
+            setAlertMessage(data.message);
+            setloading(false);
+            window.scrollTo(0,0);
+            return; // Stop further execution
+          }
+          else{
+            const data = await response.json();
       
-          const data = await response.json();
-      
-          if (data.Success) {
-            console.log('Deposit updated successfully:', data.deposit);
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
-            const savedDepositDatad = await savedDepositResponse.json();
-            setsavedDepositData(savedDepositDatad.deposit);
-            setShowSendEmailModal(true);
-            // You may update the state here if required
-          } else {
-            console.error('Failed to update deposit:', data.error);
+            if (data.Success) {
+              console.log('Deposit updated successfully:', data.deposit);
+              const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+              if (response.status === 401) {
+                const savedDepositDatad = await savedDepositResponse.json();
+                setAlertMessage(savedDepositDatad.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const savedDepositDatad = await savedDepositResponse.json();
+                setsavedDepositData(savedDepositDatad.deposit);
+                setShowSendEmailModal(true);
+              }
+            } else {
+              console.error('Failed to update deposit:', data.error);
+            }
           }
         } else {
           // If savedDepositData is empty or does not have an ID, add a new record
@@ -338,6 +410,7 @@ export default function Invoicedetail() {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
+              'Authorization': authToken,
             },
             body: JSON.stringify({
               "depositamount": amount, 
@@ -348,19 +421,40 @@ export default function Invoicedetail() {
               "invoiceid": invoiceid, 
             }),
           });
-      
-          const data = await response.json();
-      
-          if (data.success) {
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
-            const savedDepositDatad = await savedDepositResponse.json();
-            setsavedDepositData(savedDepositDatad.deposit);
-            console.log('New deposit added successfully:', data.deposit);
-            setShowSendEmailModal(true);
-      //       You may update the state here if required
-          } else {
-            console.error('Failed to add new deposit:', data.error);
+          if (response.status === 401) {
+            const data = await response.json();
+            setAlertMessage(data.message);
+            setloading(false);
+            window.scrollTo(0,0);
+            return; // Stop further execution
           }
+          else{
+            const data = await response.json();
+            if (data.success) {
+              const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+              if (response.status === 401) {
+                const savedDepositDatad = await savedDepositResponse.json();
+                setAlertMessage(savedDepositDatad.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const savedDepositDatad = await savedDepositResponse.json();
+                setsavedDepositData(savedDepositDatad.deposit);
+                console.log('New deposit added successfully:', data.deposit);
+                setShowSendEmailModal(true);
+              }
+            } else {
+              console.error('Failed to add new deposit:', data.error);
+            }
+          }
+      
+          
         }
       } catch (error) {
         console.error('Error saving deposit:', error);
@@ -381,13 +475,28 @@ export default function Invoicedetail() {
     const fetchinvoicedata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/getinvoicedata/${invoiceid}`);
-            const json = await response.json();
-            
-            setInvoiceData(json);
-            if (Array.isArray(json.items)) {
-                setitems(json.items);
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/getinvoicedata/${invoiceid}`, {
+              headers: {
+                'Authorization': authToken,
+              }
+            });
+
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
+            else{
+              const json = await response.json();
+              setInvoiceData(json);
+              if (Array.isArray(json.items)) {
+                  setitems(json.items);
+              }
+            }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -396,10 +505,25 @@ export default function Invoicedetail() {
     const fetchdepositdata = async () => {
         try {
           const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/getdepositdata/${userid}/${invoiceid}`);
-            const json = await response.json();
+          const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/getdepositdata/${userid}/${invoiceid}`, {
+              headers: {
+                'Authorization': authToken,
+              }
+            });
+
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
+            }
+            else{
+              const json = await response.json();
+              setsavedDepositData(json);
+            }
             
-            setsavedDepositData(json);
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -408,20 +532,36 @@ export default function Invoicedetail() {
     const fetchtransactiondata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoiceid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoiceid}`, {
+              headers: {
+                'Authorization': authToken,
+              }
+            });
+      
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
+            }
+            else{
+              const json = await response.json();
 
-            // Check if the response contains paidamount
-            if (Array.isArray(json)) {
-      setTransactions(json);
-    //   const totalPaidAmount = payments.reduce((total, payment) => total + payment.paidamount, 0);
+                    // Check if the response contains paidamount
+                    if (Array.isArray(json)) {
+              setTransactions(json);
+            //   const totalPaidAmount = payments.reduce((total, payment) => total + payment.paidamount, 0);
 
 
-    } else {
-      console.error('Invalid data structure for transactions:', json);
-    }
-    setloading(false);
-        } catch (error) {
+            } else {
+              console.error('Invalid data structure for transactions:', json);
+            }
+            setloading(false);
+                } 
+            }
+            catch (error) {
             console.error('Error fetching data:', error);
         }
     }
@@ -429,13 +569,29 @@ export default function Invoicedetail() {
     const fetchsignupdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+              headers: {
+                'Authorization': authToken,
+              }
+            });
+
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
+            }
+            else{
+              const json = await response.json();
             
             // if (Array.isArray(json)) {
                 setsignupdata(json);
                 console.log(signupdata);
             // }
+            }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -457,6 +613,7 @@ export default function Invoicedetail() {
   const handleAddPayment = async () => {
     // const invoiceid = 'your-invoice-id'; 
     const userid =  localStorage.getItem("userid");
+    const authToken = localStorage.getItem('authToken');
     // Check for errors
   if (transactionData.paidamount === '') {
     setpaidamounterror("Fill detail");
@@ -503,6 +660,7 @@ export default function Invoicedetail() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': authToken,
         },
         body: JSON.stringify({
           paidamount: transactionData.paidamount,
@@ -514,30 +672,41 @@ export default function Invoicedetail() {
         }),
       });
 
-      if (response.ok) {
+      if (response.status === 401) {
         const responseData = await response.json();
-        if (responseData.success) {
-          console.log('Payment added successfully!');
-          // Fetch updated transaction data after payment addition
-        await fetchtransactiondata();
+        setAlertMessage(responseData.message);
+        setloading(false);
+        window.scrollTo(0,0);
+        return; // Stop further execution
+      }
+      else{
+          if (response.ok) {
+          const responseData = await response.json();
+          if (responseData.success) {
+            console.log('Payment added successfully!');
+            // Fetch updated transaction data after payment addition
+          await fetchtransactiondata();
 
-        // Calculate total paid amount from transactions
-        const totalPaidAmount = transactions.reduce((total, payment) => total + payment.paidamount, 0);
+          // Calculate total paid amount from transactions
+          const totalPaidAmount = transactions.reduce((total, payment) => total + payment.paidamount, 0);
 
-        // Update amount due by subtracting totalPaidAmount from total invoice amount
-        const updatedAmountDue = invoiceData.total - totalPaidAmount;
-        setInvoiceData({ ...invoiceData, amountdue: updatedAmountDue });
-        // Close the modal after adding payment
-        document.getElementById('closebutton').click();
-        if (modalRef.current) {
-            modalRef.current.hide();
+          // Update amount due by subtracting totalPaidAmount from total invoice amount
+          const updatedAmountDue = invoiceData.total - totalPaidAmount;
+          setInvoiceData({ ...invoiceData, amountdue: updatedAmountDue });
+          // Close the modal after adding payment
+          document.getElementById('closebutton').click();
+          if (modalRef.current) {
+              modalRef.current.hide();
+            }
+          } else {
+            console.error('Failed to add payment.');
           }
         } else {
           console.error('Failed to add payment.');
         }
-      } else {
-        console.error('Failed to add payment.');
       }
+
+      
     } catch (error) {
       console.error('Error adding payment:', error);
     }
@@ -710,18 +879,29 @@ const handleEditContent = (invoiceData) => {
 };
 
 const handleRemove = async (invoiceid) => {
+  const authToken = localStorage.getItem('authToken');
     try {
       const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+          'Authorization': authToken,
+        }
       });
-  
-      const json = await response.json();
-  
-      if (json.success) {
-        console.log('Data removed successfully!');
-        navigate('/userpanel/Invoice');
-      } else {
-        console.error('Error deleting Invoice:', json.message);
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0,0);
+        return; // Stop further execution
+      }
+      else{
+        const json = await response.json();
+        if (json.success) {
+          console.log('Data removed successfully!');
+          navigate('/userpanel/Invoice');
+        } else {
+          console.error('Error deleting Invoice:', json.message);
+        }
       }
     } catch (error) {
       console.error('Error deleting Invoice:', error);
@@ -767,6 +947,7 @@ const getStatus = () => {
 
 const handleFormSubmit = async (event) => {
     event.preventDefault();
+      const authToken = localStorage.getItem('authToken');
     const contentAsPdf = await generatePdfFromHtml();
     try {
       const finalContent = content.trim() || 'Thank you for your business.'; // If content is empty, use default value
@@ -800,12 +981,23 @@ const handleFormSubmit = async (event) => {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify(updatedData),
             });
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
+            }
+            else{
+              fetchinvoicedata();
+            }
 
             // Fetch updated invoice data
-            fetchinvoicedata();
+            
       } else {
         console.error('Failed to send email.');
       }
@@ -816,6 +1008,7 @@ const handleFormSubmit = async (event) => {
 
 const handleDepositFormSubmit = async (event) => {
     event.preventDefault();
+    const authToken = localStorage.getItem('authToken');
     const contentAsPdf = await generatePdfFromHtml();
     try {
       const finalContent = content.trim() || 'Thank you for your business.'; // If content is empty, use default value
@@ -843,6 +1036,27 @@ const handleDepositFormSubmit = async (event) => {
         // setShowModal(false);
         setShowSendEmailModal(false)
         setShowEmailAlert(true);
+            // Update the database with emailsent status
+            const updatedData = { ...invoiceData, emailsent: 'yes' }; // Update emailsent status
+            await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
+                },
+                body: JSON.stringify(updatedData),
+            });
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
+            }
+            else{
+              // Fetch updated invoice data
+              fetchinvoicedata();
+            }
       } else {
         console.error('Failed to send email.');
       }
@@ -958,6 +1172,9 @@ const convertToPdf = () => {
                                 <a className='btn rounded-pill btn-danger text-white fw-bold' data-bs-toggle="modal" data-bs-target="#sendEmailModal">Send</a>
                             </div>
                         </div>
+                      <div className='my-2'>
+                        {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                      </div>
                         
                         {showAlert && (
                                 <>
@@ -995,9 +1212,12 @@ const convertToPdf = () => {
                                             <p className='h4 fw-bold'>{signupdata.companyname}</p>
                                           }
 
-                                          <div className='ps-3 pt-2'>
-                                              <p className='fw-bold'>{signupdata.FirstName} {signupdata.User1_Mobile_Number} | {signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</p>
-                                          </div>
+                                        <div className='ps-3 pt-2'>
+                                            <p className='fw-bold'>{signupdata.FirstName} {signupdata.User1_Mobile_Number} | {signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</p>
+                                        </div>
+
+
+
                                             {/* <p className='h4 fw-bold'>{signupdata.companyname}</p> */}
                                         </div>    
                                         <div className="col-6">
@@ -1092,12 +1312,14 @@ const convertToPdf = () => {
                                             </div>
                                             <div className="col-lg-2 col-md-2 col-sm-3 col-4 invoice-contentcol-2">
                                                 <p className='mb-2'>Subtotal</p>
-                                                <p className=''>GST</p>
+                                                <p className='mb-2'>GST</p>
+                                                <p className='mb-2'>DISCOUNT</p>
                                                 <p className=''>Total</p>
                                             </div>
                                             <div className="col-lg-3 col-md-3 col-sm-3 col-4 invoice-contentcol-2">
                                                 <p className='mb-2'><CurrencySign />{invoiceData.subtotal}</p>
                                                 <p className='mb-2'><CurrencySign />{invoiceData.tax}</p>
+                                                <p className='mb-2'><CurrencySign />{invoiceData.discountTotal}</p>
                                                 <p className=''><CurrencySign />{invoiceData.total}</p>
                                             </div>
                                           </div><hr />

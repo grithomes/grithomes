@@ -13,7 +13,9 @@ export default function Login() {
   let navigate = useNavigate();
 
   useEffect(()=> {
-    if(localStorage.getItem('authToken')){
+    if(!localStorage.getItem('authToken') || localStorage.getItem('authToken') == "" || localStorage.getItem('authToken') == "1"){
+      
+    }else{
       navigate("/userpanel/Userdashboard");
     }
   })

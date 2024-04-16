@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { ColorRing } from 'react-loader-spinner';
 import Usernavbar from './userpanel/Usernavbar';
 import Usernav from './userpanel/Usernav';
+import Alertauthtoken from '../components/Alertauthtoken';
 
 export default function Timeschemahistory() {
   const [loading, setLoading] = useState(true);
@@ -12,6 +13,7 @@ export default function Timeschemahistory() {
   const [uniqueMonths, setUniqueMonths] = useState([]);
   const [currentPageByMonth, setCurrentPageByMonth] = useState({});
   const [entriesPerPage] = useState(10);
+  const [alertMessage, setAlertMessage] = useState('');
 
   if (location == null || location.state == null || location.state.teamid == null) {
     navigate('/userpanel/Team');
@@ -28,23 +30,38 @@ export default function Timeschemahistory() {
   const fetchAllEntries = async () => {
     try {
       // Fetch all entries for the merchant's team (teamid)
-      const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`);
-      const data = await response.json();
-  
-      setUserEntries(data.userEntries);
-      // Extract unique months from the entries
-      const months = [...new Set(data.userEntries.map((entry) => new Date(entry.startTime).getMonth()))];
-      setUniqueMonths(months);
-  
-      const initialPageByMonth = {};
-      months.forEach((monthIndex) => {
-        initialPageByMonth[monthIndex] = 0;
+    const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
       });
-      setCurrentPageByMonth(initialPageByMonth);
-  
-      setTimeout(() => {
+      if (response.status === 401) {
+        const data = await response.json();
+        setAlertMessage(data.message);
         setLoading(false);
-      }, 2000);
+        window.scrollTo(0,0);
+        return; // Stop further execution
+      }
+      else{
+          const data = await response.json();
+    
+          setUserEntries(data.userEntries);
+          // Extract unique months from the entries
+          const months = [...new Set(data.userEntries.map((entry) => new Date(entry.startTime).getMonth()))];
+          setUniqueMonths(months);
+      
+          const initialPageByMonth = {};
+          months.forEach((monthIndex) => {
+            initialPageByMonth[monthIndex] = 0;
+          });
+          setCurrentPageByMonth(initialPageByMonth);
+      
+          setTimeout(() => {
+            setLoading(false);
+          }, 2000);
+      }
+      
     } catch (error) {
       console.error(error);
     }
@@ -133,6 +150,9 @@ export default function Timeschemahistory() {
               <div className='d-lg-none d-md-none d-block mt-2'>
                 <Usernav />
               </div>
+              <div className='mt-4 mx-4'>
+                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                        </div>
               <div className='row my-4 mx-3'>
                 <div className='text'>
                   <p>History</p>

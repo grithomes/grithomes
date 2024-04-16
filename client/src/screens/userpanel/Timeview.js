@@ -3,6 +3,7 @@ import Usernavbar from './Usernavbar';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ColorRing } from 'react-loader-spinner';
 import Usernav from './Usernav';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Timeview() {
   const [loading, setloading] = useState(true);
@@ -10,6 +11,7 @@ export default function Timeview() {
   const navigate = useNavigate();
   const [userEntries, setUserEntries] = useState([]);
   const currentDate = new Date();
+  const [alertMessage, setAlertMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1); // Current page number
   const [entriesPerPage] = useState(10); // Number of entries per page
 if(location == null || location.state == null || location.state.teamid == null)
@@ -31,21 +33,36 @@ useEffect(() => {
       const currentYear = currentDate.getFullYear();
       const startOfMonth = new Date(currentYear, currentMonthIndex, 1, 0, 0, 0);
       const endOfMonth = new Date(currentYear, currentMonthIndex + 1, 0, 23, 59, 59);
+      const authToken = localStorage.getItem('authToken');
 
-      const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`);
-      const data = await response.json();
+      const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
+      if (response.status === 401) {
+        const data = await response.json();
+        setAlertMessage(data.message);
+        setloading(false);
+        window.scrollTo(0,0);
+        return; // Stop further execution
+      }
+      else{
+        const data = await response.json();
 
       // Filter userEntries to include only entries for the current month
-      const filteredEntries = data.userEntries.filter((entry) => {
-        const entryTime = new Date(entry.startTime).getTime();
-        return entryTime >= startOfMonth.getTime() && entryTime <= endOfMonth.getTime();
-      });
+        const filteredEntries = data.userEntries.filter((entry) => {
+          const entryTime = new Date(entry.startTime).getTime();
+          return entryTime >= startOfMonth.getTime() && entryTime <= endOfMonth.getTime();
+        });
 
-      setUserEntries(filteredEntries);
+        setUserEntries(filteredEntries);
 
-      setTimeout(() => {
-        setloading(false);
-      }, 2000);
+        setTimeout(() => {
+          setloading(false);
+        }, 2000); 
+      }
+      
     } catch (error) {
       console.error(error);
     }
@@ -91,6 +108,9 @@ const GoToHistory = () => {
           <div className="col-lg-10 col-md-9 col-12 mx-auto">
             <div className="d-lg-none d-md-none d-block mt-2">
               <Usernav/>
+            </div>
+            <div className='mt-4 mx-4'>
+              {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
             </div>
             <div className="row my-4 mx-4">
                 <div className="col-lg-4 col-md-6 col-sm-6 col-7 me-auto">

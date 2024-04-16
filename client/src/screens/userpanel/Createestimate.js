@@ -12,6 +12,7 @@ import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Createestimate() {
     const [loading, setloading] = useState(true);
@@ -31,12 +32,14 @@ export default function Createestimate() {
     const [editedName, setEditedName] = useState('');
     const [editedEmail, setEditedEmail] = useState('');
     const [taxPercentage, setTaxPercentage] = useState(10);
+    const [discountTotal, setdiscountTotal] = useState(0);
     const [estimateData, setestimateData] = useState({
         customername: '', itemname: '', customeremail: '', estimate_id: '', EstimateNumber: '', purchaseorder: '',
         job: '', date: '', description: '', itemquantity: '', price: '', discount: '',
-        amount: '', tax: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
+        amount: '', tax: '',discountTotal:'', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
     });
     const [editorData, setEditorData] = useState("<p></p>");
+    const [alertMessage, setAlertMessage] = useState('');
     
   const [credentials, setCredentials] = useState({
     name: '',
@@ -80,18 +83,34 @@ export default function Createestimate() {
     const fetchLastEstimateNumber = async () => {
         try {
             const userid = localStorage.getItem('userid');
-            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
 
-            // let nextEstimateNumber = 1;
-            // if (json && json.lastEstimateNumber) {
-            //     nextEstimateNumber = json.lastEstimateNumber + 1;
-            // }
-            setestimateData({
-                ...estimateData,
-                EstimateNumber: `Estimate-${json.lastEstimateId + 1}`,
-                estimate_id: json.lastEstimateId + 1,
-            });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
+
+                // let nextEstimateNumber = 1;
+                // if (json && json.lastEstimateNumber) {
+                //     nextEstimateNumber = json.lastEstimateNumber + 1;
+                // }
+                setestimateData({
+                    ...estimateData,
+                    EstimateNumber: `Estimate-${json.lastEstimateId + 1}`,
+                    estimate_id: json.lastEstimateId + 1,
+                });
+              }
+            
         } catch (error) {
             console.error('Error fetching last estimate number:', error);
         }
@@ -101,12 +120,28 @@ export default function Createestimate() {
     const fetchcustomerdata = async () => {
         try {
             const userid = localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
 
-            if (Array.isArray(json)) {
-                setcustomers(json);
-            }
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+               const json = await response.json();
+
+                if (Array.isArray(json)) {
+                    setcustomers(json);
+                } 
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -115,12 +150,28 @@ export default function Createestimate() {
     const fetchitemdata = async () => {
         try {
             const userid = localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
 
-            if (Array.isArray(json)) {
-                setitems(json);
-            }
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
+
+                if (Array.isArray(json)) {
+                    setitems(json);
+                }
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -287,7 +338,8 @@ export default function Createestimate() {
     const calculateTotal = () => {
         const subtotal = calculateSubtotal();
         const taxAmount = calculateTaxAmount();
-        const totalAmount = subtotal + taxAmount;
+        const discountAmount = discountTotal;
+        const totalAmount = subtotal + taxAmount - discountAmount;
         return totalAmount;
     };
 
@@ -295,7 +347,7 @@ export default function Createestimate() {
         e.preventDefault();
         try {
             const userid = localStorage.getItem('userid'); // Assuming you have user ID stored in local storage
-
+            const authToken = localStorage.getItem('authToken');
             const estimateItems = searchitemResults.map((item) => {
                 const selectedItem = items.find((i) => i._id === item.value);
                 const itemPrice = selectedItem?.price || 0;
@@ -333,6 +385,7 @@ export default function Createestimate() {
                 EstimateNumber: estimateData.EstimateNumber,
                 purchaseorder: estimateData.purchaseorder,
                 job: estimateData.job || 'No Job',
+                discountTotal: discountTotal || 'No Discount',
                 information: editorData,
                 date: estimateData.date,
                 items: estimateItems,
@@ -349,30 +402,44 @@ export default function Createestimate() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify({ userid, estimateData: data }),
             });
-
-            if (response.ok) {
+            if (response.status === 401) {
                 const responseData = await response.json();
-                if (responseData.success) {
-                    const estimateid = responseData.estimate._id;
-                    navigate('/userpanel/Estimatedetail', { state: { estimateid } });
-                    console.log('estimate saved successfully!');
-                } else {
-                    console.error('Failed to save the estimate.');
-                }
-            } else {
-                const responseData = await response.json();
-                setmessage(true);
-                setAlertShow(responseData.error)
-                console.error('Failed to save the estimate.');
+                setAlertMessage(responseData.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
             }
+            else{
+                if (response.ok) {
+                    const responseData = await response.json();
+                    if (responseData.success) {
+                        const estimateid = responseData.estimate._id;
+                        navigate('/userpanel/Estimatedetail', { state: { estimateid } });
+                        console.log('estimate saved successfully!');
+                    } else {
+                        console.error('Failed to save the estimate.');
+                    }
+                } else {
+                    const responseData = await response.json();
+                    setmessage(true);
+                    setAlertShow(responseData.error)
+                    console.error('Failed to save the estimate.');
+                } 
+            }
+
+            
         } catch (error) {
             console.error('Error creating estimate:', error);
         }
     };
-
+    const handleDiscountChange = (e) => {
+        // Ensure you're setting the state to the new value entered by the user
+        setdiscountTotal(parseFloat(e.target.value)); // Assuming the input should accept decimal values
+    };
 
     // const onchange = (event) => {
     //     setestimateData({ ...estimateData, [event.target.name]: event.target.value });
@@ -427,10 +494,12 @@ export default function Createestimate() {
     const handleAddCustomer = async (e) => {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
+        const authToken = localStorage.getItem('authToken');
         const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': authToken,
           },
           body: JSON.stringify({
             userid: userid,
@@ -452,33 +521,44 @@ export default function Createestimate() {
             post: credentials.post,
           }),
         });
-    
-        const json = await response.json();
-        console.log(json);
-    
-        if (json.Success) {
-          setCredentials({
-            name: '',
-            email: '',
-            number: '',
-            citydata: '',
-            statedata: '',
-            countrydata: '',
-            information: '',
-            address1: '',
-            address2: '',
-            post: '',
-          });
-    
-          setMessage1(true);
-          setAlertShow(json.message);
-          window.location.reload();
-        //   navigate('/userpanel/Customerlist');
+
+        if (response.status === 401) {
+          const json = await response.json();
+          setAlertMessage(json.message);
+          setloading(false);
+          window.scrollTo(0,0);
+          return; // Stop further execution
         }
-    
         else{
-            alert("This Customer Email already exist")
+           const json = await response.json();
+            console.log(json);
+        
+            if (json.Success) {
+            setCredentials({
+                name: '',
+                email: '',
+                number: '',
+                citydata: '',
+                statedata: '',
+                countrydata: '',
+                information: '',
+                address1: '',
+                address2: '',
+                post: '',
+            });
+        
+            setMessage1(true);
+            setAlertShow(json.message);
+            window.location.reload();
+            //   navigate('/userpanel/Customerlist');
+            }
+        
+            else{
+                alert("This Customer Email already exist")
+            } 
         }
+    
+        
       };
 
       const onchangeaddcustomer = (event) => {
@@ -515,7 +595,6 @@ export default function Createestimate() {
                                     <Usernav />
                                 </div>
                                 <div className='mx-4'>
-
                                     <form onSubmit={handleSubmit}>
                                         <div className='row py-4 px-2 breadcrumbclr'>
                                             <div className="col-lg-4 col-md-6 col-sm-12 col-7 me-auto">
@@ -529,6 +608,9 @@ export default function Createestimate() {
                                             </div>
                                             <div className="col-lg-3 col-md-4 col-sm-12 col-5 text-right">
                                                 <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit">Save</button>
+                                            </div>
+                                            <div className='mt-4'>
+                                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                                             </div>
                                         </div>
                                         <div className='box1 rounded adminborder p-4 m-2 mb-5'>
@@ -716,7 +798,7 @@ export default function Createestimate() {
                                             id={`description-${itemId}`}
                                         ></textarea> */}
                                                                                 </div>
-                                                                                <div className="col">
+                                                                                {/* <div className="col">
                                                                                     <label htmlFor={`discount-${itemId}`} className="form-label">Discount</label>
                                                                                     <input
                                                                                         type='number'
@@ -728,7 +810,7 @@ export default function Createestimate() {
                                                                                         id={`discount-${itemId}`}
                                                                                         min="0"
                                                                                     />
-                                                                                </div>
+                                                                                </div> */}
                                                                             </div>
                                                                         </td>
                                                                         <td>
@@ -800,6 +882,7 @@ export default function Createestimate() {
                                                                 <p>Subtotal</p>
                                                                 <p>GST</p>
                                                                 <p className='pt-3'>GST {taxPercentage}%</p>
+                                                                <p>Discount</p>
                                                                 <p>Total</p>
                                                             </div>
                                                             <div className="col-6 col-md-9">
@@ -823,6 +906,18 @@ export default function Createestimate() {
                                                                     // style: 'currency',
                                                                     // currency: 'INR',
                                                                 })}</p>
+                                                                <div className="mb-3">
+                                                                    <input
+                                                                        type="number"
+                                                                        name="totaldiscount"
+                                                                        className="form-control"
+                                                                        value={discountTotal}
+                                                                        onChange={handleDiscountChange} // Ensure proper event binding
+                                                                        placeholder="Enter Discount Total"
+                                                                        id="discountInput"
+                                                                        min="0"
+                                                                    />
+                                                                </div>
                                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
                                                                     // style: 'currency',
                                                                     // currency: 'INR',

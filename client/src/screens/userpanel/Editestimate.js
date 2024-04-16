@@ -10,6 +10,7 @@ import VirtualizedSelect from 'react-virtualized-select';
 import 'react-virtualized-select/styles.css';
 import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Editestimate() {
     
@@ -32,6 +33,7 @@ export default function Editestimate() {
     const location = useLocation();
     const estimateid = location.state?.estimateid;
     const [editorData, setEditorData] = useState("<p></p>");
+    const [alertMessage, setAlertMessage] = useState('');
 
     useEffect(() => {
         if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
@@ -49,15 +51,30 @@ export default function Editestimate() {
     const fetchdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/geteditestimateData/${estimateid}`);
-            const json = await response.json();
-            
-            if (json.Success) {
-                setestimateData(json.estimates);
-            } else {
-                console.error('Error fetching estimateData:', json.message);
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/geteditestimateData/${estimateid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+            });
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
-            console.log(estimateData);
+            else{
+                const json = await response.json();
+            
+                if (json.Success) {
+                    setestimateData(json.estimates);
+                } else {
+                    console.error('Error fetching estimateData:', json.message);
+                }
+                console.log(estimateData);  
+            }
+            
         } catch (error) {
             console.error('Error fetching estimateData:', error);
         }
@@ -66,12 +83,27 @@ export default function Editestimate() {
     const fetchcustomerdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+            });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (Array.isArray(json)) {
-                setcustomers(json);
-            }
+                if (Array.isArray(json)) {
+                    setcustomers(json);
+                }
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -101,13 +133,28 @@ export default function Editestimate() {
     const fetchitemdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+            });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (Array.isArray(json)) {
-                setitems(json);
-            }
-            setloading(false);
+                if (Array.isArray(json)) {
+                    setitems(json);
+                }
+                setloading(false);
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -124,23 +171,35 @@ export default function Editestimate() {
                 // searchitemResults: searchitemResults 
                 tax: calculateTaxAmount(), 
             };
+            const authToken = localStorage.getItem('authToken');
     
             const response = await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify(updatedestimateData)
             });
-    
-            const json = await response.json();
-    
-            if (json.Success) {
-                navigate('/userpanel/Estimatedetail', { state: { estimateid } });
-                console.log(updatedestimateData);
-            } else {
-                console.error('Error updating  estimate data:', json.message);
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
+            else{
+                const json = await response.json();
+        
+                if (json.Success) {
+                    navigate('/userpanel/Estimatedetail', { state: { estimateid } });
+                    console.log(updatedestimateData);
+                } else {
+                    console.error('Error updating  estimate data:', json.message);
+                }   
+            }
+    
+            
         } catch (error) {
             console.error('Error updating  estimate data:', error);
         }
@@ -180,6 +239,10 @@ export default function Editestimate() {
     const handleEditorChange = (event, editor) => {
         const data = editor.getData();
         setestimateData({ ...estimateData, information: data });
+    };
+    const handledescChange = (event, editor) => {
+        const data = editor.getData();
+        setestimateData({ ...estimateData, description: data });
     };
     
 
@@ -225,16 +288,30 @@ export default function Editestimate() {
                 return;
             }
     
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/delestimateitem/${estimateData._id}/${itemId}`, {
-                method: 'GET'
+                method: 'GET',
+                headers: {
+                    'Authorization': authToken,
+                  }
             });
-    
-            if (!response.ok) {
-                const errorMessage = await response.text();
-                throw new Error(`Failed to delete item: ${errorMessage}`);
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
+            }
+            else{
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`Failed to delete item: ${errorMessage}`);
+                }
+        
+                fetchdata(); 
             }
     
-            fetchdata();
+            
         } catch (error) {
             console.error('Error deleting item:', error);
         }
@@ -399,10 +476,6 @@ export default function Editestimate() {
     };
     
     
-    const handledescChange = (event, editor) => {
-        const data = editor.getData();
-        setestimateData({ ...estimateData, description: data });
-    };
 
 
   return (
@@ -449,6 +522,9 @@ export default function Editestimate() {
                             </div>
                             <div className="col-lg-3 col-md-4 col-sm-4 col-5 text-right">
                                 <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit" onClick={handleSaveClick}>Save</button>
+                            </div>
+                            <div className='mt-2'>
+                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                             </div>
                         </div>
                         <div className='box1 rounded adminborder p-4 m-2 mb-5'>
@@ -607,6 +683,21 @@ export default function Editestimate() {
                                     <div className="col-2">
                                         <p><CurrencySign />{item.amount}</p>
                                     </div>
+                                    {/* <div className="col-5">
+                                                <div class="mb-3">
+                                                    <label htmlFor="description" className="form-label">Description</label>
+                                                    <textarea
+                                                        class="form-control"
+                                                        name='description'
+                                                        id='description'
+                                                        placeholder='Item Description'
+                                                        value={item.description}
+                                                        rows="3"
+                                                        readOnly
+                                                    >
+                                                    </textarea>
+                                                </div>
+                                    </div> */}
                                     <div className="col-5">
                                         <div className="mb-3">
                                             <label htmlFor={`description-${item.itemId}`} className="form-label">Description</label>
@@ -725,7 +816,6 @@ export default function Editestimate() {
                                                         readOnly
                                                     >
                                                     </textarea> */}
-                                                    
                                                     <CKEditor
                                                         editor={ ClassicEditor }
                                                         data={estimateData.description}
