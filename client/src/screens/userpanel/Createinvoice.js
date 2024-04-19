@@ -205,7 +205,7 @@ export default function Createinvoice() {
     };
 
     const onChangeQuantity = (event, itemId) => {
-        let newQuantity = event.target.value ? parseInt(event.target.value) : 1;
+        let newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
         newQuantity = Math.max(newQuantity, 0); // Ensure quantity is not negative
 
         setQuantityMap((prevMap) => ({

@@ -250,7 +250,7 @@ export default function Editestimate() {
         const { value } = event.target;
         const updatedItems = estimateData.items.map((item) => {
           if (item.itemId === itemId) {
-            const newQuantity = parseInt(value) >= 0 ? parseInt(value) : 0;
+            const newQuantity = parseFloat(value) >= 0 ? parseFloat(value) : 0;
             const newAmount = calculateDiscountedAmount(item.price, newQuantity, item.discount);
             
             return {
@@ -266,7 +266,7 @@ export default function Editestimate() {
       };
       
     const onChangeQuantity = (event, itemId) => {
-        let newQuantity = event.target.value ? parseInt(event.target.value) : 1;
+        let newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
         newQuantity = Math.max(newQuantity, 0); // Ensure quantity is not negative
       
         setQuantityMap((prevMap) => ({

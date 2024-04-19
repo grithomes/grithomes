@@ -47,7 +47,8 @@ export default function Invoice() {
         const json = await response.json();
 
       if (Array.isArray(json)) {
-        setinvoices(json);
+        const sortedInvoices = json.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setinvoices(sortedInvoices);
 
         const transactionPromises = json.map(async (invoice) => {
           const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
