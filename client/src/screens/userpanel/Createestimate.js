@@ -35,10 +35,24 @@ export default function Createestimate() {
     const [discountTotal, setdiscountTotal] = useState(0);
     const [estimateData, setestimateData] = useState({
         customername: '', itemname: '', customeremail: '', estimate_id: '', EstimateNumber: '', purchaseorder: '',
-        job: '', date: '', description: '', itemquantity: '', price: '', discount: '',
+        job: '', date: format(new Date(), 'yyyy-MM-dd'), description: '', itemquantity: '', price: '', discount: '',
         amount: '', tax: '',discountTotal:'', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
     });
-    const [editorData, setEditorData] = useState("<p></p>");
+    // const [editorData, setEditorData] = useState("<p></p>");
+    const [editorData, setEditorData] = useState(`
+        <p>
+            message for add-in notes<br /><br />
+
+
+            if you have any queries contact us. please deposit <strong>40%</strong> to secure your place 
+            <strong>50%</strong> before delivery and the remaining <strong>10%</strong> on Completion,<br />
+            Please share the payment receipt<br />
+            <strong>Commonwealth</strong><br />
+            <strong>BSB</strong>:-063 253<br />
+            <strong>ACC NO</strong>:-1105 4298<br />
+            We Accept Credit Cards (Surcharged 3%) Standard Hardware unless Requested
+        </p>
+    `);
     const [alertMessage, setAlertMessage] = useState('');
     
   const [credentials, setCredentials] = useState({

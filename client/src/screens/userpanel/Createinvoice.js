@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react'
-import { format } from 'date-fns';
+import { format, addDays } from 'date-fns';
 import { useNavigate } from 'react-router-dom'
 import { ColorRing } from 'react-loader-spinner'
 import Usernav from './Usernav';
@@ -36,10 +36,24 @@ export default function Createinvoice() {
     const [discountTotal, setdiscountTotal] = useState(0);
     const [invoiceData, setInvoiceData] = useState({
         customername: '', itemname: '', customeremail: '', invoice_id: '', InvoiceNumber: '', purchaseorder: '',
-        date: '', job: '', duedate: '', description: '', itemquantity: '', price: '', discount: '',
+        date: format(new Date(), 'yyyy-MM-dd'), job: '', duedate: format(addDays(new Date(), 15), 'yyyy-MM-dd'), description: '', itemquantity: '', price: '', discount: '',
         amount: '', discountTotal:'', tax: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
     });
-    const [editorData, setEditorData] = useState("<p></p>");
+    // const [editorData, setEditorData] = useState("<p></p>");
+    const [editorData, setEditorData] = useState(`
+        <p>
+            message for add-in notes<br /><br />
+
+
+            if you have any queries contact us. please deposit <strong>40%</strong> to secure your place 
+            <strong>50%</strong> before delivery and the remaining <strong>10%</strong> on Completion,<br />
+            Please share the payment receipt<br />
+            <strong>Commonwealth</strong><br />
+            <strong>BSB</strong>:-063 253<br />
+            <strong>ACC NO</strong>:-1105 4298<br />
+            We Accept Credit Cards (Surcharged 3%) Standard Hardware unless Requested
+        </p>
+    `);
     const [alertMessage, setAlertMessage] = useState('');
     const [credentials, setCredentials] = useState({
         name: '',

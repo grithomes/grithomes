@@ -667,8 +667,12 @@ export default function Estimatedetail() {
 
                           <div className='row'>
                             <div className='col-lg-12 col-sm-12 col-md-12 col-12'>
-                            <p  className='px-4'><strong>Note:</strong> </p>
-                              <div className='px-4' dangerouslySetInnerHTML={{ __html: he.decode(estimateData.information) }} />
+                            {/* <p  className='px-4'><strong>Note:</strong> </p>
+                              <div className='px-4' dangerouslySetInnerHTML={{ __html: he.decode(estimateData.information) }} /> */}
+                              {estimateData.information==''? '': <hr/> }
+                              <div className="row padding-20 invoice-content">
+                                <span className='fw-bold fs-5'>Note:</span> <div dangerouslySetInnerHTML={{ __html: estimateData.information }} />
+                              </div>
                             </div>
                           </div>
                         </div>

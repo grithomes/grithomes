@@ -1301,10 +1301,10 @@ const convertToPdf = () => {
                                               </div>
                                             </div>
                                         ))}
-                                        <hr />
+                                        {/* <hr /> */}
                                         {/* <div dangerouslySetInnerHTML={{ __html: invoiceData.information }} /> */}
-                                        <div className="row padding-20 invoice-content">Note: {invoiceData.information.replace(/<\/?[^>]+(>|$)/g, '')}</div>
-                                        <hr />
+                                        {/* <div className="row padding-20 invoice-content">Note: {invoiceData.information.replace(/<\/?[^>]+(>|$)/g, '')}</div>
+                                        <hr /> */}
 
                                           <div className="row padding-20">
                                             <div className="col-lg-7 col-md-7 col-sm-6 col-4 printcol-8">
@@ -1351,6 +1351,10 @@ const convertToPdf = () => {
                                                       </p>
                                                   </div>
                                               </div>
+                                            </div>
+                                            {invoiceData.information==''? '': <hr/> }
+                                            <div className="row padding-20 invoice-content">
+                                              <span className='fw-bold fs-5'>{invoiceData.information==''? '':'Note:' }</span> <div dangerouslySetInnerHTML={{ __html: invoiceData.information }} />
                                             </div>
                                     {/* </div> */}
                                 </div>
