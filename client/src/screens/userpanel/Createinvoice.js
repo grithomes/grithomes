@@ -42,9 +42,6 @@ export default function Createinvoice() {
     // const [editorData, setEditorData] = useState("<p></p>");
     const [editorData, setEditorData] = useState(`
         <p>
-            message for add-in notes<br /><br />
-
-
             if you have any queries contact us. please deposit <strong>40%</strong> to secure your place 
             <strong>50%</strong> before delivery and the remaining <strong>10%</strong> on Completion,<br />
             Please share the payment receipt<br />
