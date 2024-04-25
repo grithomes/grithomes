@@ -117,6 +117,21 @@ export default function Addteam() {
             </div>
             <div className='mt-4 mx-4'>
               {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+              <div className="col-12">
+                          {message == true ? 
+                            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <strong>{alertShow}</strong> 
+                              <button type="button" class="btn-close" onClick={()=>{
+                                setMessage(false);
+                                setAlertShow("");
+                              }}></button>
+                              {/* <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> */}
+
+                            </div>
+                            : 
+
+                          ""}
+              </div>
             </div>
             <form onSubmit={handleSubmit}>
               <div className="bg-white my-5 p-4 box mx-4">
@@ -210,7 +225,7 @@ export default function Addteam() {
                             />
                           </div>
                         </div>
-                        <div className="col-12">
+                        {/* <div className="col-12">
                           {message == true ? 
                             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                             <strong>{alertShow}</strong> 
@@ -218,13 +233,10 @@ export default function Addteam() {
                                 setMessage(false);
                                 setAlertShow("");
                               }}></button>
-                              {/* <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> */}
-
                             </div>
                             : 
-
                           ""}
-                        </div>
+                        </div> */}
                       </div>
                     </div>
                   </div>

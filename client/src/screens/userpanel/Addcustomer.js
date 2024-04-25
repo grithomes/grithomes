@@ -106,7 +106,7 @@ export default function Addcustomer() {
       }
 
       else{
-        setAlertmessageShow("This Customer Email already exist")
+        setAlertmessageShow("This Email already exist")
       }
     }
 
@@ -147,8 +147,20 @@ export default function Addcustomer() {
               <Usernav/>
             </div>
             <div className='mt-4 mx-4'>
-                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
-                        </div>
+              {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+              {alertmessageShow == true ?  
+                  <div class="alert alert-warning d-flex justify-content-between" role="alert">
+                    <div>
+                      {alertmessageShow}
+                    </div>
+                    <button type="button" class="btn-close" onClick={()=>{
+                        setAlertmessageShow("");
+                      }}>
+                    </button>
+                  </div>
+                  : ''
+                }
+            </div>
             <form onSubmit={handleSubmit}>
               <div className="bg-white my-5 p-4 box mx-4">
                 <div className="row">
