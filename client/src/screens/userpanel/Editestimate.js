@@ -10,6 +10,7 @@ import VirtualizedSelect from 'react-virtualized-select';
 import 'react-virtualized-select/styles.css';
 import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Editestimate() {
     
@@ -23,6 +24,7 @@ export default function Editestimate() {
     const [searchitemResults, setSearchitemResults] = useState([]);
     const [quantityMap, setQuantityMap] = useState({});
     const [discountMap, setDiscountMap] = useState({});
+    const [discountTotal, setdiscountTotal] = useState(0);
     const [taxPercentage, setTaxPercentage] = useState(0);
     const [estimateData, setestimateData] = useState({
         _id: '', customername: '',itemname: '',customeremail: '',EstimateNumber: '',purchaseorder: '',
@@ -32,6 +34,7 @@ export default function Editestimate() {
     const location = useLocation();
     const estimateid = location.state?.estimateid;
     const [editorData, setEditorData] = useState("<p></p>");
+    const [alertMessage, setAlertMessage] = useState('');
 
     useEffect(() => {
         if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
@@ -43,21 +46,40 @@ export default function Editestimate() {
             fetchcustomerdata();
             fetchitemdata();
         }
+        if (isNaN(discountTotal)) {
+            setdiscountTotal(0);
+        }
     }, [estimateid])
     let navigate = useNavigate();
 
     const fetchdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/geteditestimateData/${estimateid}`);
-            const json = await response.json();
-            
-            if (json.Success) {
-                setestimateData(json.estimates);
-            } else {
-                console.error('Error fetching estimateData:', json.message);
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/geteditestimateData/${estimateid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+            });
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
-            console.log(estimateData);
+            else{
+                const json = await response.json();
+            
+                if (json.Success) {
+                    setestimateData(json.estimates);
+                    setdiscountTotal(json.invoices.discountTotal);
+                } else {
+                    console.error('Error fetching estimateData:', json.message);
+                }
+                console.log(estimateData);  
+            }
+            
         } catch (error) {
             console.error('Error fetching estimateData:', error);
         }
@@ -66,12 +88,27 @@ export default function Editestimate() {
     const fetchcustomerdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+            });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (Array.isArray(json)) {
-                setcustomers(json);
-            }
+                if (Array.isArray(json)) {
+                    setcustomers(json);
+                }
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -101,13 +138,28 @@ export default function Editestimate() {
     const fetchitemdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+            });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (Array.isArray(json)) {
-                setitems(json);
-            }
-            setloading(false);
+                if (Array.isArray(json)) {
+                    setitems(json);
+                }
+                setloading(false);
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -123,24 +175,37 @@ export default function Editestimate() {
                 items: estimateData.items, // Include estimateData.items
                 // searchitemResults: searchitemResults 
                 tax: calculateTaxAmount(), 
+                discountTotal: discountTotal,
             };
+            const authToken = localStorage.getItem('authToken');
     
             const response = await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify(updatedestimateData)
             });
-    
-            const json = await response.json();
-    
-            if (json.Success) {
-                navigate('/userpanel/Estimatedetail', { state: { estimateid } });
-                console.log(updatedestimateData);
-            } else {
-                console.error('Error updating  estimate data:', json.message);
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
+            else{
+                const json = await response.json();
+        
+                if (json.Success) {
+                    navigate('/userpanel/Estimatedetail', { state: { estimateid } });
+                    console.log(updatedestimateData);
+                } else {
+                    console.error('Error updating  estimate data:', json.message);
+                }   
+            }
+    
+            
         } catch (error) {
             console.error('Error updating  estimate data:', error);
         }
@@ -181,13 +246,17 @@ export default function Editestimate() {
         const data = editor.getData();
         setestimateData({ ...estimateData, information: data });
     };
+    const handledescChange = (event, editor) => {
+        const data = editor.getData();
+        setestimateData({ ...estimateData, description: data });
+    };
     
 
     const handleQuantityChange = (event, itemId) => {
         const { value } = event.target;
         const updatedItems = estimateData.items.map((item) => {
           if (item.itemId === itemId) {
-            const newQuantity = parseInt(value) >= 0 ? parseInt(value) : 0;
+            const newQuantity = parseFloat(value) >= 0 ? parseFloat(value) : 0;
             const newAmount = calculateDiscountedAmount(item.price, newQuantity, item.discount);
             
             return {
@@ -203,7 +272,7 @@ export default function Editestimate() {
       };
       
     const onChangeQuantity = (event, itemId) => {
-        let newQuantity = event.target.value ? parseInt(event.target.value) : 1;
+        let newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
         newQuantity = Math.max(newQuantity, 0); // Ensure quantity is not negative
       
         setQuantityMap((prevMap) => ({
@@ -225,16 +294,30 @@ export default function Editestimate() {
                 return;
             }
     
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/delestimateitem/${estimateData._id}/${itemId}`, {
-                method: 'GET'
+                method: 'GET',
+                headers: {
+                    'Authorization': authToken,
+                  }
             });
-    
-            if (!response.ok) {
-                const errorMessage = await response.text();
-                throw new Error(`Failed to delete item: ${errorMessage}`);
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
+            }
+            else{
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`Failed to delete item: ${errorMessage}`);
+                }
+        
+                fetchdata(); 
             }
     
-            fetchdata();
+            
         } catch (error) {
             console.error('Error deleting item:', error);
         }
@@ -355,7 +438,8 @@ export default function Editestimate() {
     // Function to calculate tax amount
     const calculateTaxAmount = () => {
         const subtotal = calculateSubtotal();
-        const taxAmount = (subtotal * estimateData.taxpercentage) / 100;
+        const totalDiscountedAmount = subtotal - discountTotal; 
+        const taxAmount = (totalDiscountedAmount * estimateData.taxpercentage) / 100;
         return taxAmount;
     };
     
@@ -363,7 +447,9 @@ export default function Editestimate() {
     const calculateTotal = () => {
         const subtotal = calculateSubtotal();
         const taxAmount = calculateTaxAmount();
-        const totalAmount = subtotal + taxAmount;
+        const discountAmount = discountTotal;
+        // console.log(discountAmount,"- discountAmount");
+        const totalAmount = (subtotal- discountAmount) + taxAmount ;
         return totalAmount;
       };
 
@@ -398,10 +484,11 @@ export default function Editestimate() {
         setestimateData({ ...estimateData, items: updatedItems });
     };
     
-    
-    const handledescChange = (event, editor) => {
-        const data = editor.getData();
-        setestimateData({ ...estimateData, description: data });
+    const handleDiscountChange = (event) => {
+        const value = event.target.value;
+        // If the input is empty or NaN, set the value to 0
+        const newValue = value === '' || isNaN(parseFloat(value)) ? 0 : parseFloat(value);
+        setdiscountTotal(newValue);
     };
 
 
@@ -449,6 +536,9 @@ export default function Editestimate() {
                             </div>
                             <div className="col-lg-3 col-md-4 col-sm-4 col-5 text-right">
                                 <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit" onClick={handleSaveClick}>Save</button>
+                            </div>
+                            <div className='mt-2'>
+                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                             </div>
                         </div>
                         <div className='box1 rounded adminborder p-4 m-2 mb-5'>
@@ -536,7 +626,7 @@ export default function Editestimate() {
 
                             <div className='box1 rounded adminborder p-4 m-2'>
                                 <div className="row pt-3">
-                                    <div className="col-4">
+                                    <div className="col-6">
                                         <p>ITEM</p>
                                     </div>
                                     <div className="col-2">
@@ -545,9 +635,9 @@ export default function Editestimate() {
                                     <div className="col-2">
                                         <p>PRICE</p>
                                     </div>
-                                    <div className="col-2">
+                                    {/* <div className="col-2">
                                         <p>DISCOUNT</p>
-                                    </div>
+                                    </div> */}
                                     <div className="col-2">
                                         <p>AMOUNT</p>
                                     </div>
@@ -556,7 +646,7 @@ export default function Editestimate() {
                                 <div>
                                 {estimateData.items && estimateData.items.map((item) => (
                                     <div className='row' key={item.itemId}>
-                                    <div className="col-4 ">
+                                    <div className="col-6 ">
                                         <div className="mb-3 d-flex align-items-baseline justify-content-between">
                                             <p>{item.itemname}</p>
                                             <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(item.itemId)}>
@@ -601,13 +691,28 @@ export default function Editestimate() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="col-2">
+                                    {/* <div className="col-2">
                                         <p><CurrencySign />{item.discount}</p>
-                                    </div>
+                                    </div> */}
                                     <div className="col-2">
                                         <p><CurrencySign />{item.amount}</p>
                                     </div>
-                                    <div className="col-5">
+                                    {/* <div className="col-5">
+                                                <div class="mb-3">
+                                                    <label htmlFor="description" className="form-label">Description</label>
+                                                    <textarea
+                                                        class="form-control"
+                                                        name='description'
+                                                        id='description'
+                                                        placeholder='Item Description'
+                                                        value={item.description}
+                                                        rows="3"
+                                                        readOnly
+                                                    >
+                                                    </textarea>
+                                                </div>
+                                    </div> */}
+                                    <div className="col-6">
                                         <div className="mb-3">
                                             <label htmlFor={`description-${item.itemId}`} className="form-label">Description</label>
                                             {/* <textarea
@@ -640,7 +745,7 @@ export default function Editestimate() {
                                         </div>
                                     </div>
                                             
-                                            <div className="col-3">
+                                            {/* <div className="col-3">
                                                 <div class="mb-3">
                                                     <label htmlFor="Discount" className="form-label">Discount</label>
                                                     <input
@@ -654,7 +759,7 @@ export default function Editestimate() {
                                                         min="0"
                                                     />
                                                 </div>
-                                            </div>
+                                            </div> */}
                                     
                                     </div>
                                         ))}
@@ -672,7 +777,7 @@ export default function Editestimate() {
 
                                     return (
                                         <div className='row'  key={item.itemId}>
-                                            <div className="col-4 ">
+                                            <div className="col-6 ">
                                                 <div className="mb-3 d-flex align-items-baseline justify-content-between">
                                                     <p>{item.label}</p>
                                                     <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
@@ -706,13 +811,13 @@ export default function Editestimate() {
                                                     />
                                                 </div>
                                             </div>
-                                            <div className="col-2 text-center">
+                                            {/* <div className="col-2 text-center">
                                                 <p><CurrencySign />{discount.toFixed(2)}</p>
-                                            </div>
+                                            </div> */}
                                             <div className="col-2 text-center">
                                                 <p><CurrencySign />{formattedTotalAmount}</p>
                                             </div>
-                                            <div className="col-5">
+                                            <div className="col-6">
                                                 <div class="mb-3">
                                                     <label htmlFor="description" className="form-label">Description</label>
                                                     {/* <textarea
@@ -725,7 +830,6 @@ export default function Editestimate() {
                                                         readOnly
                                                     >
                                                     </textarea> */}
-                                                    
                                                     <CKEditor
                                                         editor={ ClassicEditor }
                                                         data={estimateData.description}
@@ -744,7 +848,7 @@ export default function Editestimate() {
                                                 </div>
                                             </div>
                                             
-                                            <div className="col-3">
+                                            {/* <div className="col-3">
                                                 <div class="mb-3">
                                                     <label htmlFor="Discount" className="form-label">Discount</label>
                                                     <input
@@ -758,7 +862,7 @@ export default function Editestimate() {
                                                         min="0"
                                                     />
                                                 </div>
-                                            </div>
+                                            </div> */}
                                         </div>
         );
       })}
@@ -788,7 +892,7 @@ export default function Editestimate() {
                                         <div className="row">
                                             <div className="col-6">
                                                 <p>Subtotal</p>
-                                                <p>GST</p>
+                                                <p className="mb-4">Discount</p>
                                                 <p>GST {estimateData.taxpercentage}%</p>
                                                 <p>Total</p>
                                             </div>
@@ -798,23 +902,26 @@ export default function Editestimate() {
                                                     // currency: 'INR',
                                                 })}</p>
                                                 <div className="col-6">
-                                                <div class="mb-3">
+                                                
+                                            </div>
+                                            <div className="mb-3">
                                                     <input
                                                         type="number"
-                                                        name="tax"
+                                                        name="totaldiscount"
                                                         className="form-control"
-                                                        value={estimateData.taxpercentage}
-                                                        onChange={handleTaxChange}
-                                                        placeholder="Enter GST Percentage"
-                                                        id="taxInput"
+                                                        value={discountTotal}
+                                                        onChange={handleDiscountChange} // Ensure proper event binding
+                                                        placeholder="Enter Discount Total"
+                                                        id="discountInput"
                                                         min="0"
                                                     />
                                                 </div>
-                                            </div>
                                                 <p><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN', {
                                                     // style: 'currency',
                                                     // currency: 'INR',
                                                 })}</p>
+                                                
+                                                
                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
                                                     // style: 'currency',
                                                     // currency: 'INR',

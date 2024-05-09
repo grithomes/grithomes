@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import Usernavbar from './Usernavbar';
 import Usernav from './Usernav';
-import { ColorRing } from  'react-loader-spinner'
+import Alertauthtoken from '../../components/Alertauthtoken';
+import { ColorRing } from  'react-loader-spinner';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 
 export default function Edititem() {
     const [ loading, setloading ] = useState(true);
     const location = useLocation();
     const navigate = useNavigate();
+    const [alertMessage, setAlertMessage] = useState('');
     
     const itemId = location.state.itemId;
 
@@ -27,16 +31,31 @@ export default function Edititem() {
 
     const fetchitemData = async () => {
         try {
-            const response = await fetch(`https://grithomes.onrender.com/api/getitems/${itemId}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/getitems/${itemId}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
+                if (json.Success) {
+                    setitem(json.item);
+                } else {
+                    console.error('Error fetching itemdata:', json.message);
+                }
+                console.log(item);
+                setloading(false);
+              }
             
-            if (json.Success) {
-                setitem(json.item);
-            } else {
-                console.error('Error fetching itemdata:', json.message);
-            }
-            console.log(item);
-            setloading(false);
         } catch (error) {
             console.error('Error fetching itemdata:', error);
         }
@@ -47,22 +66,35 @@ export default function Edititem() {
             const updateditemdata = {
                 ...item
             };
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/updateitemdata/${itemId}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify(updateditemdata)
             });
 
-            const json = await response.json();
-
-            if (json.Success) {
-                navigate('/userpanel/itemlist');
-                console.log(updateditemdata);
-            } else {
-                console.error('Error updating itemdata:', json.message);
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
+            else{
+                const json = await response.json();
+
+                if (json.Success) {
+                    navigate('/userpanel/itemlist');
+                    console.log(updateditemdata);
+                } else {
+                    console.error('Error updating itemdata:', json.message);
+                }  
+            }
+
+            
         } catch (error) {
             console.error('Error updating itemdata:', error);
         }
@@ -100,6 +132,9 @@ export default function Edititem() {
                     <div className="col-lg-10 col-md-9 col-12 mx-auto">
                         <div className='d-lg-none d-md-none d-block mt-2'>
                             <Usernav/>
+                        </div>
+                        <div className='mt-4 mx-4'>
+                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                         </div>
                         <form>
                             <div className="bg-white my-5 p-4 box mx-4">
@@ -155,12 +190,20 @@ export default function Edititem() {
                                         </div>
                                     </div>
 
-                                    <div className="col-12 col-sm-12 col-lg-12">
+                                    <div className="col-12 col-sm-12 col-lg-6">
                                         <div className="mb-3">
                                             <label htmlFor="description" className="form-label">
                                             Description
                                             </label>
-                                            <textarea
+                                            <CKEditor
+                                                editor={ClassicEditor}
+                                                data={item.description}
+                                                onChange={(event, editor) => {
+                                                const data = editor.getData();
+                                                setitem({ ...item, description: data });
+                                                }}
+                                            />
+                                            {/* <textarea
                                             type="text"
                                             className="form-control"
                                             value={item.description}
@@ -169,7 +212,7 @@ export default function Edititem() {
                                             placeholder="Description"
                                             id="description"
                                             required
-                                            />
+                                            /> */}
                                         </div>
                                     </div>
                                 </div>

@@ -1,11 +1,13 @@
 import React, { useState,useEffect } from 'react'
 import Usernavbar from './Usernavbar';
 import Usernav from './Usernav';
-import {useNavigate} from 'react-router-dom'
+import {useNavigate} from 'react-router-dom';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Editprofile() {
     
     const [signupdata, setsignupdata] = useState([]);
+    const [alertMessage, setAlertMessage] = useState('');
     let navigate = useNavigate();
 
     useEffect(() => {
@@ -19,11 +21,26 @@ export default function Editprofile() {
     const fetchsignupdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                // setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
             // if (Array.isArray(json)) {
                 setsignupdata(json);
+              }
+            
             // }
         } catch (error) {
             console.error('Error fetching data:', error);
@@ -59,25 +76,38 @@ export default function Editprofile() {
     const handleSaveClick = async () => {
         try {
             const userid =  localStorage.getItem("userid");
+            const authToken = localStorage.getItem('authToken');
             const updatedsignupdata = {
                 ...signupdata
             };
             const response = await fetch(`https://grithomes.onrender.com/api/updatesignupdata/${userid}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify(updatedsignupdata)
             });
 
-            const json = await response.json();
-
-            if (json.Success) {
-                navigate('/userpanel/Userdashboard');
-                console.log(updatedsignupdata);
-            } else {
-                console.error('Error updating Signupdata:', json.message);
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+            //   setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
+            else{
+                const json = await response.json();
+
+                if (json.Success) {
+                    navigate('/userpanel/Userdashboard');
+                    console.log(updatedsignupdata);
+                } else {
+                    console.error('Error updating Signupdata:', json.message);
+                }
+            }
+
+            
         } catch (error) {
             console.error('Error updating Signupdata:', error);
         }
@@ -98,6 +128,9 @@ export default function Editprofile() {
                         <Usernav/>
                     </div>
                     <div className='mx-4 my-5'>
+                        <div className='my-2'>
+                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                        </div>
                         <section className='box1 rounded adminborder p-4 m-2 mb-5'>
                             <form>
                                 <div className=' p-5 pb-4 mt-3'>
@@ -142,7 +175,6 @@ export default function Editprofile() {
                                                 value={signupdata.CurrencyType}
                                                 onChange={handleInputChange}
                                                 aria-label="Default select example"
-                                                
                                                 >
                                                     <option value="">Select Currency Type</option>
                                                     <option value="AUD"> AUD - Australian Dollar </option>
@@ -157,7 +189,6 @@ export default function Editprofile() {
                                                 <textarea type="message" className="form-control" name="address" value={signupdata.address} onChange={handleInputChange} placeholder="Address" id="exampleInputaddress" />
                                             </div>
                                         </div>
-                                        
                                         <div className="col-12 col-sm-12 col-md-4 col-lg-4">
                                             <div class="form-group pt-3">
                                                 <label class="label py-2" for="First_Name">First Name</label>
@@ -185,7 +216,7 @@ export default function Editprofile() {
                                         <div className="col-12 col-sm-12 col-md-4 col-lg-4">
                                             <div class="form-group pt-3">
                                                 <label class="label py-2" for="Last_Name">Last Name</label>
-                                                <input type="text" class="form-control" name="User2LastName" value={signupdata.User2LastName} onChange={handleInputChange} placeholder="Last Name"  />
+                                                <input type="text" class="form-control" name="LastName" value={signupdata.User2LastName} onChange={handleInputChange} placeholder="Last Name"  />
                                             </div>
                                         </div>
                                         <div className="col-12 col-sm-12 col-md-4 col-lg-4">
@@ -202,10 +233,11 @@ export default function Editprofile() {
                                         </div>
                                         <div className="col-12 col-sm-12 col-md-6 col-lg-6">
                                             <div class="form-group pt-3">
-                                                <label class="label py-2" for="gstNumber">GST Number</label>
-                                                <input type="text" class="form-control" name="gstNumber" value={signupdata.gstNumber} onChange={handleInputChange} placeholder="GST Number" />
+                                                <label class="label py-2" for="gstNumber">Abn</label>
+                                                <input type="text" class="form-control" name="gstNumber" value={signupdata.gstNumber} onChange={handleInputChange} placeholder="Abn" />
                                             </div>
                                         </div>
+                                        
 
                                     </div>
                                 <button type="button" className='btn btnclr text-white me-2' onClick={handleSaveClick}>Save</button>

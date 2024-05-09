@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { ColorRing } from  'react-loader-spinner'
 import { format } from 'date-fns';
 import Usernav from './Usernav';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Team() {
 
@@ -12,6 +13,7 @@ export default function Team() {
     const [searchQuery, setSearchQuery] = useState('');
     const [ loading, setloading ] = useState(true);
     const [currentPage, setCurrentPage] = useState(0);
+    const [alertMessage, setAlertMessage] = useState('');
     const entriesPerPage = 10;
     
     const navigate = useNavigate();
@@ -42,13 +44,28 @@ export default function Team() {
     const fetchdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/teammemberdata/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/teammemberdata/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (Array.isArray(json)) {
-                setTeammembers(json);
-            }
-            setloading(false);
+                if (Array.isArray(json)) {
+                    setTeammembers(json);
+                }
+                setloading(false);
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
             setloading(false);
@@ -63,16 +80,29 @@ export default function Team() {
 
     const handleDeleteClick = async (teamid) => {
         try {
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/delteammember/${teamid}`, {
-                method: 'GET'
+                method: 'GET',
+                headers: {
+                    'Authorization': authToken,
+                  }
             });
+
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
+            }
+            else{
+                const json = await response.json();
     
-            const json = await response.json();
-    
-            if (json.Success) {
-                fetchdata(); // Refresh the teams list
-            } else {
-                console.error('Error deleting teammember:', json.message);
+                if (json.Success) {
+                    fetchdata(); // Refresh the teams list
+                } else {
+                    console.error('Error deleting teammember:', json.message);
+                }
             }
         } catch (error) {
             console.error('Error deleting teammember:', error);
@@ -132,6 +162,9 @@ export default function Team() {
                 <div className="col-lg-10 col-md-9 col-12 mx-auto">
                     <div className='d-lg-none d-md-none d-block mt-2'>
                         <Usernav/>
+                    </div>
+                    <div className='mt-5 mx-4'>
+                        {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                     </div>
                     <div className="bg-white my-5 p-4 box mx-4">
                         <div className='row py-2'>

@@ -2,12 +2,16 @@ import React, { useState, useEffect } from 'react';
 import Usernavbar from './Usernavbar';
 import { useNavigate } from 'react-router-dom';
 import Usernav from './Usernav';
-import { ColorRing } from  'react-loader-spinner'
+import { ColorRing } from  'react-loader-spinner';
+import Alertauthtoken from '../../components/Alertauthtoken';
+import { CKEditor } from '@ckeditor/ckeditor5-react';
+import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 // import Usernavbar from './Usernavbar';
 
 export default function Additem() {
   const [ loading, setloading ] = useState(true);
   const navigate = useNavigate();
+  const [alertMessage, setAlertMessage] = useState('');
   const [credentials, setCredentials] = useState({
     itemname: '',
     description: '',
@@ -16,6 +20,7 @@ export default function Additem() {
 
   const [message, setMessage] = useState(false);
   const [alertShow, setAlertShow] = useState('');
+  const [editorData, setEditorData] = useState("<p></p>");
 
   useEffect(() => {
     if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
@@ -28,38 +33,55 @@ export default function Additem() {
   const handleSubmit = async (e) => {
     // e.preventDefault();
     let userid = localStorage.getItem('userid');
+    const authToken = localStorage.getItem('authToken');
     const response = await fetch('https://grithomes.onrender.com/api/additem', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': authToken,
       },
       body: JSON.stringify({
         userid: userid,
         itemname: credentials.itemname,
-        description: credentials.description,
+        description: editorData,
         price: credentials.price,
       }),
     });
-
-    const json = await response.json();
-    console.log(json);
-
-    if (json.Success) {
-      setCredentials({
-        itemname: '',
-        description: '',
-        price: '',
-      });
-
-      setMessage(true);
-      setAlertShow(json.message);
+    if (response.status === 401) {
+      const json = await response.json();
+      setAlertMessage(json.message);
       setloading(false);
-      navigate('/userpanel/Itemlist');
+      window.scrollTo(0,0);
+      return; // Stop further execution
     }
     else{
-      console.log("else part")
+        const json = await response.json();
+        console.log(json);
+
+        if (json.Success) {
+          setCredentials({
+            itemname: '',
+            description: '',
+            price: '',
+          });
+
+          setMessage(true);
+          setAlertShow(json.message);
+          setloading(false);
+          navigate('/userpanel/Itemlist');
+        }
+        else{
+          console.log("else part")
+        }
     }
+
+    
   };
+
+  const handleEditorChange = (event, editor) => {
+    const data = editor.getData();
+    setEditorData(data);
+};
 
   const onchange = (event) => {
     setCredentials({ ...credentials, [event.target.name]: event.target.value });
@@ -94,6 +116,9 @@ export default function Additem() {
             <div className="d-lg-none d-md-none d-block mt-2">
               <Usernav/>
             </div>
+            <div className='mt-4 mx-4'>
+                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                        </div>
               <div className="bg-white my-5 p-4 box mx-4">
                 <div className="row">
                   <p className="h5 fw-bold">Item</p>
@@ -152,12 +177,29 @@ export default function Additem() {
                           </div>
                         </div>
 
-                        <div className="col-12 col-sm-12 col-lg-12">
+                        <div className="col-12 col-sm-12 col-lg-6">
                           <div className="mb-3">
                             <label htmlFor="description" className="form-label">
                             Description
                             </label>
-                            <textarea
+                            <div className='box1 rounded adminborder m-2'>
+                            <CKEditor
+                                editor={ClassicEditor}
+                                data={editorData}
+                                                    // onReady={ editor => {
+                                                    //     console.log( 'Editor is ready to use!', editor );
+                                                    // } }
+
+                                onChange={handleEditorChange}
+                                onBlur={(event, editor) => {
+                                    console.log('Blur.', editor);
+                                }}
+                                onFocus={(event, editor) => {
+                                    console.log('Focus.', editor);
+                                }}
+                            />
+                          </div>
+                            {/* <textarea
                               type="text"
                               className="form-control"
                               name="description"
@@ -165,9 +207,27 @@ export default function Additem() {
                               placeholder="Description"
                               id="description"
                               required
-                            />
+                            /> */}
                           </div>
                         </div>
+                        {/* <label htmlFor="" className='fs-4 ms-2 mt-5'>Note</label> */}
+                          {/* <div className='box1 rounded adminborder m-2'>
+                            <CKEditor
+                                editor={ClassicEditor}
+                                data={editorData}
+                                                    // onReady={ editor => {
+                                                    //     console.log( 'Editor is ready to use!', editor );
+                                                    // } }
+
+                                onChange={handleEditorChange}
+                                onBlur={(event, editor) => {
+                                    console.log('Blur.', editor);
+                                }}
+                                onFocus={(event, editor) => {
+                                    console.log('Focus.', editor);
+                                }}
+                            />
+                          </div> */}
 
                         
                       </div>

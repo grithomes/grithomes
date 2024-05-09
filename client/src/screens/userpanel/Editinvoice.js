@@ -10,6 +10,7 @@ import VirtualizedSelect from 'react-virtualized-select';
 import 'react-virtualized-select/styles.css';
 import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Editinvoice() {
     
@@ -23,55 +24,130 @@ export default function Editinvoice() {
     const [searchitemResults, setSearchitemResults] = useState([]);
     const [quantityMap, setQuantityMap] = useState({});
     const [discountMap, setDiscountMap] = useState({});
+    const [discountTotal, setdiscountTotal] = useState(0);
     const [taxPercentage, setTaxPercentage] = useState(0);
     const [invoiceData, setInvoiceData] = useState({
         _id: '', customername: '',itemname: '',customeremail: '',InvoiceNumber: '',purchaseorder: '',
         date: new Date(),duedate: new Date(),description: '',itemquantity: '', price: '',discount: '',
-        amount: '',tax: '',taxpercentage:'',subtotal: '',total: '',amountdue: '',information: '', items:[]
+        discountTotal:'',amount: '',tax: '',taxpercentage:'',subtotal: '',total: '',amountdue: '',information: '', items:[]
     });
     const location = useLocation();
     const invoiceid = location.state?.invoiceid;
     const [editorData, setEditorData] = useState("<p></p>");
+    const [alertMessage, setAlertMessage] = useState('');
+
+    // useEffect(() => {
+    //     if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
+    //     {
+    //       navigate("/");
+    //     }
+    //     if (invoiceid) {
+    //         fetchdata();
+    //         fetchcustomerdata();
+    //         fetchitemdata();
+    //     }
+    // }, [invoiceid])
 
     useEffect(() => {
-        if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
-        {
-          navigate("/");
-        }
-        if (invoiceid) {
-            fetchdata();
-            fetchcustomerdata();
+        if (!localStorage.getItem('authToken') || localStorage.getItem('isTeamMember') === 'true') {
+            navigate('/');
+        } else if (invoiceid) {
+            fetchInvoiceData();
             fetchitemdata();
+            fetchcustomerdata();
         }
-    }, [invoiceid])
+        if (isNaN(discountTotal)) {
+            setdiscountTotal(0);
+        }
+    }, [invoiceid]);
+
     let navigate = useNavigate();
 
-    const fetchdata = async () => {
-        try {
-            const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/geteditinvoicedata/${invoiceid}`);
-            const json = await response.json();
+    // const fetchdata = async () => {
+    //     try {
+    //         const userid =  localStorage.getItem("userid");
+    //         const authToken = localStorage.getItem('authToken');
+    //         const response = await fetch(`https://grithomes.onrender.com/api/geteditinvoicedata/${invoiceid}`, {
+    //             headers: {
+    //               'Authorization': authToken,
+    //             }
+    //         });
+    //           if (response.status === 401) {
+    //             const json = await response.json();
+    //             setAlertMessage(json.message);
+    //             setloading(false);
+    //             window.scrollTo(0,0);
+    //             return; // Stop further execution
+    //           }
+    //           else{
+    //             const json = await response.json();
             
-            if (json.Success) {
-                setInvoiceData(json.invoices);
+    //             if (json.Success) {
+    //                 setInvoiceData(json.invoices);
+    //             } else {
+    //                 console.error('Error fetching invoicedata:', json.message);
+    //             }
+    //             console.log(invoiceData);
+    //           }
+            
+    //     } catch (error) {
+    //         console.error('Error fetching invoicedata:', error);
+    //     }
+    // };
+
+    const fetchInvoiceData = async () => {
+        try {
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/geteditinvoicedata/${invoiceid}`, {
+                headers: {
+                    'Authorization': authToken,
+                }
+            });
+            if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0, 0);
+                return;
             } else {
-                console.error('Error fetching invoicedata:', json.message);
+                const json = await response.json();
+                if (json.Success) {
+                    setInvoiceData(json.invoices);
+                    setdiscountTotal(json.invoices.discountTotal);
+                } else {
+                    console.error('Error fetching invoice data:', json.message);
+                }
+                setloading(false);
             }
-            console.log(invoiceData);
         } catch (error) {
-            console.error('Error fetching invoicedata:', error);
+            console.error('Error fetching invoice data:', error);
         }
     };
 
     const fetchcustomerdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (Array.isArray(json)) {
-                setcustomers(json);
-            }
+                if (Array.isArray(json)) {
+                    setcustomers(json);
+                }
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -101,13 +177,28 @@ export default function Editinvoice() {
     const fetchitemdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (Array.isArray(json)) {
-                setitems(json);
-            }
-            setloading(false);
+                if (Array.isArray(json)) {
+                    setitems(json);
+                }
+                setloading(false);
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -123,24 +214,37 @@ export default function Editinvoice() {
                 items: invoiceData.items, // Include invoiceData.items
                 // searchitemResults: searchitemResults 
                 tax: calculateTaxAmount(), 
+                discountTotal: discountTotal,
             };
     
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify(updatedInvoiceData)
             });
-    
-            const json = await response.json();
-    
-            if (json.Success) {
-                navigate('/userpanel/Invoicedetail', { state: { invoiceid } });
-                console.log(updatedInvoiceData);
-            } else {
-                console.error('Error updating invoice data:', json.message);
+            if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
             }
+            else{
+               const json = await response.json();
+    
+                if (json.Success) {
+                    navigate('/userpanel/Invoicedetail', { state: { invoiceid } });
+                    console.log(updatedInvoiceData);
+                } else {
+                    console.error('Error updating invoice data:', json.message);
+                } 
+            }
+    
+            
         } catch (error) {
             console.error('Error updating invoice data:', error);
         }
@@ -188,13 +292,17 @@ export default function Editinvoice() {
         const data = editor.getData();
         setInvoiceData({ ...invoiceData, information: data });
     };
+    const handledescChange = (event, editor) => {
+        const data = editor.getData();
+        setInvoiceData({ ...invoiceData, description: data });
+    };
     
 
     const handleQuantityChange = (event, itemId) => {
         const { value } = event.target;
         const updatedItems = invoiceData.items.map((item) => {
           if (item.itemId === itemId) {
-            const newQuantity = parseInt(value) >= 0 ? parseInt(value) : 0;
+            const newQuantity = parseFloat(value) >= 0 ? parseFloat(value) : 0;
             const newAmount = calculateDiscountedAmount(item.price, newQuantity, item.discount);
             
             return {
@@ -210,7 +318,7 @@ export default function Editinvoice() {
       };
       
     const onChangeQuantity = (event, itemId) => {
-        let newQuantity = event.target.value ? parseInt(event.target.value) : 1;
+        let newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
         newQuantity = Math.max(newQuantity, 0); // Ensure quantity is not negative
       
         setQuantityMap((prevMap) => ({
@@ -232,25 +340,36 @@ export default function Editinvoice() {
                 return;
             }
     
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/delinvoiceitem/${invoiceData._id}/${itemId}`, {
-                method: 'GET'
+                method: 'GET',
+                headers: {
+                    'Authorization': authToken,
+                }
             });
-    
-            if (!response.ok) {
-                const errorMessage = await response.text();
-                throw new Error(`Failed to delete item: ${errorMessage}`);
+            if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
             }
+            else{
+                if (!response.ok) {
+                    const errorMessage = await response.text();
+                    throw new Error(`Failed to delete item: ${errorMessage}`);
+                }
     
             // Update UI or perform other actions upon successful deletion
-            fetchdata();
+            // fetchdata();
+            }
+    
+            
         } catch (error) {
             console.error('Error deleting item:', error);
         }
     };
     
-    
-    
-
     const calculateDiscountedAmount = (price, quantity, discount) => {
         const totalAmount = price * quantity;
         const discountedAmount = totalAmount - Math.max(discount, 0); // Ensure discount is not negative
@@ -366,7 +485,8 @@ export default function Editinvoice() {
     // Function to calculate tax amount
     const calculateTaxAmount = () => {
         const subtotal = calculateSubtotal();
-        const taxAmount = (subtotal * invoiceData.taxpercentage) / 100;
+        const totalDiscountedAmount = subtotal - discountTotal; 
+        const taxAmount = (totalDiscountedAmount * invoiceData.taxpercentage) / 100;
         return taxAmount;
     };
     
@@ -374,7 +494,9 @@ export default function Editinvoice() {
     const calculateTotal = () => {
         const subtotal = calculateSubtotal();
         const taxAmount = calculateTaxAmount();
-        const totalAmount = subtotal + taxAmount;
+        const discountAmount = discountTotal;
+        // console.log(discountAmount,"- discountAmount");
+        const totalAmount = (subtotal- discountAmount) + taxAmount ;
         return totalAmount;
       };
 
@@ -403,7 +525,17 @@ export default function Editinvoice() {
         }));
       };
       
-      const handleDescriptionChange = (editor, itemId) => {
+    //   const handleDescriptionChange = (event, itemId) => {
+    //     const { value } = event.target;
+    //     setInvoiceData((prevData) => ({
+    //       ...prevData,
+    //       items: prevData.items.map((item) =>
+    //         item.itemId === itemId ? { ...item, description: value } : item
+    //       ),
+    //     }));
+    //   };
+
+    const handleDescriptionChange = (editor, itemId) => {
         const value = editor.getData();
         const updatedItems = invoiceData.items.map((item) => {
             if (item.itemId === itemId) {
@@ -413,7 +545,28 @@ export default function Editinvoice() {
         });
         setInvoiceData({ ...invoiceData, items: updatedItems });
     };
+    //   const handleDescriptionChange = (event, itemId) => {
+    //     if (event && event.target && typeof event.target.value !== 'undefined') {
+    //       const { value } = event.target;
+    //       setInvoiceData((prevData) => ({
+    //         ...prevData,
+    //         items: prevData.items.map((item) =>
+    //           item.itemId === itemId ? { ...item, description: value } : item
+    //         ),
+    //       }));
+    //     }
+    //   };
       
+    // const handleDiscountChange = (e) => {
+    //     // Ensure you're setting the state to the new value entered by the user
+    //     setdiscountTotal(parseFloat(e.target.value)); // Assuming the input should accept decimal values
+    // }; 
+    const handleDiscountChange = (event) => {
+        const value = event.target.value;
+        // If the input is empty or NaN, set the value to 0
+        const newValue = value === '' || isNaN(parseFloat(value)) ? 0 : parseFloat(value);
+        setdiscountTotal(newValue);
+    };
 
 
   return (
@@ -460,6 +613,9 @@ export default function Editinvoice() {
                             </div>
                             <div className="col-lg-3 col-md-4 col-sm-4 col-5 text-right">
                                 <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit" onClick={handleSaveClick}>Save</button>
+                            </div>
+                            <div className='mt-2'>
+                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                             </div>
                         </div>
                         <div className='box1 rounded adminborder p-4 m-2 mb-5'>
@@ -526,6 +682,22 @@ export default function Editinvoice() {
                                         </div>
                                         <div className="col-6">
                                             <div className="mb-3">
+                                                <label htmlFor="job" className="form-label">
+                                                Job
+                                                </label>
+                                                <input
+                                                type="text"
+                                                name="job"
+                                                className="form-control"
+                                                value={invoiceData.job} 
+                                                onChange={onchange}
+                                                // placeholder="Date"
+                                                id="job"
+                                                />
+                                            </div>
+                                        </div>
+                                        <div className="col-6">
+                                            <div className="mb-3">
                                                 <label htmlFor="duedate" className="form-label">
                                                     Due Date
                                                 </label>
@@ -545,7 +717,7 @@ export default function Editinvoice() {
 
                             <div className='box1 rounded adminborder p-4 m-2'>
                                 <div className="row pt-3">
-                                    <div className="col-4">
+                                    <div className="col-6">
                                         <p>ITEM</p>
                                     </div>
                                     <div className="col-2">
@@ -554,18 +726,19 @@ export default function Editinvoice() {
                                     <div className="col-2">
                                         <p>PRICE</p>
                                     </div>
-                                    <div className="col-2">
+                                    {/* <div className="col-2">
                                         <p>DISCOUNT</p>
-                                    </div>
+                                    </div> */}
                                     <div className="col-2">
                                         <p>AMOUNT</p>
                                     </div>
                                 </div>
 
                                 <div>
+                                    {console.log(invoiceData, "invoiceData")}
                                 {invoiceData.items && invoiceData.items.map((item) => (
                                     <div className='row' key={item.itemId}>
-                                    <div className="col-4 ">
+                                    <div className="col-6 ">
                                         <div className="mb-3 d-flex align-items-baseline justify-content-between">
                                             <p>{item.itemname}</p>
                                             <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(item.itemId)}>
@@ -609,16 +782,15 @@ export default function Editinvoice() {
                                                     />
                                         </div>
                                     </div>
-                                    <div className="col-2">
+                                    {/* <div className="col-2">
                                         <p><CurrencySign />{item.discount}</p>
-                                    </div>
+                                    </div> */}
                                     <div className="col-2">
                                         <p><CurrencySign />{item.amount}</p>
                                     </div>
-                                    <div className="col-5">
+                                    <div className="col-6">
                                                 <div class="mb-3">
                                                     <label htmlFor="description" className="form-label">Description</label>
-                                                    
                                                     {/* <textarea
                                                         className="form-control"
                                                         name="description"
@@ -628,7 +800,6 @@ export default function Editinvoice() {
                                                         value={item.description}
                                                         onChange={(event) => handleDescriptionChange(event, item.itemId)}
                                                     /> */}
-                                                    
                                                     <CKEditor
                                                         editor={ClassicEditor}
                                                         data={item.description} // Make sure item.description is a valid string
@@ -646,7 +817,7 @@ export default function Editinvoice() {
                                                 </div>
                                             </div>
                                             
-                                            <div className="col-3">
+                                            {/* <div className="col-3">
                                                 <div class="mb-3">
                                                     <label htmlFor="Discount" className="form-label">Discount</label>
                                                     <input
@@ -660,7 +831,7 @@ export default function Editinvoice() {
                                                         min="0"
                                                     />
                                                 </div>
-                                            </div>
+                                            </div> */}
                                     
                                     </div>
                                         ))}
@@ -674,6 +845,7 @@ export default function Editinvoice() {
                                     const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
                                     
                                     });
+                                    console.log(selectedItem);
 
                                     return (
                                         <div className='row'  key={item.itemId}>
@@ -722,18 +894,19 @@ export default function Editinvoice() {
                                                     <label htmlFor="description" className="form-label">Description</label>
                                                     
                                                     <CKEditor
-                                                        editor={ClassicEditor}
-                                                        data={item.description} // Make sure item.description is a valid string
-                                                        onChange={(event, editor) => {
-                                                            // Ensure handleDescriptionChange receives editor instance
+                                                        editor={ ClassicEditor }
+                                                        data={selectedItem.description}
+                                                        
+                                                        onChange={( event, editor ) => {
                                                             handleDescriptionChange(editor, item.itemId);
-                                                        }}
-                                                        onBlur={(event, editor) => {
-                                                            console.log('Blur.', editor);
-                                                        }}
-                                                        onFocus={(event, editor) => {
-                                                            console.log('Focus.', editor);
-                                                        }}
+                                                        }
+                                                        }
+                                                        onBlur={ ( event, editor ) => {
+                                                            console.log( 'Blur.', editor );
+                                                        } }
+                                                        onFocus={ ( event, editor ) => {
+                                                            console.log( 'Focus.', editor );
+                                                        } }
                                                     />
                                                 </div>
                                             </div>
@@ -782,8 +955,9 @@ export default function Editinvoice() {
                                         <div className="row">
                                             <div className="col-6">
                                                 <p>Subtotal</p>
-                                                <p>GST</p>
+                                                {/* <p>GST</p> */}
                                                 <p>GST {invoiceData.taxpercentage}%</p>
+                                                <p>Discount</p>
                                                 <p>Total</p>
                                             </div>
                                             <div className="col-6">
@@ -792,7 +966,7 @@ export default function Editinvoice() {
                                                     // currency: 'INR',
                                                 })}</p>
                                                 <div className="col-6">
-                                                <div class="mb-3">
+                                                {/* <div class="mb-3">
                                                     <input
                                                         type="number"
                                                         name="tax"
@@ -803,12 +977,25 @@ export default function Editinvoice() {
                                                         id="taxInput"
                                                         min="0"
                                                     />
-                                                </div>
+                                                </div> */}
                                             </div>
                                                 <p><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN', {
                                                     // style: 'currency',
                                                     // currency: 'INR',
                                                 })}</p>
+                                                
+                                                <div className="mb-3">
+                                                    <input
+                                                        type="number"
+                                                        name="totaldiscount"
+                                                        className="form-control"
+                                                        value={discountTotal}
+                                                        onChange={handleDiscountChange} // Ensure proper event binding
+                                                        placeholder="Enter Discount Total"
+                                                        id="discountInput"
+                                                        min="0"
+                                                    />
+                                                </div>
                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
                                                     // style: 'currency',
                                                     // currency: 'INR',

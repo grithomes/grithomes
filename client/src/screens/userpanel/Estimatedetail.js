@@ -8,6 +8,8 @@ import 'react-multi-email/dist/style.css'
 import html2pdf from 'html2pdf.js';
 import he from 'he';
 import CurrencySign from '../../components/CurrencySign ';
+import Alertauthtoken from '../../components/Alertauthtoken';
+// import { PDFViewer, pdf, PDFDownloadLink, Document, Image, Page, Text, Font, View, StyleSheet } from '@react-pdf/renderer';   
 
 export default function Estimatedetail() {
   const [loading, setloading] = useState(true);
@@ -33,11 +35,17 @@ export default function Estimatedetail() {
   const [showAlert, setShowAlert] = useState(false);
   const [emails, setEmails] = useState([]);
   const [bccEmails, setBccEmails] = useState([]);
-  const [content, setContent] = useState('Thank you for your business.');
+  const [content, setContent] = useState(`Thank you for Business With Us
+  </p>`);
   const [showModal, setShowModal] = useState(false);
   const [showEmailAlert, setShowEmailAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState('');
 
-
+  
+  const roundOff = (amount) => {
+    return parseFloat(amount).toFixed(2);
+  };
+  
   useEffect(() => {
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true") {
       navigate("/");
@@ -50,7 +58,7 @@ export default function Estimatedetail() {
   }, [estimateid])
 
   useEffect(() => {
-    console.log('Customer Email:', estimateData.customeremail);
+    // console.log('Customer Email:', estimateData.customeremail);
     if (estimateData.customeremail) {
       setEmails([estimateData.customeremail]);
     }
@@ -60,13 +68,29 @@ export default function Estimatedetail() {
   const fetchestimateData = async () => {
     try {
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`);
-      const json = await response.json();
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
 
-      setestimateData(json);
-      if (Array.isArray(json.items)) {
-        setitems(json.items);
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
       }
+      else {
+        const json = await response.json();
+
+        setestimateData(json);
+        if (Array.isArray(json.items)) {
+          setitems(json.items);
+        }
+      }
+
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -75,19 +99,35 @@ export default function Estimatedetail() {
   const fetchtransactiondata = async () => {
     try {
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`);
-      const json = await response.json();
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
 
-      // Check if the response contains paidamount
-      if (Array.isArray(json)) {
-        setTransactions(json);
-        //   const totalPaidAmount = payments.reduce((total, payment) => total + payment.paidamount, 0);
-
-
-      } else {
-        console.error('Invalid data structure for transactions:', json);
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
       }
-      setloading(false);
+      else {
+        const json = await response.json();
+
+        // Check if the response contains paidamount
+        if (Array.isArray(json)) {
+          setTransactions(json);
+          //   const totalPaidAmount = payments.reduce((total, payment) => total + payment.paidamount, 0);
+
+
+        } else {
+          console.error('Invalid data structure for transactions:', json);
+        }
+        setloading(false);
+      }
+
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -96,12 +136,28 @@ export default function Estimatedetail() {
   const fetchsignupdata = async () => {
     try {
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`);
-      const json = await response.json();
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
 
-      // if (Array.isArray(json)) {
-      setsignupdata(json);
-      // }
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
+      }
+      else {
+        const json = await response.json();
+
+        // if (Array.isArray(json)) {
+        setsignupdata(json);
+        // }
+      }
+
     } catch (error) {
       console.error('Error fetching data:', error);
     }
@@ -123,15 +179,9 @@ export default function Estimatedetail() {
       <head>
         <title>Print Invoice</title>
         <style>
-      //   @media print {
-      //    .row {
-      //         background-color: #1a4567 !important;
-      //         print-color-adjust: exact; 
-      //     }
-      // }
       
         .print-page{
-          width:80%;
+          // width:80%;
           margin:auto
         }
         .adminborder{
@@ -200,14 +250,14 @@ export default function Estimatedetail() {
           float:left;
           text-align:right
         }
-        // .printcol-2{
-        //   width:25%;
-        //   text-align:right
-        // }
         .invoice-contentcol-8{
           width:50% !important;
           float:left;
           text-align:center;
+        }
+
+        .logoimage{
+          width:50%;
         }
 
         .detailbg{
@@ -242,10 +292,171 @@ export default function Estimatedetail() {
         .m-right{
           margin-right:100px;
         }
-
-        .logoimage{
-          width:25%;
+        
+        /* Adjustments for better PDF rendering */
+        body {
+          font-size: 14px;
         }
+        .invoice-content {
+          page-break-inside: avoid;
+        }
+        .page-not-break {
+          page-break-before: auto;
+          page-break-after: auto;
+          page-break-inside: avoid;
+          reak-before: auto;
+          break-after: auto;
+          break-inside: avoid;
+        }
+        .invoice-price .invoice-price-right {
+          width: 30%;
+          background: #f0f3f4;
+          color: black;
+          border: 2px solid #f0f3f4;
+          font-size: 28px;
+          text-align: right;
+          vertical-align: bottom;
+          font-weight: 300;
+          position: relative;
+          right: 38px;
+          padding: 28px 12px 16px;
+        }
+        .invoice-price .invoice-price-right span {
+          display: block;
+          font-weight: 400;
+        }
+        .invoice-price .invoice-price-right small {
+          display: block;
+          opacity: .7;
+          position: absolute;
+          top: 10px;
+          left: 12px;
+          font-size: 18px;
+        }
+        
+        @media only screen and (max-width: 575.98px) {
+              .invoice-price .invoice-price-right {
+                  right: 18px;
+              }
+        
+              .invoice-price-right{
+                width: 290px !important;
+                display: block !important;
+              }
+          }
+        .invoice-price {
+          /* background: #f0f3f4; */
+          display: table;
+          width: 100%;
+        }
+        .invoice-price .invoice-price-left, .invoice-price .invoice-price-right {
+          display: table-cell;
+          font-size: 20px;
+          font-weight: 600;
+          width: 70%;
+          position: relative;
+          vertical-align: middle;
+        }
+        .print {
+          margin-top: 10px;
+            max-width: 28cm;
+            zoom: 0.8;
+            box-shadow: 0 0 0.5cm rgba(0, 0, 0, 0.2);
+            margin-right: auto;
+            margin-left: auto;
+            background: white !important;
+            flex-direction: row; justify-content: space-between; margin-bottom: 10px;
+        }
+        .invoice-header {
+          background: #f0f3f4;
+          padding: 25px 50px;
+        }
+        @media print {
+          body {
+            -webkit-print-color-adjust: exact;
+          }
+          .invoice-header {
+            background: #f0f3f4;
+            padding: 25px 50px;
+          }
+          @page {
+            /* Hide header and footer */
+            margin: 0;
+          }
+          @page :first {
+            /* Hide header on first page */
+            header {
+              display: none;
+            }
+          }
+          @page {
+            /* Hide footer on all pages */
+            footer {
+              display: none;
+            }
+          }
+}
+        .invoice-body {
+          background: #fff;
+          padding: 30px 50px;
+        }
+        .invoice-to {
+          // padding-right: 20px;
+        }
+        .invoice-date {
+          /* text-align: right; */
+          // padding-left: 15px;
+        }
+        .table{
+          width: 100%;
+    margin-bottom: 1rem;
+    color: #212529;
+    vertical-align: top;
+    border-color: #dee2e6;
+        }
+        .table>thead {
+    vertical-align: bottom;
+        border-color: inherit;
+    border-style: solid;
+    border-width: 0;
+}
+
+.col-12 {
+  width: 100%;
+}
+thead{
+  text-align:left;
+}
+.text-end {
+  text-align: right;
+}
+        .invoice-table{
+          padding: 20px 38px 10px;
+        }
+        .text-md-end {
+          text-align: right;
+        }
+        .clr {
+          clear: both;
+        }
+        .col-md-6{
+          width:50%;
+          float: left;
+        }
+        .row {
+    --bs-gutter-x: 1.5rem;
+    --bs-gutter-y: 0;
+    display: flex;
+    flex-wrap: wrap;
+    margin-top: calc(-1* var(--bs-gutter-y));
+    margin-right: calc(-.5* var(--bs-gutter-x));
+    margin-left: calc(-.5* var(--bs-gutter-x));
+}
+        
+        .invoice-content {
+          padding: 00px 38px 10px;
+        }
+
 
         </style>
       </head>
@@ -273,18 +484,33 @@ export default function Estimatedetail() {
 
   const handleRemove = async (estimateid) => {
     try {
+      const authToken = localStorage.getItem('authToken');
       const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
-        method: 'GET'
+        method: 'GET',
+        headers: {
+          'Authorization': authToken,
+        }
       });
 
-      const json = await response.json();
-
-      if (json.success) {
-        console.log('Data removed successfully!');
-        navigate('/userpanel/Userdashboard');
-      } else {
-        console.error('Error deleting Invoice:', json.message);
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
       }
+      else {
+        const json = await response.json();
+
+        if (json.success) {
+          console.log('Data removed successfully!');
+          navigate('/userpanel/Userdashboard');
+        } else {
+          console.error('Error deleting Invoice:', json.message);
+        }
+      }
+
+
     } catch (error) {
       console.error('Error deleting Invoice:', error);
     }
@@ -308,7 +534,7 @@ export default function Estimatedetail() {
     event.preventDefault();
     const contentAsPdf = await generatePdfFromHtml();
     try {
-      const finalContent = content.trim() || 'Thank you for your business.'; // If content is empty, use default value
+      const finalContent = content.trim() || `Thank you for Business With Us`; // If content is empty, use default value
       const response = await fetch('https://grithomes.onrender.com/api/send-estimate-email', {
         method: 'POST',
         headers: {
@@ -336,11 +562,11 @@ export default function Estimatedetail() {
         // Update the database with emailsent status
         const updatedData = { ...estimateData, emailsent: 'yes' }; // Update emailsent status
         await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(updatedData),
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(updatedData),
         });
 
         // Fetch updated invoice data
@@ -361,6 +587,7 @@ export default function Estimatedetail() {
     return new Promise((resolve, reject) => {
       const content = document.getElementById('invoiceContent').innerHTML;
       const opt = {
+        margin: 0.2, 
         filename: 'myfile.pdf',
         html2canvas: { scale: 3, useCORS: true }, // Increase scale for better resolution
         jsPDF: { unit: 'in', format: 'A4', orientation: 'portrait' },
@@ -441,6 +668,9 @@ export default function Estimatedetail() {
                       <div className="col-lg-1">
                         <a className='btn rounded-pill btn-danger text-white fw-bold' data-bs-toggle="modal" data-bs-target="#sendEmailModal">Send</a>
                       </div>
+                      <div className='my-2'>
+                        {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                      </div>
                     </div>
 
                     {showAlert && (
@@ -468,140 +698,187 @@ export default function Estimatedetail() {
 
                     )}
 
+
                     <div className="row">
-                      <div className="col-12 col-sm-12 col-md-12 col-lg-8" id="invoiceContent">
-                        <div className='box1 rounded adminborder mb-5 pb-5'>
-                          <div className='row pt-30 py-5 px-3'>
-                            <div className="col-6">
-                              {signupdata.companyImageUrl !== "" ?
-                                <img src={signupdata.companyImageUrl} className='w-50 logoimage' alt="testing imahe" />
-                                :
-                                <p className='h4 fw-bold'>{signupdata.companyname}</p>
-                              }
+                    
+                    </div>
 
-                              <div className='ps-3 pt-2'>
-                                  <p className='fw-bold'>{signupdata.FirstName} {signupdata.User1_Mobile_Number} | {signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</p>
+                    <div className="row">
+                    <div className="col-12 col-sm-12 col-md-12 col-lg-8" id="">
+                        <div className='print' id='invoiceContent'>
+                        <div className="invoice-body">
+                            <div className='row'>
+                              <div className='col-sm-12 col-md-6 mb-3 mb-md-0 pt-3'>
+                                {signupdata.companyImageUrl !== "" ?
+                                  <img src={signupdata.companyImageUrl} className='w-50 logoimage' alt="testing imahe" /> :
+                                  <p className='h4 fw-bold'>{signupdata.companyname}</p>
+                                }
                               </div>
-                              {/* <p className='h4 fw-bold'>{signupdata.companyname}</p> */}
-                            </div>
-                            <div className="col-6">
-                              <div className="row text-end right">
-                                <p className='h4 fw-bold'>Estimate</p>
-                                <p className='fw-bold'>{signupdata.address}</p>
-                                <p className='fw-bold'>{signupdata.email}</p>
-                              </div>
-                            </div>
-                            <div className='clear'></div>
-                          </div>
-
-                          <div className='row py-4 pb-90 px-4 mx-0 mb-4 detailbg'>
-                            <div bgcolor="#333" className="col-12 col-lg-6 col-md-6 col-sm-6 customerdetail">
-                              <p className='fw-bold pt-3'>BILL TO</p>
-                              <p className='my-0'>{estimateData.customername}</p>
-                              <p className='my-0'>{estimateData.customeremail}</p>
-                            </div>
-                            <div className="col-12 col-lg-6 col-md-6 col-sm-6 text-md-end text-lg-end">
-                              <div className='row'>
-                                <div className='col-6  fw-bold'>
-                                  <p className='pt-3'>Invoice #</p>
-                                  <p className='my-0'>Date</p>
-                                  <p className='pt-3'>Job</p>
+                              <div className='col-sm-12 col-md-6 text-md-end'>
+                                <h1>Estimate</h1>
+                                <div className='text-inverse mb-1'>
+                                  <strong>{signupdata.companyname}</strong>
                                 </div>
-                                <div className='col-6'>
-                                  <p className='pt-3'>{estimateData.EstimateNumber}</p>
-                                  <p className='my-0'>{formatCustomDate(estimateData.date)}</p>
-                                  <p className='pt-3'>{estimateData.job}</p>
+                                <address className='m-t-5 m-b-5'>
+                                  <div className='mb-2'>
+                                  <div className=''>227</div>
+                                    <div className=''>Falwood Way N.E</div>
+                                    <div className=''>Calgary, AB T3J 1A9</div>
+                                    <div className=''>Canada</div>
+                                  </div>
+                                  <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
+                                  <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
+                                  <div>{signupdata.email}</div>
+                                  <div>ABN: {signupdata.gstNumber}</div>
 
-                                </div>
-
+                                </address>
                               </div>
 
-
                             </div>
-
+                            <div class="clr"></div>
                           </div>
+                          <div className='invoice-header'>
+  <div className='row'>
+    <div className='invoice-to col-sm-12 col-md-6'>
+      <strong>Bill To</strong>
+      <div className='text-inverse mb-1'>
+        {estimateData.customername}
+      </div>
+      <address className='m-t-5 m-b-5'>
+        <div>{estimateData.customeremail}</div>
+        <div>{estimateData.customerphone || ''}</div>
 
-                          <div className="row pb-30 pt-1 fw-bold invoice-content">
-                            <div className="col-lg-5 col-md-5 col-sm-5 col-4 invoice-contentcol-6">
-                              <p>ITEM</p>
-                            </div>
-                            <div className="col-lg-3 col-md-3 col-sm-3 col-4 invoice-contentcol-6">
-                              <p>QUANTITY</p>
-                            </div>
-                            <div className="col-lg-2 col-md-2 col-sm-2 d-sm-block d-md-block d-lg-block d-none invoice-contentcol-6">
-                              <p>PRICE</p>
-                            </div>
-                            <div className="col-lg-2 col-md-2 col-sm-2 col-4 invoice-contentcol-6">
-                              <p>AMOUNT</p>
-                            </div>
-                          </div>
-                          <hr />
+      </address>
+    </div>
+    <div className='invoice-date col-sm-12 col-md-6'>
+      <div className='row text-md-end'>
+        <div className='col-6 col-md'>
+          <strong>Estimate #</strong>
+        </div>
+        <div className='col-6 col-md invoice-detail-right'>{estimateData.EstimateNumber}</div>
+      </div>
+      <div className='row text-md-end'>
+        <div className='col-6 col-md'>
+          <strong>Date</strong>
+        </div>
+        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.date)}</div>
+      </div>
+      <div className='row text-md-end'>
+        <div className='col-6 col-md'>
+          <strong>Due date</strong>
+        </div>
+        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
+      </div>
+      {/* <div className='row text-md-end'>
+        <div className='col-6 col-md'>
+          <strong>PO #</strong>
+        </div>
+        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
+      </div> */}
+      <div className='row text-md-end'>
+        <div className='col-6 col-md'>
+          <strong>Job</strong>
+        </div>
+        <div className='col-6 col-md invoice-detail-right'>{estimateData.job}</div>
+      </div>
 
-                          {items.map((item) => (
-                            <div className='row padding-20 invoice-content' key={item._id}>
-                              <div className='col-lg-5 col-md-6 col-sm-5 col-4 invoice-contentcol-6'>
-                                <p className='fw-bold my-0'>{item.itemname}</p>
-                                {/* <p className='my-0 decwidth'>{item.description}</p> */}
-                              </div>
-                              <div className='col-lg-3 col-md-2 col-sm-3 col-3 invoice-contentcol-2'>
-                                <p>{item.itemquantity}</p>
-                              </div>
-                              <div className='col-lg-2 col-md-2 col-sm-2 d-sm-block d-md-block d-lg-block d-none invoice-contentcol-2'>
-                                <p><CurrencySign />{item.price}</p>
-                              </div>
-                              <div className='col-lg-2 col-md-2 col-sm-2 col-5 invoice-contentcol-2'>
-                                <p><CurrencySign />{item.amount}</p>
-                              </div>
-                              <div className="col-lg-6 col-md-6 col-sm-2 col-4 invoice-contentcol-12">
-                              <div dangerouslySetInnerHTML={{ __html: he.decode(item.description) }} />
-                                {/* <p className='my-0 decwidth'>{item.description}</p> */}
-                              </div>
-                            </div>
-                          ))}
-                          <hr />
+    </div>
+  </div>
+  <div class="clr"></div>
+</div>
 
-                          <div className="row padding-20">
-                            <div className="col-lg-7 col-md-7 col-sm-6 col-4 printcol-8">
-                              <p className='d-none'>.</p>
-                            </div>
-                            <div className="col-lg-2 col-md-2 col-sm-3 col-4 invoice-contentcol-2">
-                              <p className='mb-2'>Subtotal</p>
-                            </div>
-                            <div className="col-lg-3 col-md-3 col-sm-3 col-4 invoice-contentcol-2">
-                              <p className='mb-2'><CurrencySign />{estimateData.subtotal}</p>
-                            </div>
-                          </div>
-                          <div className="row padding-20">
-                            <div className="col-lg-7 col-md-7 col-sm-6 col-4 printcol-8">
-                              <p className='d-none'>.</p>
-                            </div>
-                            <div className="col-lg-2 col-md-2 col-sm-3 col-4 invoice-contentcol-2">
-                              <p className='mb-2'>GST</p>
-                            </div>
-                            <div className="col-lg-3 col-md-3 col-sm-3 col-4 invoice-contentcol-2">
-                              <p className='mb-2'><CurrencySign />{estimateData.tax}</p>
-                            </div>
-                          </div>
+<div className='invoice-table'>
+  <div className='table-responsive'>
+    <table className='table table-invoice'>
+      <thead>
+        <tr className='table table-invoice'>
+          <th className='text-start'>Item</th>
+          <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
+          <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
+          <th className='text-end' width="15%"> Amount</th>
+        </tr>
+      </thead>
 
-                          {console.log(estimateData.information, "estimateData")}
+      <tbody>
+        {items.map((item) => (
+          <tr key={item._id}>
+            <td>
+              <div>
+                <span><strong>{item.itemname}</strong></span>
+                <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div>
+              </div>
+            </td>
+            <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
+            <td className="text-end d-none d-md-table-cell">{item.price}</td>
+            <td className='text-end'>{item.amount}</td>
+          </tr>
+        ))}
+      </tbody>
 
-                          <div className="row flex">
-                            <div className="col-lg-4 col-sm-4 col-md-4 col-6 offset-6 offset-lg-7 offset-md-7 offset-sm-7 m-right">
-                              <div className="mt-2 detailbg p-2 padding">
-                                <p className='text-left'>Grand Total</p>
-                                <p className='fs-5 text-end text-right'>
-                                  <CurrencySign />{estimateData.total}
-                                </p>
-                              </div>
-                            </div>
-                          </div>
+    </table>
+  </div>
+  <hr />
+  <div className='row'>
+    <div className='col-12'>
+      <table className='table table-borderless table-small'>
 
-                          <div className='row'>
-                            <div className='col-lg-12 col-sm-12 col-md-12 col-12'>
-                            <p  className='px-4'><strong>Note:</strong> </p>
-                              <div className='px-4' dangerouslySetInnerHTML={{ __html: he.decode(estimateData.information) }} />
-                            </div>
-                          </div>
+        <tbody>
+          <tr>
+            <td className='d-none d-md-table-cell' rowspan="5"></td>
+            <td className='text-md-end' width="22%">Subtotal</td>
+            <td className='text-end' width="22%">${estimateData.subtotal}</td>
+          </tr>
+          <tr>
+
+            <td className='text-md-end' width="22%">Discount</td>
+            <td className='text-end' width="22%">${estimateData.discountTotal}</td>
+          </tr>
+          <tr>
+
+            <td className='text-md-end' width="22%">GST (10%)</td>
+            <td className='text-end' width="22%">${estimateData.tax}</td>
+          </tr>
+          <tr>
+
+            <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
+            <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${estimateData.total}</td>
+          </tr>
+          {transactions.map((transaction) => (
+            <tr key={transaction._id}>
+              <td className='text-md-end' width="22%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
+              <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${transaction.paidamount}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  <div class="clr"></div>
+</div>
+
+<div className='invoice-price page-not-break'>
+  <div className='invoice-price-left text-end'>
+    <div className='d-none d-md-block'></div>
+
+  </div>
+  <div className='invoice-price-right'>
+    <small>Amount Due</small>
+    <span class="f-w-600 mt-3"><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
+
+  </div>
+
+</div>
+
+<div className='invoice-body'>
+  <div className='mt-1'>
+    <span>{estimateData.information == '' ? '' : 'Note:'}</span> <div dangerouslySetInnerHTML={{ __html: estimateData.information }} />
+
+  </div>
+</div>
+                      
+
+                         
+
                         </div>
                       </div>
 
@@ -624,6 +901,7 @@ export default function Estimatedetail() {
                             <div className="col-6 text-end">
                               <p><CurrencySign />{estimateData.total}</p>
                             </div>
+
                           </div><hr />
                         </div>
                       </div>
@@ -716,7 +994,7 @@ export default function Estimatedetail() {
                 </div>
                 <div class="mb-3">
                   <label for="content" class="form-label">Content</label>
-                  <textarea class="form-control" id="content" name="content" rows="5" value={content} onChange={handleContentChange}></textarea>
+                  <textarea class="form-control" id="content" name="content" rows="5" defaultValue={content} onChange={handleContentChange}></textarea>
                 </div>
                 <div class="modal-footer">
                   <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>

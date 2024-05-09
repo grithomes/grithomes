@@ -12,6 +12,7 @@ import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
+import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Createestimate() {
     const [loading, setloading] = useState(true);
@@ -31,12 +32,26 @@ export default function Createestimate() {
     const [editedName, setEditedName] = useState('');
     const [editedEmail, setEditedEmail] = useState('');
     const [taxPercentage, setTaxPercentage] = useState(10);
+    const [discountTotal, setdiscountTotal] = useState(0);
     const [estimateData, setestimateData] = useState({
         customername: '', itemname: '', customeremail: '', estimate_id: '', EstimateNumber: '', purchaseorder: '',
-        job: '', date: '', description: '', itemquantity: '', price: '', discount: '',
-        amount: '', tax: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
+        job: '', date: format(new Date(), 'yyyy-MM-dd'), description: '', itemquantity: '', price: '', discount: '',
+        amount: '', tax: '',discountTotal:'', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
     });
-    const [editorData, setEditorData] = useState("<p></p>");
+    
+    // const [editorData, setEditorData] = useState("<p></p>");
+    const [editorData, setEditorData] = useState(`
+        <p>
+            If you have any queries contact us. please deposit <strong>40%</strong> to secure your place 
+            <strong>50%</strong> before delivery and the remaining <strong>10%</strong> on Completion,<br />
+            Please share the payment receipt<br />
+            <strong>Commonwealth</strong><br />
+            <strong>BSB</strong>:-063 253<br />
+            <strong>ACC NO</strong>:-1105 4298<br />
+            We Accept Credit Cards (Surcharged 3%) Standard Hardware unless Requested
+        </p>
+    `);
+    const [alertMessage, setAlertMessage] = useState('');
     
   const [credentials, setCredentials] = useState({
     name: '',
@@ -60,7 +75,9 @@ export default function Createestimate() {
             await fetchitemdata();
             await fetchLastEstimateNumber();
         };
-
+        if (isNaN(discountTotal)) {
+            setdiscountTotal(0);
+        }
         fetchData();
         setloading(false);
     }, [])
@@ -80,18 +97,34 @@ export default function Createestimate() {
     const fetchLastEstimateNumber = async () => {
         try {
             const userid = localStorage.getItem('userid');
-            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
 
-            // let nextEstimateNumber = 1;
-            // if (json && json.lastEstimateNumber) {
-            //     nextEstimateNumber = json.lastEstimateNumber + 1;
-            // }
-            setestimateData({
-                ...estimateData,
-                EstimateNumber: `Estimate-${json.lastEstimateId + 1}`,
-                estimate_id: json.lastEstimateId + 1,
-            });
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
+
+                // let nextEstimateNumber = 1;
+                // if (json && json.lastEstimateNumber) {
+                //     nextEstimateNumber = json.lastEstimateNumber + 1;
+                // }
+                setestimateData({
+                    ...estimateData,
+                    EstimateNumber: `Estimate-${json.lastEstimateId + 1}`,
+                    estimate_id: json.lastEstimateId + 1,
+                });
+              }
+            
         } catch (error) {
             console.error('Error fetching last estimate number:', error);
         }
@@ -101,12 +134,28 @@ export default function Createestimate() {
     const fetchcustomerdata = async () => {
         try {
             const userid = localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
 
-            if (Array.isArray(json)) {
-                setcustomers(json);
-            }
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+               const json = await response.json();
+
+                if (Array.isArray(json)) {
+                    setcustomers(json);
+                } 
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -115,12 +164,28 @@ export default function Createestimate() {
     const fetchitemdata = async () => {
         try {
             const userid = localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
 
-            if (Array.isArray(json)) {
-                setitems(json);
-            }
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
+
+                if (Array.isArray(json)) {
+                    setitems(json);
+                }
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -144,7 +209,7 @@ export default function Createestimate() {
     };
 
     // const onChangeQuantity = (event, itemId) => {
-    //     const newQuantity = event.target.value ? parseInt(event.target.value) : 1;
+    //     const newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
 
     //     // Update quantity for the corresponding item
     //     setQuantityMap((prevMap) => ({
@@ -154,7 +219,7 @@ export default function Createestimate() {
     //   };
 
     const onChangeQuantity = (event, itemId) => {
-        let newQuantity = event.target.value ? parseInt(event.target.value) : 1;
+        let newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
         newQuantity = Math.max(newQuantity, 0); // Ensure quantity is not negative
 
         setQuantityMap((prevMap) => ({
@@ -277,9 +342,20 @@ export default function Createestimate() {
     };
 
     // Function to calculate tax amount
+    // const calculateTaxAmount = () => {
+    //     const subtotal = calculateSubtotal();
+    //     const taxAmount = (subtotal * taxPercentage) / 100;
+    //     return taxAmount;
+    // };
+
     const calculateTaxAmount = () => {
         const subtotal = calculateSubtotal();
-        const taxAmount = (subtotal * taxPercentage) / 100;
+        const totalDiscountedAmount = subtotal - discountTotal; // Apply overall discount first
+    
+        // Calculate tax amount on the discounted amount
+        const taxAmount = (totalDiscountedAmount * taxPercentage) / 100;
+        // const taxAmount = ((subtotal-discountTotal) * taxPercentage) / 100;
+        // console.log("taxAmount:", taxAmount, "subtotal:", subtotal, "discountTotal:",discountTotal);
         return taxAmount;
     };
 
@@ -287,7 +363,8 @@ export default function Createestimate() {
     const calculateTotal = () => {
         const subtotal = calculateSubtotal();
         const taxAmount = calculateTaxAmount();
-        const totalAmount = subtotal + taxAmount;
+        const discountAmount = discountTotal;
+        const totalAmount = subtotal + taxAmount - discountAmount;
         return totalAmount;
     };
 
@@ -295,7 +372,7 @@ export default function Createestimate() {
         e.preventDefault();
         try {
             const userid = localStorage.getItem('userid'); // Assuming you have user ID stored in local storage
-
+            const authToken = localStorage.getItem('authToken');
             const estimateItems = searchitemResults.map((item) => {
                 const selectedItem = items.find((i) => i._id === item.value);
                 const itemPrice = selectedItem?.price || 0;
@@ -333,6 +410,7 @@ export default function Createestimate() {
                 EstimateNumber: estimateData.EstimateNumber,
                 purchaseorder: estimateData.purchaseorder,
                 job: estimateData.job || 'No Job',
+                discountTotal: discountTotal || 'No Discount',
                 information: editorData,
                 date: estimateData.date,
                 items: estimateItems,
@@ -349,30 +427,46 @@ export default function Createestimate() {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify({ userid, estimateData: data }),
             });
-
-            if (response.ok) {
+            if (response.status === 401) {
                 const responseData = await response.json();
-                if (responseData.success) {
-                    const estimateid = responseData.estimate._id;
-                    navigate('/userpanel/Estimatedetail', { state: { estimateid } });
-                    console.log('estimate saved successfully!');
-                } else {
-                    console.error('Failed to save the estimate.');
-                }
-            } else {
-                const responseData = await response.json();
-                setmessage(true);
-                setAlertShow(responseData.error)
-                console.error('Failed to save the estimate.');
+                setAlertMessage(responseData.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
             }
+            else{
+                if (response.ok) {
+                    const responseData = await response.json();
+                    if (responseData.success) {
+                        const estimateid = responseData.estimate._id;
+                        navigate('/userpanel/Estimatedetail', { state: { estimateid } });
+                        console.log('estimate saved successfully!');
+                    } else {
+                        console.error('Failed to save the estimate.');
+                    }
+                } else {
+                    const responseData = await response.json();
+                    setmessage(true);
+                    setAlertShow(responseData.error)
+                    console.error('Failed to save the estimate.');
+                } 
+            }
+
+            
         } catch (error) {
             console.error('Error creating estimate:', error);
         }
     };
-
+    const handleDiscountChange = (event) => {
+        const value = event.target.value;
+        // If the input is empty or NaN, set the value to 0
+        const newValue = value === '' || isNaN(parseFloat(value)) ? 0 : parseFloat(value);
+        setdiscountTotal(newValue);
+    };
 
     // const onchange = (event) => {
     //     setestimateData({ ...estimateData, [event.target.name]: event.target.value });
@@ -427,10 +521,12 @@ export default function Createestimate() {
     const handleAddCustomer = async (e) => {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
+        const authToken = localStorage.getItem('authToken');
         const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': authToken,
           },
           body: JSON.stringify({
             userid: userid,
@@ -452,33 +548,44 @@ export default function Createestimate() {
             post: credentials.post,
           }),
         });
-    
-        const json = await response.json();
-        console.log(json);
-    
-        if (json.Success) {
-          setCredentials({
-            name: '',
-            email: '',
-            number: '',
-            citydata: '',
-            statedata: '',
-            countrydata: '',
-            information: '',
-            address1: '',
-            address2: '',
-            post: '',
-          });
-    
-          setMessage1(true);
-          setAlertShow(json.message);
-          window.location.reload();
-        //   navigate('/userpanel/Customerlist');
+
+        if (response.status === 401) {
+          const json = await response.json();
+          setAlertMessage(json.message);
+          setloading(false);
+          window.scrollTo(0,0);
+          return; // Stop further execution
         }
-    
         else{
-            alert("This Customer Email already exist")
+           const json = await response.json();
+            console.log(json);
+        
+            if (json.Success) {
+            setCredentials({
+                name: '',
+                email: '',
+                number: '',
+                citydata: '',
+                statedata: '',
+                countrydata: '',
+                information: '',
+                address1: '',
+                address2: '',
+                post: '',
+            });
+        
+            setMessage1(true);
+            setAlertShow(json.message);
+            window.location.reload();
+            //   navigate('/userpanel/Customerlist');
+            }
+        
+            else{
+                alert("This Customer Email already exist")
+            } 
         }
+    
+        
       };
 
       const onchangeaddcustomer = (event) => {
@@ -515,7 +622,6 @@ export default function Createestimate() {
                                     <Usernav />
                                 </div>
                                 <div className='mx-4'>
-
                                     <form onSubmit={handleSubmit}>
                                         <div className='row py-4 px-2 breadcrumbclr'>
                                             <div className="col-lg-4 col-md-6 col-sm-12 col-7 me-auto">
@@ -529,6 +635,9 @@ export default function Createestimate() {
                                             </div>
                                             <div className="col-lg-3 col-md-4 col-sm-12 col-5 text-right">
                                                 <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit">Save</button>
+                                            </div>
+                                            <div className='mt-4'>
+                                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                                             </div>
                                         </div>
                                         <div className='box1 rounded adminborder p-4 m-2 mb-5'>
@@ -657,7 +766,7 @@ export default function Createestimate() {
                                                                 <th scope="col">ITEM</th>
                                                                 <th scope="col">QUANTITY</th>
                                                                 <th scope="col">PRICE</th>
-                                                                <th scope="col">DISCOUNT</th>
+                                                                {/* <th scope="col">DISCOUNT</th> */}
                                                                 <th scope="col">AMOUNT</th>
                                                             </tr>
                                                         </thead>
@@ -687,14 +796,7 @@ export default function Createestimate() {
                                                                             <div className="row">
                                                                                 <div className="col">
                                                                                     <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
-                                                                                    {/* <textarea
-                                            className="form-control mb-3"
-                                            name='description'
-                                            id={`item-description-${itemId}`}
-                                            placeholder='Item Description'
-                                            rows="3"
-                                            value={selectedItem?.description || ''}
-                                        ></textarea> */}
+                                                                                   
                                                                                     <CKEditor
                                                                                         editor={ClassicEditor}
                                                                                         data={selectedItem?.description || ''}
@@ -707,28 +809,9 @@ export default function Createestimate() {
                                                                                             console.log('Focus.', editor);
                                                                                         }}
                                                                                     />
-                                                                                    {/* <textarea
-                                            className="form-control"
-                                            name={`description-${itemId}`}  // Use a unique identifier for each item
-                                            value={selectedItem?.description || ''}
-                                            onChange={(event) => onChangeDescription(event, itemId)}  // Add onChange handler for description
-                                            rows="3"
-                                            id={`description-${itemId}`}
-                                        ></textarea> */}
+                                                                          
                                                                                 </div>
-                                                                                <div className="col">
-                                                                                    <label htmlFor={`discount-${itemId}`} className="form-label">Discount</label>
-                                                                                    <input
-                                                                                        type='number'
-                                                                                        name={`discount-${itemId}`}
-                                                                                        className='form-control mb-3'
-                                                                                        value={discount}
-                                                                                        onChange={(event) => onDiscountChange(event, itemId)}
-                                                                                        placeholder='Discount'
-                                                                                        id={`discount-${itemId}`}
-                                                                                        min="0"
-                                                                                    />
-                                                                                </div>
+                                                                              
                                                                             </div>
                                                                         </td>
                                                                         <td>
@@ -762,9 +845,9 @@ export default function Createestimate() {
                                                                                 required
                                                                             />
                                                                         </td>
-                                                                        <td className="text-center">
-                                                                            <p><CurrencySign />{discount.toFixed(2)}</p>
-                                                                        </td>
+                                                                        {/* <td className="text-center">
+                                                                            <p><CurrencySign />{discountTotal.toFixed(2)}</p>
+                                                                        </td> */}
                                                                         <td className="text-center">
                                                                             <p><CurrencySign />{formattedTotalAmount}</p>
                                                                         </td>
@@ -798,16 +881,30 @@ export default function Createestimate() {
                                                         <div className="row">
                                                             <div className="col-6 col-md-3">
                                                                 <p>Subtotal</p>
-                                                                <p>GST</p>
+                                                                <p>Discount</p>
+                                                                {/* <p>GST</p> */}
                                                                 <p className='pt-3'>GST {taxPercentage}%</p>
+                                                                
                                                                 <p>Total</p>
                                                             </div>
                                                             <div className="col-6 col-md-9">
-                                                                <p><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
+                                                                <p className="mb-3"><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
                                                                     // style: 'currency',
                                                                     // currency: 'INR',
                                                                 })}</p>
                                                                 <div className="mb-3">
+                                                                    <input
+                                                                        type="number"
+                                                                        name="totaldiscount"
+                                                                        className="form-control"
+                                                                        value={discountTotal}
+                                                                        onChange={handleDiscountChange} // Ensure proper event binding
+                                                                        placeholder="Enter Discount Total"
+                                                                        id="discountInput"
+                                                                        min="0"
+                                                                    />
+                                                                </div>
+                                                                {/* <div className="mb-3">
                                                                     <input
                                                                         type="number"
                                                                         name="tax"
@@ -818,11 +915,12 @@ export default function Createestimate() {
                                                                         id="taxInput"
                                                                         min="0"
                                                                     />
-                                                                </div>
+                                                                </div> */}
                                                                 <p><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN', {
                                                                     // style: 'currency',
                                                                     // currency: 'INR',
                                                                 })}</p>
+                                                                
                                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
                                                                     // style: 'currency',
                                                                     // currency: 'INR',

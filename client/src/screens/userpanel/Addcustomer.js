@@ -4,12 +4,14 @@ import { useNavigate } from 'react-router-dom';
 // import Usernavbar from './Usernavbar';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
+import Alertauthtoken from '../../components/Alertauthtoken';
 import Usernav from './Usernav';
 import { ColorRing } from  'react-loader-spinner'
 
 export default function Addcustomer() {
   const navigate = useNavigate();
   const [ loading, setloading ] = useState(true);
+  const [alertMessage, setAlertMessage] = useState('');
   const [credentials, setCredentials] = useState({
     name: '',
     email: '',
@@ -46,10 +48,12 @@ export default function Addcustomer() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     let userid = localStorage.getItem('userid');
+    const authToken = localStorage.getItem('authToken');
     const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
+        'Authorization': authToken,
       },
       body: JSON.stringify({
         userid: userid,
@@ -71,32 +75,42 @@ export default function Addcustomer() {
         post: credentials.post,
       }),
     });
-
-    const json = await response.json();
-    console.log(json);
-
-    if (json.Success) {
-      setCredentials({
-        name: '',
-        email: '',
-        number: '',
-        citydata: '',
-        statedata: '',
-        countrydata: '',
-        information: '',
-        address1: '',
-        address2: '',
-        post: '',
-      });
-
-      setMessage(true);
-      setAlertShow(json.message);
-      navigate('/userpanel/Customerlist');
+    if (response.status === 401) {
+      const json = await response.json();
+      setAlertMessage(json.message);
+      setloading(false);
+      window.scrollTo(0,0);
+      return; // Stop further execution
     }
-
     else{
-      setAlertmessageShow("This Customer Email already exist")
+      const json = await response.json();
+      console.log(json);
+
+      if (json.Success) {
+        setCredentials({
+          name: '',
+          email: '',
+          number: '',
+          citydata: '',
+          statedata: '',
+          countrydata: '',
+          information: '',
+          address1: '',
+          address2: '',
+          post: '',
+        });
+
+        setMessage(true);
+        setAlertShow(json.message);
+        navigate('/userpanel/Customerlist');
+      }
+
+      else{
+        setAlertmessageShow("This Email already exist")
+      }
     }
+
+    
   };
 
   const onchange = (event) => {
@@ -131,6 +145,21 @@ export default function Addcustomer() {
           <div className="col-lg-10 col-md-9 col-12 mx-auto">
             <div className="d-lg-none d-md-none d-block mt-2">
               <Usernav/>
+            </div>
+            <div className='mt-4 mx-4'>
+              {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+              {alertmessageShow == true ?  
+                  <div class="alert alert-warning d-flex justify-content-between" role="alert">
+                    <div>
+                      {alertmessageShow}
+                    </div>
+                    <button type="button" class="btn-close" onClick={()=>{
+                        setAlertmessageShow("");
+                      }}>
+                    </button>
+                  </div>
+                  : ''
+                }
             </div>
             <form onSubmit={handleSubmit}>
               <div className="bg-white my-5 p-4 box mx-4">

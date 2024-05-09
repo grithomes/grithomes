@@ -4,11 +4,13 @@ import Usernavbar from './Usernavbar';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
 import Usernav from './Usernav';
+import Alertauthtoken from '../../components/Alertauthtoken';
 import { ColorRing } from  'react-loader-spinner'
 
 export default function Editcustomer() {
     const [ loading, setloading ] = useState(true);
     const location = useLocation();
+    const [alertMessage, setAlertMessage] = useState('');
     const navigate = useNavigate();
     
     const customerId = location.state.customerId;
@@ -36,16 +38,32 @@ export default function Editcustomer() {
 
     const fetchCustomerData = async () => {
         try {
-            const response = await fetch(`https://grithomes.onrender.com/api/getcustomers/${customerId}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/getcustomers/${customerId}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (json.Success) {
-                setcustomer(json.customer);
-            } else {
-                console.error('Error fetching Customerdata:', json.message);
-            }
-            console.log(customer);
-            setloading(false);
+                if (json.Success) {
+                    setcustomer(json.customer);
+                } else {
+                    console.error('Error fetching Customerdata:', json.message);
+                }
+                console.log(customer);
+                setloading(false);
+              }
+            
         } catch (error) {
             console.error('Error fetching Customerdata:', error);
         }
@@ -56,22 +74,35 @@ export default function Editcustomer() {
             const updatedcustomerdata = {
                 ...customer
             };
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/updatecostomerdata/${customerId}`, {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/json'
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
                 },
                 body: JSON.stringify(updatedcustomerdata)
             });
 
-            const json = await response.json();
-
-            if (json.Success) {
-                navigate('/userpanel/Customerlist');
-                console.log(updatedcustomerdata);
-            } else {
-                console.error('Error updating Customerdata:', json.message);
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
+            else{
+              const json = await response.json();
+
+                if (json.Success) {
+                    navigate('/userpanel/Customerlist');
+                    console.log(updatedcustomerdata);
+                } else {
+                    console.error('Error updating Customerdata:', json.message);
+                }  
+            }
+
+            
         } catch (error) {
             console.error('Error updating Customerdata:', error);
         }
@@ -109,6 +140,8 @@ export default function Editcustomer() {
                     <div className="col-lg-10 col-md-9 col-12 mx-auto">
                         <div className='d-lg-none d-md-none d-block mt-2'>
                             <Usernav/>
+                        </div><div className='mt-4 mx-4'>
+                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                         </div>
                         <form>
                             <div className="bg-white my-5 p-4 box mx-4">

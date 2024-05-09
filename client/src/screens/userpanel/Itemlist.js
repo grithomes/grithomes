@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import Usernav from './Usernav';
 import { ColorRing } from  'react-loader-spinner'
 import CurrencySign from '../../components/CurrencySign ';
+import Alertauthtoken from '../../components/Alertauthtoken';
 // import Nav from './Nav';
 
 export default function Itemlist() {
@@ -11,6 +12,7 @@ export default function Itemlist() {
     const [items, setitems] = useState([]);
     const [selecteditems, setselecteditems] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [alertMessage, setAlertMessage] = useState('');
     const navigate = useNavigate();
     const [currentPage, setCurrentPage] = useState(0);
     const entriesPerPage = 10;
@@ -30,13 +32,29 @@ export default function Itemlist() {
     const fetchdata = async () => {
         try {
             const userid =  localStorage.getItem("userid");
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`);
-            const json = await response.json();
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+                headers: {
+                  'Authorization': authToken,
+                }
+              });
+
+              if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
+              }
+              else{
+                const json = await response.json();
             
-            if (Array.isArray(json)) {
-                setitems(json);
-            }
-            setloading(false);
+                if (Array.isArray(json)) {
+                    setitems(json);
+                }
+                setloading(false);
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -56,17 +74,32 @@ export default function Itemlist() {
 
     const handleDeleteClick = async (itemId) => {
         try {
+            const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/delitem/${itemId}`, {
-                method: 'GET'
+                method: 'GET',
+                headers: {
+                    'Authorization': authToken,
+                }
             });
-    
-            const json = await response.json();
-    
-            if (json.Success) {
-                fetchdata(); // Refresh the items list
-            } else {
-                console.error('Error deleting item:', json.message);
+
+            if (response.status === 401) {
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
+            else{
+                const json = await response.json();
+    
+                if (json.Success) {
+                    fetchdata(); // Refresh the items list
+                } else {
+                    console.error('Error deleting item:', json.message);
+                }  
+            }
+    
+            
         } catch (error) {
             console.error('Error deleting item:', error);
         }
@@ -125,6 +158,9 @@ export default function Itemlist() {
                 <div className="col-lg-10 col-md-9 col-12 mx-auto">
                     <div className='d-lg-none d-md-none d-block mt-2'>
                         <Usernav/>
+                    </div>
+                    <div className='mt-4 mx-4'>
+                        {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                     </div>
                     <div className="bg-white my-5 p-4 box mx-4">
                         <div className='row py-2'>

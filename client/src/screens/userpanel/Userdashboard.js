@@ -8,7 +8,7 @@ export default function Userdashboard() {
     <div className='bg'>
         <div className='container-fluid'>
             <div className="row">
-                <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
+                <div className='col-lg-2 col-md-3 ps-0 d-lg-block d-md-block d-none' >
                     <Usernavbar/>
                 </div>
                 <div className="col-lg-10 col-md-9 col-12 mx-auto">
