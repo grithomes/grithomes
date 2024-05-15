@@ -16,6 +16,9 @@ const EstimateSchema = new Schema({
     purchaseorder: {
         type: String,
     },
+    discountTotal: {
+        type: String,
+    },
     job: {
         type: String,
     },

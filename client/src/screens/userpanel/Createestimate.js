@@ -40,17 +40,7 @@ export default function Createestimate() {
     });
     
     // const [editorData, setEditorData] = useState("<p></p>");
-    const [editorData, setEditorData] = useState(`
-        <p>
-            If you have any queries contact us. please deposit <strong>40%</strong> to secure your place 
-            <strong>50%</strong> before delivery and the remaining <strong>10%</strong> on Completion,<br />
-            Please share the payment receipt<br />
-            <strong>Commonwealth</strong><br />
-            <strong>BSB</strong>:-063 253<br />
-            <strong>ACC NO</strong>:-1105 4298<br />
-            We Accept Credit Cards (Surcharged 3%) Standard Hardware unless Requested
-        </p>
-    `);
+    const [editorData, setEditorData] = useState(``);
     const [alertMessage, setAlertMessage] = useState('');
     
   const [credentials, setCredentials] = useState({

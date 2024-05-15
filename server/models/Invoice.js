@@ -23,6 +23,9 @@ const InvoiceSchema = new Schema({
     date: {
         type: Date,
     },
+    discountTotal: {
+        type: String,
+    },
     duedate: {
         type: Date,
     },
