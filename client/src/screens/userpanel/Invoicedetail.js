@@ -1448,7 +1448,7 @@ thead{
                                       
                                     <tr>
 
-                                      <td className='text-md-end' width="22%">GST (10%)</td>
+                                      <td className='text-md-end' width="22%">GST (5%)</td>
                                       <td className='text-end' width="22%">${invoiceData.tax}</td>
                                     </tr>
                                     <tr>
