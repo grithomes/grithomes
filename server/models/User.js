@@ -47,6 +47,10 @@ const UserSchema = new Schema({
       gstNumber: {
         type: String, // GST number field
       },
+      TaxName: {
+        type: String, // GST number field
+        default: 'GST',
+      },
       resetPasswordToken: String,
 });
 

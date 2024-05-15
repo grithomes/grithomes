@@ -233,8 +233,14 @@ export default function Editprofile() {
                                         </div>
                                         <div className="col-12 col-sm-12 col-md-6 col-lg-6">
                                             <div class="form-group pt-3">
-                                                <label class="label py-2" for="gstNumber">Abn</label>
+                                                <label class="label py-2" for="gstNumber">Business Tax Number</label>
                                                 <input type="text" class="form-control" name="gstNumber" value={signupdata.gstNumber} onChange={handleInputChange} placeholder="Abn" />
+                                            </div>
+                                        </div>
+                                        <div className="col-12 col-sm-12 col-md-6 col-lg-6">
+                                            <div class="form-group pt-3">
+                                                <label class="label py-2" for="TaxName">Business Tax Name</label>
+                                                <input type="text" class="form-control" name="TaxName" value={signupdata.TaxName || ''} onChange={handleInputChange} placeholder="Tax Name" />
                                             </div>
                                         </div>
                                         

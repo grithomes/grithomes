@@ -113,7 +113,7 @@ export default function Dashboard() {
       }
       else{
         const json = await response.json();
-
+console.log(json, "json");
         // if (Array.isArray(json)) {
         setsignupdata(json);
         // }
@@ -256,7 +256,7 @@ export default function Dashboard() {
             <div className=''>
               <div className='txt px-4 py-4'>
                 <h2 className='fs-35 fw-bold'>Dashboard</h2>
-                <p>Hi, {signupdata.FirstName} ! &#128075;</p>
+                <p>Hi, {signupdata.companyname} ! &#128075;</p>
               </div>
               <div className='row'>
                 <div className='col-12 col-sm-12 col-md-8 col-lg-8 '>
@@ -282,41 +282,7 @@ export default function Dashboard() {
                 </div>
               </div>
 
-              {/* <div className="row">
-                <div className='col-12 col-sm-4 col-md-4 col-lg-4'>
-                  <div className='box1 fw-bold rounded adminborder py-4 px-3 m-2 text-center'>
-                    <p className='fs-6 fw-bold'>TOTAL PAYMENTS RECEIVED</p>
-                    <p className='fs-3 fw-bold'></p>
-                  </div>
-                </div>
-                <div className='col-12 col-sm-4 col-md-4 col-lg-4'>
-                  <div className='box1 fw-bold rounded adminborder py-4 px-3 m-2 text-center'>
-                    <p className='fs-6 fw-bold'>OCTOBER INVOICE AMOUNT</p>
-                    <p className='fs-3 fw-bold'></p>
-                  </div>
-                </div>
-              </div> */}
-
-              {/* <div className="row">
-            <div className='col-12 col-sm-8 col-md-8 col-lg-8'>
-              <div className='box1 fw-bold rounded adminborder py-4 px-3 m-2'>
-                <div className="row">
-                  <div className="col-3 greyclr">
-                    <p>INVOICE</p>
-                  </div>
-                  <div className="col-3 greyclr">
-                    <p>STATUS</p>
-                  </div>
-                  <div className="col-3 greyclr">
-                    <p>DATE</p>
-                  </div>
-                  <div className="col-3 greyclr">
-                    <p>AMOUNT</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div> */}
+             
           
           <div className=''>
             {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
