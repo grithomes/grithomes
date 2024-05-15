@@ -515,7 +515,7 @@ export default function Invoicedetail() {
 
         // if (Array.isArray(json)) {
         setsignupdata(json);
-        console.log(signupdata);
+        console.log(signupdata, "sddsfsdfsdfds=============");
         // }
       }
 
@@ -1340,7 +1340,7 @@ thead{
                                   <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
                                   <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
                                   <div>{signupdata.email}</div>
-                                  <div>ABN: {signupdata.gstNumber}</div>
+                                  <div>{signupdata.TaxName}: {signupdata.gstNumber}</div>
 
                                 </address>
                               </div>

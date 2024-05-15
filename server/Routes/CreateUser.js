@@ -4283,11 +4283,23 @@ router.get('/invoicedata/:userid', async (req, res) => {
     try {
         let userid = req.params.userid;
         let authtoken = req.headers.authorization;
+        let status = req.query.status; // Get the status from query parameters
+
         // Verify JWT token
         const decodedToken = jwt.verify(authtoken, jwrsecret);
         console.log(decodedToken);
+
+        // Build the query object
+        let query = { userid: userid };
+
+        // If a status is provided, add it to the query
+        if (status) {
+            query.status = status;
+        }
+
         // Find invoice data sorted by creation date in descending order
-        const invoicedata = await Invoice.find({ userid: userid }).sort({ createdAt: -1 });
+        const invoicedata = await Invoice.find(query).sort({ createdAt: -1 });
+
         res.json(invoicedata);
     } catch (error) {
         console.error('Error fetching dashboard data:', error);

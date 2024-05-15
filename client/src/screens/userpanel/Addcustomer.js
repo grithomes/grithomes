@@ -383,19 +383,19 @@ export default function Addcustomer() {
                     <div className="row pt-4 pe-2">
                       <div className="col-3 me-auto"></div>
 
-{
-alertmessageShow == '' 
-?
-<></>
-:
-<div class="alert alert-warning alert-dismissible fade show" role="alert">
-{alertmessageShow}
-<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-</div>
-}
+                      {
+                        alertmessageShow == ''
+                          ?
+                          <></>
+                          :
+                          <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            {alertmessageShow}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                      }
 
 
-                     
+
                       <div className="col-4 col-sm-2">
                         <button className="btn btnclr text-white">Add</button>
                       </div>

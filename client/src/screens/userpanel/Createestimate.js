@@ -31,7 +31,7 @@ export default function Createestimate() {
     const [isCustomerSelected, setIsCustomerSelected] = useState(false);
     const [editedName, setEditedName] = useState('');
     const [editedEmail, setEditedEmail] = useState('');
-    const [taxPercentage, setTaxPercentage] = useState(10);
+    const [taxPercentage, setTaxPercentage] = useState(5);
     const [discountTotal, setdiscountTotal] = useState(0);
     const [estimateData, setestimateData] = useState({
         customername: '', itemname: '', customeremail: '', estimate_id: '', EstimateNumber: '', purchaseorder: '',
@@ -1206,6 +1206,18 @@ export default function Createestimate() {
                       </div>
                         </div>
                         <div className="modal-footer">
+                        {
+                        alertMessage == ''
+                          ?
+                          <></>
+                          :
+                          <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            {alertMessage}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                          </div>
+                      }
+
+
                             <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                             <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
                         </div>

@@ -13,12 +13,13 @@ export default function Dashboard() {
   const [transactions, setTransactions] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const entriesPerPage = 10;
+  const status = 'Saved';
   useEffect(() => {
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true") {
       navigate("/");
     }
     fetchsignupdata();
-    fetchData();
+    fetchData(status);
     // setloading(true)
 
   }, [])
@@ -113,7 +114,7 @@ export default function Dashboard() {
       }
       else{
         const json = await response.json();
-console.log(json, "json");
+
         // if (Array.isArray(json)) {
         setsignupdata(json);
         // }
@@ -127,11 +128,22 @@ console.log(json, "json");
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/invoicedata/${userid}`, {
-        headers: {
-          'Authorization': authToken,
-        }
-      });
+      let url = `https://grithomes.onrender.com/api/invoicedata/${userid}`;
+     // Add the status query parameter if provided
+     if (status) {
+      url += `?status=${encodeURIComponent(status)}`;
+    }
+    console.log("Status:->", status);
+    
+
+    const response = await fetch(url, {
+      headers: {
+        'Authorization': authToken,
+      }
+    });
+      
+      
+
       if (response.status === 401) {
         const json = await response.json();
         setAlertMessage(json.message);
@@ -141,24 +153,38 @@ console.log(json, "json");
       }
       else{
         const json = await response.json();
-        if (Array.isArray(json)) {
-          const sortedInvoices = json.sort((a, b) => new Date(b.date) - new Date(a.date));
-          setinvoices(sortedInvoices);
+        console.log("json:->===============",json);
+      if (Array.isArray(json)) {
+       setinvoices(json);
 
-          // const transactionPromises = json.map(async (invoice) => {
-          //   const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`);
-          //   const transactionJson = await response.json();
-          //   return transactionJson.map(transaction => ({
-          //     ...transaction,
-          //     invoiceId: invoice._id // Attach invoiceId to each transaction
-          //   }));
-          // });
+        const transactionPromises = json.map(async (invoice) => {
+          const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
+            headers: {
+              'Authorization': authToken,
+            }
+          });
 
-          // const transactionsData = await Promise.all(transactionPromises);
-          // const flattenedTransactions = transactionsData.flat(); // Flatten the transactions array
-          // setTransactions(flattenedTransactions);
-        }
-        setloading(false);
+          if (response.status === 401) {
+            const transactionJson = await response.json();
+            setAlertMessage(transactionJson.message);
+            setloading(false);
+            window.scrollTo(0,0);
+            return; // Stop further execution
+          }
+          else{
+            const transactionJson = await response.json();
+            return transactionJson.map(transaction => ({
+              ...transaction,
+              invoiceId: invoice._id // Attach invoiceId to each transaction
+            }));
+          }
+        });
+
+        const transactionsData = await Promise.all(transactionPromises);
+        const flattenedTransactions = transactionsData.flat(); // Flatten the transactions array
+        setTransactions(flattenedTransactions);
+      }
+      setloading(false);
       }
       
     } catch (error) {
@@ -170,16 +196,16 @@ console.log(json, "json");
     // Filter transactions related to the current invoice
     const relatedTransactions = transactions.filter(transaction => transaction.invoiceId === invoice._id);
 
-    console.log("relatedTransactions:", relatedTransactions);
-    console.log("Transactions:", transactions);
-    console.log("Invoices:", invoices);
+    // console.log("relatedTransactions:", relatedTransactions);
+    // console.log("Transactions:", transactions);
+    // console.log("Invoices:", invoices);
     // Calculate the total paid amount for the current invoice
     const totalPaidAmount = relatedTransactions.reduce(
       (total, payment) => total + parseFloat(payment.paidamount),
       0
     );
 
-    console.log("totalPaidAmount:", totalPaidAmount);
+    // console.log("totalPaidAmount:", totalPaidAmount);
     if (totalPaidAmount === 0) {
       return (
         <strong>
@@ -256,7 +282,7 @@ console.log(json, "json");
             <div className=''>
               <div className='txt px-4 py-4'>
                 <h2 className='fs-35 fw-bold'>Dashboard</h2>
-                <p>Hi, {signupdata.companyname} ! &#128075;</p>
+                 <p>Hi, {signupdata.companyname} ! &#128075;</p>
               </div>
               <div className='row'>
                 <div className='col-12 col-sm-12 col-md-8 col-lg-8 '>
@@ -282,88 +308,94 @@ console.log(json, "json");
                 </div>
               </div>
 
-             
+              {/* <div className="row">
+                <div className='col-12 col-sm-4 col-md-4 col-lg-4'>
+                  <div className='box1 fw-bold rounded adminborder py-4 px-3 m-2 text-center'>
+                    <p className='fs-6 fw-bold'>TOTAL PAYMENTS RECEIVED</p>
+                    <p className='fs-3 fw-bold'></p>
+                  </div>
+                </div>
+                <div className='col-12 col-sm-4 col-md-4 col-lg-4'>
+                  <div className='box1 fw-bold rounded adminborder py-4 px-3 m-2 text-center'>
+                    <p className='fs-6 fw-bold'>OCTOBER INVOICE AMOUNT</p>
+                    <p className='fs-3 fw-bold'></p>
+                  </div>
+                </div>
+              </div> */}
+
+              {/* <div className="row">
+            <div className='col-12 col-sm-8 col-md-8 col-lg-8'>
+              <div className='box1 fw-bold rounded adminborder py-4 px-3 m-2'>
+                <div className="row">
+                  <div className="col-3 greyclr">
+                    <p>INVOICE</p>
+                  </div>
+                  <div className="col-3 greyclr">
+                    <p>STATUS</p>
+                  </div>
+                  <div className="col-3 greyclr">
+                    <p>DATE</p>
+                  </div>
+                  <div className="col-3 greyclr">
+                    <p>AMOUNT</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div> */}
           
           <div className=''>
             {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
           </div>
               <div className="bg-white my-5 p-4 box">
                 <div className="row px-2 table-responsive">
-                  <table class="table table-bordered">
-                    <thead>
-                      <tr>
-                        <th scope="col">INVOICE </th>
-                        <th scope="col">STATUS </th>
-                        <th scope="col">DATE </th>
-                        <th scope='col'>EMAIL STATUS </th>
-                        <th scope="col">VIEW </th>
-                        <th scope="col">AMOUNT </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {getCurrentPageInvoices().map((invoice, index) => (
-                        <tr key={index}>
-                          <td>
-                            <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
-                            <p className='my-0'>{invoice.InvoiceNumber}</p>
-                            <p className='my-0'>Job: {invoice.job}</p>
-                          </td>
-                          <td>
-                            <span className='clrtrxtstatus'>{getStatus(invoice)}</span>
-                          </td>
-                          <td>
-                            <div className='d-flex'>
-                              <p className='issue px-1 my-1'>Issued</p>
-                              <p className='datetext my-1'>{formatCustomDate(invoice.date)}</p>
-                            </div>
-                            <div className='d-flex'>
-                              <p className='due px-1'>Due</p>
-                              <p className='datetext'>{formatCustomDate(invoice.duedate)}</p>
-                            </div>
-                          </td>
-                          <td className='text-center'>
-                            <p className='datetext'>{invoice.emailsent}</p>
-                          </td>
-
-                          <td className='text-center'>
-                            <a role="button" className='text-black text-center' onClick={() => handleViewClick(invoice)}>
-                              <i class="fa-solid fa-eye"></i>
-                            </a>
-                          </td>
-                          <td><CurrencySign /> {invoice.total}</td>
+                <table className='table table-bordered'>
+                      <thead>
+                        <tr>
+                          <th scope='col'>INVOICE </th>
+                          <th scope='col'>STATUS </th>
+                          <th scope='col'>DATE </th>
+                          <th scope='col'>EMAIL STATUS </th>
+                          <th scope='col'>VIEW </th>
+                          <th scope='col'>AMOUNT </th>
                         </tr>
-                      ))}
-                      {/* {invoices.map((invoice, index) => (
-                                            <tr key={index}>
-                                                <td>
-                                                    <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
-                                                    <p className='my-0'>{invoice.InvoiceNumber}</p>
-                                                    <p className='my-0'>Job: {invoice.job}</p>
-                                                </td>
-                                                <td>
-                                                    <span className='clrtrxtstatus'>{getStatus(invoice)}</span>
-                                                </td>
-                                                <td>
-                                                    <div className='d-flex'>
-                                                        <p className='issue px-1 my-1'>Issued</p>
-                                                        <p className='datetext my-1'>{formatCustomDate(invoice.date)}</p>
-                                                    </div>
-                                                    <div className='d-flex'>
-                                                        <p className='due px-1'>Due</p>
-                                                        <p className='datetext'>{formatCustomDate(invoice.duedate)}</p>
-                                                    </div>
-                                                </td>
-                                                 
-                                                <td className='text-center'>
-                                                    <a role="button" className='text-black text-center' onClick={ () => handleViewClick(invoice)}>
-                                                        <i class="fa-solid fa-eye"></i>
-                                                    </a>
-                                                </td>
-                                                <td><CurrencySign /> {invoice.total}</td>
-                                            </tr>
-                                        ))} */}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {getCurrentPageInvoices().map((invoice, index) => (
+                          <tr key={index}>
+                            <td>
+                              <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
+                              <p className='my-0'>{invoice.InvoiceNumber}</p>
+                              <p className='my-0'>Job: {invoice.job}</p>
+                            </td>
+                            <td>
+                              <span className='clrtrxtstatus'>{getStatus(invoice)}</span>
+                            </td>
+                            <td>
+                              <div className=''>
+                                <div className='d-flex'>
+                                  <p className='issue px-1 my-1'>Issued</p>
+                                  <p className='datetext my-1'>{formatCustomDate(invoice.date)}</p>
+                                </div>
+                                <div className='d-flex'>
+                                  <p className='due px-1'>Due</p>
+                                  <p className='datetext'>{formatCustomDate(invoice.duedate)}</p>
+                                </div>
+                              </div>
+                            </td>
+                            <td className='text-center'>
+                              <p className='datetext'>{invoice.emailsent}</p>
+                            </td>
+                            <td className='text-center'>
+                              <a role='button' className='text-black text-center' onClick={() => handleViewClick(invoice)}>
+                                <i className='fa-solid fa-eye'></i>
+                              </a>
+                            </td>
+                            <td><CurrencySign />{invoice.total}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
                 </div>
 
                 {/* Pagination buttons */}

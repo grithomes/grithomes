@@ -33,7 +33,7 @@ export default function Createinvoice() {
     const [editedName, setEditedName] = useState('');
     const [editedEmail, setEditedEmail] = useState('');
     const [editedPhone, setEditedPhone] = useState('');
-    const [taxPercentage, setTaxPercentage] = useState(10);
+    const [taxPercentage, setTaxPercentage] = useState(5);
     const [discountTotal, setdiscountTotal] = useState(0);
     const [invoiceData, setInvoiceData] = useState({
         customername: '', itemname: '', customeremail: '',customerphone:'', invoice_id: '', InvoiceNumber: '', purchaseorder: '',
