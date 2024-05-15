@@ -73,7 +73,7 @@ export default function Editestimate() {
             
                 if (json.Success) {
                     setestimateData(json.estimates);
-                    setdiscountTotal(json.invoices.discountTotal);
+                    setdiscountTotal(json.estimates.discountTotal);
                 } else {
                     console.error('Error fetching estimateData:', json.message);
                 }
@@ -153,7 +153,7 @@ export default function Editestimate() {
               }
               else{
                 const json = await response.json();
-            
+            console.log("Josn:", json);
                 if (Array.isArray(json)) {
                     setitems(json);
                 }

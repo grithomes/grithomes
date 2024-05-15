@@ -1033,14 +1033,7 @@ thead{
     const authToken = localStorage.getItem('authToken');
     const contentAsPdf = await generatePdfFromHtml();
     try {
-      const finalContent = content.trim() || `<p> > Quotation Is based on drawings provided and quote is valid for 2 weeks from the date of issue.
-      <br/>> Overhead Cabinets and Fridge Panels are of maximum 2380mm in Height.
-      <br/>> All Cabinets are made with A-Grade Australian made material in our factory in Ravenhall.
-      <br/>> Plumbing and Electrical Connection disconnect or replace is customer responsibility.
-      <br/>> There will be 3-5mm Gap between wall and panels is expectable.
-      <br/>> Travell Charges over 50km of radius form Ravenhall will be charged.
-      <br/>> Delivery to upstairs additional $100 to each floor will be added to final invoice.
-      <br/>> Overdue or unpaid accounts will refer to debit collection agency or law firm. you will be liable for all cost in full include all legal demand cost.</p>`; // If content is empty, use default value
+      const finalContent = content.trim() || ``; // If content is empty, use default value
       const response = await fetch('https://grithomes.onrender.com/api/send-invoice-email', {
         method: 'POST',
         headers: {
@@ -1441,11 +1434,18 @@ thead{
                                       <td className='text-md-end' width="22%">Subtotal</td>
                                       <td className='text-end' width="22%">${invoiceData.subtotal}</td>
                                     </tr>
-                                    <tr>
-
-                                      <td className='text-md-end' width="22%">Discount</td>
+                                    
+{
+  invoiceData.discountTotal > 0 
+  ?
+<tr>
+<td className='text-md-end' width="22%">Discount</td>
                                       <td className='text-end' width="22%">${invoiceData.discountTotal}</td>
                                     </tr>
+                                    :
+                                    null
+}
+                                      
                                     <tr>
 
                                       <td className='text-md-end' width="22%">GST (10%)</td>

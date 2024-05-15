@@ -41,11 +41,11 @@ export default function Estimatedetail() {
   const [showEmailAlert, setShowEmailAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
 
-  
+
   const roundOff = (amount) => {
     return parseFloat(amount).toFixed(2);
   };
-  
+
   useEffect(() => {
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true") {
       navigate("/");
@@ -587,7 +587,7 @@ thead{
     return new Promise((resolve, reject) => {
       const content = document.getElementById('invoiceContent').innerHTML;
       const opt = {
-        margin: 0.2, 
+        margin: 0.2,
         filename: 'myfile.pdf',
         html2canvas: { scale: 3, useCORS: true }, // Increase scale for better resolution
         jsPDF: { unit: 'in', format: 'A4', orientation: 'portrait' },
@@ -700,13 +700,13 @@ thead{
 
 
                     <div className="row">
-                    
+
                     </div>
 
                     <div className="row">
-                    <div className="col-12 col-sm-12 col-md-12 col-lg-8" id="">
+                      <div className="col-12 col-sm-12 col-md-12 col-lg-8" id="">
                         <div className='print' id='invoiceContent'>
-                        <div className="invoice-body">
+                          <div className="invoice-body">
                             <div className='row'>
                               <div className='col-sm-12 col-md-6 mb-3 mb-md-0 pt-3'>
                                 {signupdata.companyImageUrl !== "" ?
@@ -721,7 +721,7 @@ thead{
                                 </div>
                                 <address className='m-t-5 m-b-5'>
                                   <div className='mb-2'>
-                                  <div className=''>227</div>
+                                    <div className=''>227</div>
                                     <div className=''>Falwood Way N.E</div>
                                     <div className=''>Calgary, AB T3J 1A9</div>
                                     <div className=''>Canada</div>
@@ -738,146 +738,153 @@ thead{
                             <div class="clr"></div>
                           </div>
                           <div className='invoice-header'>
-  <div className='row'>
-    <div className='invoice-to col-sm-12 col-md-6'>
-      <strong>Bill To</strong>
-      <div className='text-inverse mb-1'>
-        {estimateData.customername}
-      </div>
-      <address className='m-t-5 m-b-5'>
-        <div>{estimateData.customeremail}</div>
-        <div>{estimateData.customerphone || ''}</div>
+                            <div className='row'>
+                              <div className='invoice-to col-sm-12 col-md-6'>
+                                <strong>Bill To</strong>
+                                <div className='text-inverse mb-1'>
+                                  {estimateData.customername}
+                                </div>
+                                <address className='m-t-5 m-b-5'>
+                                  <div>{estimateData.customeremail}</div>
+                                  <div>{estimateData.customerphone || ''}</div>
 
-      </address>
-    </div>
-    <div className='invoice-date col-sm-12 col-md-6'>
-      <div className='row text-md-end'>
-        <div className='col-6 col-md'>
-          <strong>Estimate #</strong>
-        </div>
-        <div className='col-6 col-md invoice-detail-right'>{estimateData.EstimateNumber}</div>
-      </div>
-      <div className='row text-md-end'>
-        <div className='col-6 col-md'>
-          <strong>Date</strong>
-        </div>
-        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.date)}</div>
-      </div>
-      <div className='row text-md-end'>
-        <div className='col-6 col-md'>
-          <strong>Due date</strong>
-        </div>
-        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
-      </div>
-      {/* <div className='row text-md-end'>
+                                </address>
+                              </div>
+                              <div className='invoice-date col-sm-12 col-md-6'>
+                                <div className='row text-md-end'>
+                                  <div className='col-6 col-md'>
+                                    <strong>Estimate #</strong>
+                                  </div>
+                                  <div className='col-6 col-md invoice-detail-right'>{estimateData.EstimateNumber}</div>
+                                </div>
+                                <div className='row text-md-end'>
+                                  <div className='col-6 col-md'>
+                                    <strong>Date</strong>
+                                  </div>
+                                  <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.date)}</div>
+                                </div>
+                                <div className='row text-md-end'>
+                                  <div className='col-6 col-md'>
+                                    <strong>Due date</strong>
+                                  </div>
+                                  <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
+                                </div>
+                                {/* <div className='row text-md-end'>
         <div className='col-6 col-md'>
           <strong>PO #</strong>
         </div>
         <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
       </div> */}
-      <div className='row text-md-end'>
-        <div className='col-6 col-md'>
-          <strong>Job</strong>
-        </div>
-        <div className='col-6 col-md invoice-detail-right'>{estimateData.job}</div>
-      </div>
+                                <div className='row text-md-end'>
+                                  <div className='col-6 col-md'>
+                                    <strong>Job</strong>
+                                  </div>
+                                  <div className='col-6 col-md invoice-detail-right'>{estimateData.job}</div>
+                                </div>
 
-    </div>
-  </div>
-  <div class="clr"></div>
-</div>
+                              </div>
+                            </div>
+                            <div class="clr"></div>
+                          </div>
 
-<div className='invoice-table'>
-  <div className='table-responsive'>
-    <table className='table table-invoice'>
-      <thead>
-        <tr className='table table-invoice'>
-          <th className='text-start'>Item</th>
-          <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
-          <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
-          <th className='text-end' width="15%"> Amount</th>
-        </tr>
-      </thead>
+                          <div className='invoice-table'>
+                            <div className='table-responsive'>
+                              <table className='table table-invoice'>
+                                <thead>
+                                  <tr className='table table-invoice'>
+                                    <th className='text-start'>Item</th>
+                                    <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
+                                    <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
+                                    <th className='text-end' width="15%"> Amount</th>
+                                  </tr>
+                                </thead>
 
-      <tbody>
-        {items.map((item) => (
-          <tr key={item._id}>
-            <td>
-              <div>
-                <span><strong>{item.itemname}</strong></span>
-                <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div>
-              </div>
-            </td>
-            <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
-            <td className="text-end d-none d-md-table-cell">{item.price}</td>
-            <td className='text-end'>{item.amount}</td>
-          </tr>
-        ))}
-      </tbody>
+                                <tbody>
+                                  {items.map((item) => (
+                                    <tr key={item._id}>
+                                      <td>
+                                        <div>
+                                          <span><strong>{item.itemname}</strong></span>
+                                          <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div>
+                                        </div>
+                                      </td>
+                                      <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
+                                      <td className="text-end d-none d-md-table-cell">{item.price}</td>
+                                      <td className='text-end'>{item.amount}</td>
+                                    </tr>
+                                  ))}
+                                </tbody>
 
-    </table>
-  </div>
-  <hr />
-  <div className='row'>
-    <div className='col-12'>
-      <table className='table table-borderless table-small'>
+                              </table>
+                            </div>
+                            <hr />
+                            <div className='row'>
+                              <div className='col-12'>
+                                <table className='table table-borderless table-small'>
 
-        <tbody>
-          <tr>
-            <td className='d-none d-md-table-cell' rowspan="5"></td>
-            <td className='text-md-end' width="22%">Subtotal</td>
-            <td className='text-end' width="22%">${estimateData.subtotal}</td>
-          </tr>
-          <tr>
+                                  <tbody>
+                                    <tr>
+                                      <td className='d-none d-md-table-cell' rowspan="5"></td>
+                                      <td className='text-md-end' width="22%">Subtotal</td>
+                                      <td className='text-end' width="22%">${estimateData.subtotal}</td>
+                                    </tr>
 
-            <td className='text-md-end' width="22%">Discount</td>
-            <td className='text-end' width="22%">${estimateData.discountTotal}</td>
-          </tr>
-          <tr>
+                                    {
+                                      estimateData.discountTotal > 0
+                                        ?
+                                        <tr>
 
-            <td className='text-md-end' width="22%">GST (10%)</td>
-            <td className='text-end' width="22%">${estimateData.tax}</td>
-          </tr>
-          <tr>
+                                          <td className='text-md-end' width="22%">Discount</td>
+                                          <td className='text-end' width="22%">${estimateData.discountTotal}</td>
+                                        </tr>
+                                        :
+                                        null
+                                    }
+                                    <tr>
 
-            <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
-            <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${estimateData.total}</td>
-          </tr>
-          {transactions.map((transaction) => (
-            <tr key={transaction._id}>
-              <td className='text-md-end' width="22%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
-              <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${transaction.paidamount}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <div class="clr"></div>
-</div>
+                                      <td className='text-md-end' width="22%">GST (10%)</td>
+                                      <td className='text-end' width="22%">${estimateData.tax}</td>
+                                    </tr>
+                                    <tr>
 
-<div className='invoice-price page-not-break'>
-  <div className='invoice-price-left text-end'>
-    <div className='d-none d-md-block'></div>
+                                      <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
+                                      <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${estimateData.total}</td>
+                                    </tr>
+                                    {transactions.map((transaction) => (
+                                      <tr key={transaction._id}>
+                                        <td className='text-md-end' width="22%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
+                                        <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${transaction.paidamount}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                            <div class="clr"></div>
+                          </div>
 
-  </div>
-  <div className='invoice-price-right'>
-    <small>Amount Due</small>
-    <span class="f-w-600 mt-3"><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
+                          <div className='invoice-price page-not-break'>
+                            <div className='invoice-price-left text-end'>
+                              <div className='d-none d-md-block'></div>
 
-  </div>
+                            </div>
+                            <div className='invoice-price-right'>
+                              <small>Amount Due</small>
+                              <span class="f-w-600 mt-3"><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
 
-</div>
+                            </div>
 
-<div className='invoice-body'>
-  <div className='mt-1'>
-    <span>{estimateData.information == '' ? '' : 'Note:'}</span> <div dangerouslySetInnerHTML={{ __html: estimateData.information }} />
+                          </div>
 
-  </div>
-</div>
-                      
+                          <div className='invoice-body'>
+                            <div className='mt-1'>
+                              <span>{estimateData.information == '' ? '' : 'Note:'}</span> <div dangerouslySetInnerHTML={{ __html: estimateData.information }} />
 
-                         
+                            </div>
+                          </div>
+
+
+
 
                         </div>
                       </div>
