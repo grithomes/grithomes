@@ -805,7 +805,7 @@ thead{
                                       <td>
                                         <div>
                                           <span><strong>{item.itemname}</strong></span>
-                                          <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div>
+                                          <div dangerouslySetInnerHTML={{ __html: item.description }} />
                                         </div>
                                       </td>
                                       <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
@@ -842,7 +842,7 @@ thead{
                                     }
                                     <tr>
 
-                                      <td className='text-md-end' width="22%">GST (10%)</td>
+                                      <td className='text-md-end' width="22%">GST (5%)</td>
                                       <td className='text-end' width="22%">${estimateData.tax}</td>
                                     </tr>
                                     <tr>
