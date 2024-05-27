@@ -17,6 +17,7 @@ export default function Invoice() {
   const [transactions, setTransactions] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [alertMessage, setAlertMessage] = useState('');
+  const [filterStatus, setFilterStatus] = useState('All');
   const entriesPerPage = 10;
 
   useEffect(() => {
@@ -26,6 +27,16 @@ export default function Invoice() {
     fetchData();
   }, [])
 
+  const getFilteredInvoices = () => {
+    if (filterStatus === 'All') {
+      return invoices;
+    }
+    return invoices.filter(invoice => invoice.status === filterStatus);
+  };
+
+  const roundOff = (value) => {
+    return Math.round(value * 100) / 100;
+};
   const fetchData = async () => {
     try {
       const userid = localStorage.getItem("userid");
@@ -140,9 +151,11 @@ export default function Invoice() {
   const getPageCount = () => Math.ceil(invoices.length / entriesPerPage);
 
   const getCurrentPageInvoices = () => {
+    const filteredInvoices = getFilteredInvoices();
     const startIndex = currentPage * entriesPerPage;
     const endIndex = startIndex + entriesPerPage;
-    return invoices.slice(startIndex, endIndex);
+    return filteredInvoices.slice(startIndex, startIndex + entriesPerPage);
+    // return invoices.slice(startIndex, endIndex);
   };
 
   const handlePrevPage = () => {
@@ -174,101 +187,144 @@ export default function Invoice() {
               data-testid="loader"
             />
           </div> :
-          <div className='container-fluid'>
-            <div className='row'>
-              <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
-                <div>
-                  <Usernavbar />
-                </div>
+
+ <div className='container-fluid'>
+      <div className='row'>
+        <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
+          <div>
+            <Usernavbar />
+          </div>
+        </div>
+
+        <div className='col-lg-10 col-md-9 col-12 mx-auto'>
+          <div className='d-lg-none d-md-none d-block mt-2'>
+            <Usernav />
+          </div>
+          <div className='bg-white my-5 p-4 box mx-4'>
+            <div className=''>
+              {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+            </div>
+            <div className='row py-2'>
+              <div className='col-lg-4 col-md-6 col-sm-6 col-7 me-auto'>
+                <p className='h5 fw-bold'>Invoice</p>
               </div>
+              <div className='col-lg-3 col-md-4 col-sm-4 col-5 text-lg-end text-md-end text-sm-end text-end'>
+                <button className='btn rounded-pill btnclr text-white fw-bold' onClick={handleAddClick}>
+                  + Add New
+                </button>
+              </div>
+            </div>
+            <hr />
+            <div className='row mb-3'>
+              <div className='col-3'>
+                <select onChange={(e) => setFilterStatus(e.target.value)} className='form-select'>
+                  <option value='All'>All</option>
+                  <option value='Paid'>Paid</option>
+                  <option value='Partially Paid'>Partially Paid</option>
+                  <option value='Saved'>Saved</option>
+                  <option value='Send'>Send</option>
+                </select>
+              </div>
+            </div>
 
-              <div className='col-lg-10 col-md-9 col-12 mx-auto'>
-                <div className='d-lg-none d-md-none d-block mt-2'>
-                  <Usernav />
-                </div>
-                <div className='bg-white my-5 p-4 box mx-4'>
-                  <div className=''>
-                    {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
-                  </div>
-                  <div className='row py-2'>
-                    <div className='col-lg-4 col-md-6 col-sm-6 col-7 me-auto'>
-                      <p className='h5 fw-bold'>Invoice</p>
-                    </div>
-                    <div className='col-lg-3 col-md-4 col-sm-4 col-5 text-lg-end text-md-end text-sm-end text-end'>
-                      <button className='btn rounded-pill btnclr text-white fw-bold' onClick={handleAddClick}>
-                        + Add New
-                      </button>
-                    </div>
-                  </div>
-                  <hr />
-
-                  <div className='row px-2 table-responsive'>
-                    <table className='table table-bordered'>
-                      <thead>
-                        <tr>
-                          <th scope='col'>INVOICE </th>
-                          <th scope='col'>STATUS </th>
-                          <th scope='col'>DATE </th>
-                          <th scope='col'>EMAIL STATUS </th>
-                          <th scope='col'>VIEW </th>
-                          <th scope='col'>AMOUNT </th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {getCurrentPageInvoices().map((invoice, index) => (
-                          <tr key={index}>
-                            <td>
-                              <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
-                              <p className='my-0'>{invoice.InvoiceNumber}</p>
-                              <p className='my-0'>Job: {invoice.job}</p>
-                            </td>
-                            <td>
-                              <span className='clrtrxtstatus'>{getStatus(invoice)}</span>
-                            </td>
-                            <td>
-                              <div className=''>
-                                <div className='d-flex'>
-                                  <p className='issue px-1 my-1'>Issued</p>
-                                  <p className='datetext my-1'>{formatCustomDate(invoice.date)}</p>
-                                </div>
-                                <div className='d-flex'>
-                                  <p className='due px-1'>Due</p>
-                                  <p className='datetext'>{formatCustomDate(invoice.duedate)}</p>
-                                </div>
-                              </div>
-                            </td>
-                            <td className='text-center'>
-                              <p className='datetext'>{invoice.emailsent}</p>
-                            </td>
-                            <td className='text-center'>
-                              <a role='button' className='text-black text-center' onClick={() => handleViewClick(invoice)}>
-                                <i className='fa-solid fa-eye'></i>
-                              </a>
-                            </td>
-                            <td><CurrencySign />{invoice.total}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  {/* Pagination buttons */}
-                  <div className='row mt-3'>
-                    <div className='col-12'>
-                      <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
-                        Previous Page
-                      </button>
-                      <button
-                        onClick={handleNextPage}
-                        disabled={(currentPage + 1) * entriesPerPage >= invoices.length}
-                      >
-                        Next Page
-                      </button>
-                    </div>
-                  </div>
-                </div>
+            <div className='row px-2 table-responsive'>
+              <table className='table table-bordered'>
+                <thead>
+                  <tr>
+                    <th scope='col'>INVOICE</th>
+                    <th scope='col'>STATUS</th>
+                    {/* <th scope='col'>Status</th> */}
+                    <th scope='col'>DATE</th>
+                    {/* <th scope='col'>EMAIL STATUS</th> */}
+                    <th scope='col'>VIEW</th>
+                    <th scope='col'>AMOUNT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {getCurrentPageInvoices().map((invoice, index) => (
+                    <tr key={index}>
+                      <td>
+                        <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
+                        <p className='my-0'>{invoice.InvoiceNumber}</p>
+                        <p className='my-0'>Job: {invoice.job}</p>
+                      </td>
+                      {/* <td>
+                        <span className='clrtrxtstatus'>{getStatus(invoice)}</span>
+                      </td> */}
+                      
+                        
+                      <td>
+  {invoice.status === 'Saved' ? (
+    <span className='saved p-2 rounded-pill'>
+    <i className="fa-solid fa-circle fs-12 me-2 grey-3"></i> 
+    <span className='clrtrxtstatus fw-bold'>Saved</span>
+  </span>
+  ) : invoice.status === 'Send' ? (
+    <span className='sent p-2 rounded-pill'>
+      <i className="fa-solid fa-circle fs-12 me-2 text-primary"></i> 
+      <span className='clrtrxtstatus fw-bold'>Send</span>
+    </span>
+  ) : invoice.status === 'Paid' ? (
+    <span className='paid p-2 rounded-pill'>
+      <i class="fa-solid fa-circle fs-12 me-2 "></i>
+      <span className='clrtrxtstatus fw-bold'>Paid</span>
+    </span>
+  ) : invoice.status === 'Partially Paid' ? (
+    <span className='paid p-2 rounded-pill'>
+      <i class="fa-solid fa-circle fs-12 me-2"></i> 
+      <span className='clrtrxtstatus fw-bold'>Partially Paid</span>
+    </span>
+  ) : (
+    <>
+      <i className="fa-solid fa-circle fs-12 me-2 unknown"></i> 
+      <span className='clrtrxtstatus fw-bold'>Unknown Status</span>
+    </>
+  )}
+</td>
+                      
+                      <td>
+                        <div className=''>
+                          <div className='d-flex'>
+                            <p className='issue px-1 my-1'>Issued</p>
+                            <p className='datetext my-1'>{formatCustomDate(invoice.date)}</p>
+                          </div>
+                          <div className='d-flex'>
+                            <p className='due px-1'>Due</p>
+                            <p className='datetext'>{formatCustomDate(invoice.duedate)}</p>
+                          </div>
+                        </div>
+                      </td>
+                      {/* <td className='text-center'>
+                        <p className='datetext'>{invoice.emailsent}</p>
+                      </td> */}
+                      <td className='text-center'>
+                        <a role='button' className='text-black text-center' onClick={() => handleViewClick(invoice)}>
+                          <i className='fa-solid fa-eye'></i>
+                        </a>
+                      </td>
+                      <td><CurrencySign />{roundOff(invoice.total)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <div className='row mt-3'>
+              <div className='col-12'>
+                <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
+                  Previous Page
+                </button>
+                <button
+                  onClick={handleNextPage}
+                  disabled={(currentPage + 1) * entriesPerPage >= invoices.length}
+                >
+                  Next Page
+                </button>
               </div>
             </div>
           </div>
+        </div>
+      </div>
+    </div>
       }
     </div>
   )

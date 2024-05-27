@@ -25,10 +25,6 @@ export default function Estimate() {
     fetchData();
   }, [])
 
-  const roundOff = (value) => {
-    return Math.round(value * 100) / 100;
-};
-
   const fetchData = async () => {
     try {
       const userid = localStorage.getItem("userid");
@@ -226,7 +222,7 @@ export default function Estimate() {
                               <td className='text-center'>
                                 <a role='button' className='btn text-black text-center converbtn' onClick={() => handleConvertToInvoice(estimate._id)} >Convert</a>
                               </td>
-                              <td><CurrencySign />{roundOff(estimate.total)}</td>
+                              <td><CurrencySign />{estimate.total}</td>
                             </tr>
                           )
                         ))}

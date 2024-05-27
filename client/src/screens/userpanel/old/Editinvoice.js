@@ -36,7 +36,18 @@ export default function Editinvoice() {
     const [editorData, setEditorData] = useState("<p></p>");
     const [alertMessage, setAlertMessage] = useState('');
 
-   
+    // useEffect(() => {
+    //     if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
+    //     {
+    //       navigate("/");
+    //     }
+    //     if (invoiceid) {
+    //         fetchdata();
+    //         fetchcustomerdata();
+    //         fetchitemdata();
+    //     }
+    // }, [invoiceid])
+
     useEffect(() => {
         if (!localStorage.getItem('authToken') || localStorage.getItem('isTeamMember') === 'true') {
             navigate('/');
@@ -52,13 +63,37 @@ export default function Editinvoice() {
 
     let navigate = useNavigate();
 
-    const roundOff1 = (amount) => {
-        return parseFloat(amount).toFixed(2);
-      };
-      const roundOff = (value) => {
-        return Math.round(value * 100) / 100;
-      };
-    
+    // const fetchdata = async () => {
+    //     try {
+    //         const userid =  localStorage.getItem("userid");
+    //         const authToken = localStorage.getItem('authToken');
+    //         const response = await fetch(`https://grithomes.onrender.com/api/geteditinvoicedata/${invoiceid}`, {
+    //             headers: {
+    //               'Authorization': authToken,
+    //             }
+    //         });
+    //           if (response.status === 401) {
+    //             const json = await response.json();
+    //             setAlertMessage(json.message);
+    //             setloading(false);
+    //             window.scrollTo(0,0);
+    //             return; // Stop further execution
+    //           }
+    //           else{
+    //             const json = await response.json();
+            
+    //             if (json.Success) {
+    //                 setInvoiceData(json.invoices);
+    //             } else {
+    //                 console.error('Error fetching invoicedata:', json.message);
+    //             }
+    //             console.log(invoiceData);
+    //           }
+            
+    //     } catch (error) {
+    //         console.error('Error fetching invoicedata:', error);
+    //     }
+    // };
 
     const fetchInvoiceData = async () => {
         try {
@@ -472,58 +507,34 @@ export default function Editinvoice() {
 
     const handlePriceChange = (event, itemId) => {
         const { value } = event.target;
-        const numericValue = value.replace(/[^0-9.]/g, ''); // Remove any non-numeric characters except decimal point
-      
-        // Limit the numeric value to two decimal places
-        const decimalIndex = numericValue.indexOf('.');
-        let formattedValue = numericValue;
-        if (decimalIndex !== -1) {
-          formattedValue = numericValue.slice(0, decimalIndex + 1) + numericValue.slice(decimalIndex + 1).replace(/[^0-9]/g, '').slice(0, 2);
-        }
-      
-        const newPrice = parseFloat(formattedValue) || 0;
-      
-        const updatedItems = invoiceData.items.map((item) => {
-          if (item.itemId === itemId) {
-            const newAmount = newPrice * item.itemquantity;
-            return {
-              ...item,
-              price: formattedValue, // Update with formatted value
-              amount: roundOff(newAmount),
-            };
-          }
-          return item;
-        });
-      
-        setInvoiceData((prevData) => ({
-          ...prevData,
-          items: updatedItems,
-        }));
-      };
-      
-
-      const handlePriceBlur = (event, itemId) => {
-        const { value } = event.target;
         const newPrice = parseFloat(value) || 0;
-        
         const updatedItems = invoiceData.items.map((item) => {
           if (item.itemId === itemId) {
             const newAmount = newPrice * item.itemquantity;
             return {
               ...item,
-              price: roundOff(newPrice), // Format to two decimal places
-              amount: roundOff(newAmount),
+              price: newPrice,
+              amount: newAmount,
             };
           }
           return item;
         });
-      
         setInvoiceData((prevData) => ({
           ...prevData,
           items: updatedItems,
         }));
       };
       
+    //   const handleDescriptionChange = (event, itemId) => {
+    //     const { value } = event.target;
+    //     setInvoiceData((prevData) => ({
+    //       ...prevData,
+    //       items: prevData.items.map((item) =>
+    //         item.itemId === itemId ? { ...item, description: value } : item
+    //       ),
+    //     }));
+    //   };
+
     const handleDescriptionChange = (editor, itemId) => {
         const value = editor.getData();
         const updatedItems = invoiceData.items.map((item) => {
@@ -752,27 +763,43 @@ export default function Editinvoice() {
                                     </div>
                                     <div className="col-2">
                                         <div className="mb-3">
-                                          
+                                            {/* <input
+                                                type="number"
+                                                name="price"
+                                                className="form-control"
+                                                value={item.price}
+                                                id="price"
+                                                required
+                                            /> */}
                                             <input
-                                                        type="text"
+                                                        type="number"
                                                         name="price"
                                                         className="form-control"
                                                         value={item.price}
                                                         id={`price-${item.itemId}`}
                                                         required
                                                         onChange={(event) => handlePriceChange(event, item.itemId)}
-                                                        onBlur={(event) => handlePriceBlur(event, item.itemId)}
                                                     />
                                         </div>
                                     </div>
-                                  
+                                    {/* <div className="col-2">
+                                        <p><CurrencySign />{item.discount}</p>
+                                    </div> */}
                                     <div className="col-2">
                                         <p><CurrencySign />{item.amount}</p>
                                     </div>
                                     <div className="col-6">
                                                 <div class="mb-3">
                                                     <label htmlFor="description" className="form-label">Description</label>
-                                                  
+                                                    {/* <textarea
+                                                        className="form-control"
+                                                        name="description"
+                                                        id={`description-${item.itemId}`}
+                                                        placeholder="Item Description"
+                                                        rows="3"
+                                                        value={item.description}
+                                                        onChange={(event) => handleDescriptionChange(event, item.itemId)}
+                                                    /> */}
                                                     <CKEditor
                                                         editor={ClassicEditor}
                                                         data={item.description} // Make sure item.description is a valid string
@@ -790,11 +817,118 @@ export default function Editinvoice() {
                                                 </div>
                                             </div>
                                             
-                                          
+                                            {/* <div className="col-3">
+                                                <div class="mb-3">
+                                                    <label htmlFor="Discount" className="form-label">Discount</label>
+                                                    <input
+                                                        type='number'
+                                                        name='discount'
+                                                        className='form-control'
+                                                        value={item.discount}
+                                                        onChange={(event) => onDiscountpreitemChange(event, item.itemId)}
+                                                        placeholder='Discount'
+                                                        id={`discount-${item.itemId}`}
+                                                        min="0"
+                                                    />
+                                                </div>
+                                            </div> */}
                                     
                                     </div>
                                         ))}
-                               
+                                {/* {searchitemResults.map((item) => {
+                                    const selectedItem = items.find((i) => i._id === item.value);
+                                    const itemPrice = selectedItem?.price || 0;
+                                    const itemId = item.value;
+                                    const quantity = quantityMap[itemId] || 1;
+                                    const discount = discountMap[itemId] || 0;
+                                    const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+                                    const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
+                                    
+                                    });
+                                    console.log(selectedItem);
+
+                                    return (
+                                        <div className='row'  key={item.itemId}>
+                                            <div className="col-4 ">
+                                                <div className="mb-3 d-flex align-items-baseline justify-content-between">
+                                                    <p>{item.label}</p>
+                                                    <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="col-2">
+                                                <div className="mb-3">
+                                                <input
+                                                    type="number"
+                                                    name={`quantity-${itemId}`}
+                                                    className="form-control"
+                                                    value={quantity}
+                                                    onChange={(event) => onChangeQuantity(event, itemId)}
+                                                    id={`quantity-${itemId}`}
+                                                    required
+                                                />
+                                                </div>
+                                            </div>
+                                            <div className="col-2">
+                                                <div className="mb-3">
+                                                    <input
+                                                        type="number"
+                                                        name="price"
+                                                        className="form-control"
+                                                        value={item.price}
+                                                        id={`price-${item.itemId}`}
+                                                        required
+                                                        onChange={(event) => handlePriceChange(event, item.itemId)}
+                                                    />
+                                                </div>
+                                            </div>
+                                            <div className="col-2 text-center">
+                                                <p><CurrencySign />{discount.toFixed(2)}</p>
+                                            </div>
+                                            <div className="col-2 text-center">
+                                                <p><CurrencySign />{formattedTotalAmount}</p>
+                                            </div>
+                                            <div className="col-5">
+                                                <div class="mb-3">
+                                                    <label htmlFor="description" className="form-label">Description</label>
+                                                    
+                                                    <CKEditor
+                                                        editor={ ClassicEditor }
+                                                        data={selectedItem.description}
+                                                        
+                                                        onChange={( event, editor ) => {
+                                                            handleDescriptionChange(editor, item.itemId);
+                                                        }
+                                                        }
+                                                        onBlur={ ( event, editor ) => {
+                                                            console.log( 'Blur.', editor );
+                                                        } }
+                                                        onFocus={ ( event, editor ) => {
+                                                            console.log( 'Focus.', editor );
+                                                        } }
+                                                    />
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="col-3">
+                                                <div class="mb-3">
+                                                    <label htmlFor="Discount" className="form-label">Discount</label>
+                                                    <input
+                                                        type='number'
+                                                        name={`discount-${itemId}`}
+                                                        className='form-control'
+                                                        value={discount}
+                                                        onChange={(event) => onDiscountChange(event, itemId)}
+                                                        placeholder='Discount'
+                                                        id={`discount-${itemId}`}
+                                                        min="0"
+                                                    />
+                                                </div>
+                                            </div>
+                                        </div>
+        );
+      })} */}
                                 </div>
                                 <hr />
 

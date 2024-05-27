@@ -12,7 +12,7 @@ import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
 import Alertauthtoken from '../../components/Alertauthtoken';
 
-export default function Editinvoice() {
+export default function Editestimate() {
     
     const [ loading, setloading ] = useState(true);
     const [customers, setcustomers] = useState([]);
@@ -26,66 +26,62 @@ export default function Editinvoice() {
     const [discountMap, setDiscountMap] = useState({});
     const [discountTotal, setdiscountTotal] = useState(0);
     const [taxPercentage, setTaxPercentage] = useState(0);
-    const [invoiceData, setInvoiceData] = useState({
-        _id: '', customername: '',itemname: '',customeremail: '',InvoiceNumber: '',purchaseorder: '',
-        date: new Date(),duedate: new Date(),description: '',itemquantity: '', price: '',discount: '',
-        discountTotal:'',amount: '',tax: '',taxpercentage:'',subtotal: '',total: '',amountdue: '',information: '', items:[]
+    const [estimateData, setestimateData] = useState({
+        _id: '', customername: '',itemname: '',customeremail: '',EstimateNumber: '',purchaseorder: '',
+        date: new Date(),description: '',itemquantity: '', price: '',discount: '',
+        amount: '',tax: '',taxpercentage:'',subtotal: '',total: '',amountdue: '',information: '', items:[]
     });
     const location = useLocation();
-    const invoiceid = location.state?.invoiceid;
+    const estimateid = location.state?.estimateid;
     const [editorData, setEditorData] = useState("<p></p>");
     const [alertMessage, setAlertMessage] = useState('');
 
-   
     useEffect(() => {
-        if (!localStorage.getItem('authToken') || localStorage.getItem('isTeamMember') === 'true') {
-            navigate('/');
-        } else if (invoiceid) {
-            fetchInvoiceData();
-            fetchitemdata();
+        if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
+        {
+          navigate("/");
+        }
+        if (estimateid) {
+            fetchdata();
             fetchcustomerdata();
+            fetchitemdata();
         }
         if (isNaN(discountTotal)) {
             setdiscountTotal(0);
         }
-    }, [invoiceid]);
-
+    }, [estimateid])
     let navigate = useNavigate();
 
-    const roundOff1 = (amount) => {
-        return parseFloat(amount).toFixed(2);
-      };
-      const roundOff = (value) => {
-        return Math.round(value * 100) / 100;
-      };
-    
-
-    const fetchInvoiceData = async () => {
+    const fetchdata = async () => {
         try {
+            const userid =  localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/geteditinvoicedata/${invoiceid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/geteditestimateData/${estimateid}`, {
                 headers: {
-                    'Authorization': authToken,
+                  'Authorization': authToken,
                 }
             });
             if (response.status === 401) {
-                const json = await response.json();
-                setAlertMessage(json.message);
-                setloading(false);
-                window.scrollTo(0, 0);
-                return;
-            } else {
-                const json = await response.json();
-                if (json.Success) {
-                    setInvoiceData(json.invoices);
-                    setdiscountTotal(json.invoices.discountTotal);
-                } else {
-                    console.error('Error fetching invoice data:', json.message);
-                }
-                setloading(false);
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
+            else{
+                const json = await response.json();
+            
+                if (json.Success) {
+                    setestimateData(json.estimates);
+                    setdiscountTotal(json.estimates.discountTotal);
+                } else {
+                    console.error('Error fetching estimateData:', json.message);
+                }
+                console.log(estimateData);  
+            }
+            
         } catch (error) {
-            console.error('Error fetching invoice data:', error);
+            console.error('Error fetching estimateData:', error);
         }
     };
 
@@ -97,7 +93,7 @@ export default function Editinvoice() {
                 headers: {
                   'Authorization': authToken,
                 }
-              });
+            });
               if (response.status === 401) {
                 const json = await response.json();
                 setAlertMessage(json.message);
@@ -123,8 +119,8 @@ export default function Editinvoice() {
         const selectedCustomer = customers.find((customer) => customer._id === selectedCustomerId);
 
         if (selectedCustomer) {
-            setInvoiceData({
-                ...invoiceData,
+            setestimateData({
+                ...estimateData,
                 customername: selectedCustomer.name,
                 customeremail: selectedCustomer.email,
             });
@@ -147,7 +143,7 @@ export default function Editinvoice() {
                 headers: {
                   'Authorization': authToken,
                 }
-              });
+            });
               if (response.status === 401) {
                 const json = await response.json();
                 setAlertMessage(json.message);
@@ -157,7 +153,7 @@ export default function Editinvoice() {
               }
               else{
                 const json = await response.json();
-            
+            console.log("Josn:", json);
                 if (Array.isArray(json)) {
                     setitems(json);
                 }
@@ -171,54 +167,54 @@ export default function Editinvoice() {
 
     const handleSaveClick = async () => {
         try {
-            const updatedInvoiceData = {
-                ...invoiceData,
+            const updatedestimateData = {
+                ...estimateData,
                 subtotal: calculateSubtotal(), // Update subtotal
                 total: calculateTotal(), // Update total
                 amountdue: calculateTotal(), // Update amountdue
-                items: invoiceData.items, // Include invoiceData.items
+                items: estimateData.items, // Include estimateData.items
                 // searchitemResults: searchitemResults 
                 tax: calculateTaxAmount(), 
                 discountTotal: discountTotal,
             };
-    
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+    
+            const response = await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': authToken,
                 },
-                body: JSON.stringify(updatedInvoiceData)
+                body: JSON.stringify(updatedestimateData)
             });
             if (response.status === 401) {
-                const json = await response.json();
-                setAlertMessage(json.message);
-                setloading(false);
-                window.scrollTo(0,0);
-                return; // Stop further execution
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
             else{
-               const json = await response.json();
-    
+                const json = await response.json();
+        
                 if (json.Success) {
-                    navigate('/userpanel/Invoicedetail', { state: { invoiceid } });
-                    console.log(updatedInvoiceData);
+                    navigate('/userpanel/Estimatedetail', { state: { estimateid } });
+                    console.log(updatedestimateData);
                 } else {
-                    console.error('Error updating invoice data:', json.message);
-                } 
+                    console.error('Error updating  estimate data:', json.message);
+                }   
             }
     
             
         } catch (error) {
-            console.error('Error updating invoice data:', error);
+            console.error('Error updating  estimate data:', error);
         }
     };
 
-    const addSelectedItemToInvoice = (selectedItem) => {
+    const addSelectedItemToEstimate = (selectedItem) => {
         const { value, label } = selectedItem;
-        // Check if the item is already present in invoiceData.items
-        const itemExists = invoiceData.items.some((item) => item.itemId === value);
+        // Check if the item is already present in estimateData.items
+        const itemExists = estimateData.items.some((item) => item.itemId === value);
     
         if (!itemExists) {
             const selectedPrice = items.find((i) => i._id === value)?.price || 0;
@@ -232,40 +228,33 @@ export default function Editinvoice() {
                 amount: selectedPrice, // Initially set amount same as price
                 description: selectedDescription, // Set the description if needed
             };
-            // Add the selected item to invoiceData.items
-            setInvoiceData({
-                ...invoiceData,
-                items: [...invoiceData.items, newItem],
+            // Add the selected item to estimateData.items
+            setestimateData({
+                ...estimateData,
+                items: [...estimateData.items, newItem],
             });
         } else {
-            // Handle case where item already exists in invoiceData.items
-            // You might want to show a message to the user
-            console.log('Item already added to the invoice');
+            console.log('Item already added to the estimate');
         }
     };
-    
 
-    // const onChangeitem=(event)=>{
-    //     setSearchitemResults([...searchitemResults,event]);
-    // }
     const onChangeitem = (selectedItem) => {
-        // Call the function to add the selected item to invoiceData.items
-        addSelectedItemToInvoice(selectedItem);
+        addSelectedItemToEstimate(selectedItem);
     };
 
     const handleEditorChange = (event, editor) => {
         const data = editor.getData();
-        setInvoiceData({ ...invoiceData, information: data });
+        setestimateData({ ...estimateData, information: data });
     };
     const handledescChange = (event, editor) => {
         const data = editor.getData();
-        setInvoiceData({ ...invoiceData, description: data });
+        setestimateData({ ...estimateData, description: data });
     };
     
 
     const handleQuantityChange = (event, itemId) => {
         const { value } = event.target;
-        const updatedItems = invoiceData.items.map((item) => {
+        const updatedItems = estimateData.items.map((item) => {
           if (item.itemId === itemId) {
             const newQuantity = parseFloat(value) >= 0 ? parseFloat(value) : 0;
             const newAmount = calculateDiscountedAmount(item.price, newQuantity, item.discount);
@@ -279,7 +268,7 @@ export default function Editinvoice() {
           return item;
         });
       
-        setInvoiceData({ ...invoiceData, items: updatedItems });
+        setestimateData({ ...estimateData, items: updatedItems });
       };
       
     const onChangeQuantity = (event, itemId) => {
@@ -306,27 +295,26 @@ export default function Editinvoice() {
             }
     
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/delinvoiceitem/${invoiceData._id}/${itemId}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/delestimateitem/${estimateData._id}/${itemId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': authToken,
-                }
+                  }
             });
             if (response.status === 401) {
-                const json = await response.json();
-                setAlertMessage(json.message);
-                setloading(false);
-                window.scrollTo(0,0);
-                return; // Stop further execution
+              const json = await response.json();
+              setAlertMessage(json.message);
+              setloading(false);
+              window.scrollTo(0,0);
+              return; // Stop further execution
             }
             else{
                 if (!response.ok) {
                     const errorMessage = await response.text();
                     throw new Error(`Failed to delete item: ${errorMessage}`);
                 }
-    
-            // Update UI or perform other actions upon successful deletion
-            // fetchdata();
+        
+                fetchdata(); 
             }
     
             
@@ -350,7 +338,7 @@ export default function Editinvoice() {
             const newDiscount = value !== '' ? parseFloat(value) : 0;
     
             // Update only the discount for the specific item with the matching itemId
-            const updatedItems = invoiceData.items.map((item) => {
+            const updatedItems = estimateData.items.map((item) => {
                 if (item.itemId === itemId) {
                     const quantity = item.itemquantity || 1;
                     const discountedAmount = calculateDiscountedAmount(item.price, quantity, newDiscount);
@@ -365,8 +353,8 @@ export default function Editinvoice() {
             });
     
             // Set the updated items in the state
-            setInvoiceData({
-                ...invoiceData,
+            setestimateData({
+                ...estimateData,
                 items: updatedItems,
             });
         } else {
@@ -404,9 +392,9 @@ export default function Editinvoice() {
     const calculateSubtotal = () => {
         let subtotal = 0;
       
-        // Calculate subtotal for invoiceData.items
-        if (invoiceData.items && Array.isArray(invoiceData.items)) {
-            invoiceData.items.forEach((item) => {
+        // Calculate subtotal for estimateData.items
+        if (estimateData.items && Array.isArray(estimateData.items)) {
+            estimateData.items.forEach((item) => {
               const itemPrice = item.price || 0;
               const quantity = item.itemquantity || 1;
               const discount = item.discount || 0;
@@ -443,7 +431,7 @@ export default function Editinvoice() {
             // Ensure that the entered value is a valid number
             enteredTax = parseFloat(enteredTax);
             setTaxPercentage(enteredTax);
-            setInvoiceData({ ...invoiceData, taxpercentage: enteredTax }); 
+            setestimateData({ ...estimateData, taxpercentage: enteredTax }); 
         }
     };
     
@@ -451,7 +439,7 @@ export default function Editinvoice() {
     const calculateTaxAmount = () => {
         const subtotal = calculateSubtotal();
         const totalDiscountedAmount = subtotal - discountTotal; 
-        const taxAmount = (totalDiscountedAmount * invoiceData.taxpercentage) / 100;
+        const taxAmount = (totalDiscountedAmount * estimateData.taxpercentage) / 100;
         return taxAmount;
     };
     
@@ -467,89 +455,35 @@ export default function Editinvoice() {
 
     const onchange = (event) => {
         const { name, value } = event.target;
-        setInvoiceData({ ...invoiceData, [name]: value });
+        setestimateData({ ...estimateData, [name]: value });
     };
 
     const handlePriceChange = (event, itemId) => {
         const { value } = event.target;
-        const numericValue = value.replace(/[^0-9.]/g, ''); // Remove any non-numeric characters except decimal point
-      
-        // Limit the numeric value to two decimal places
-        const decimalIndex = numericValue.indexOf('.');
-        let formattedValue = numericValue;
-        if (decimalIndex !== -1) {
-          formattedValue = numericValue.slice(0, decimalIndex + 1) + numericValue.slice(decimalIndex + 1).replace(/[^0-9]/g, '').slice(0, 2);
-        }
-      
-        const newPrice = parseFloat(formattedValue) || 0;
-      
-        const updatedItems = invoiceData.items.map((item) => {
-          if (item.itemId === itemId) {
-            const newAmount = newPrice * item.itemquantity;
-            return {
-              ...item,
-              price: formattedValue, // Update with formatted value
-              amount: roundOff(newAmount),
-            };
-          }
-          return item;
+        const updatedItems = estimateData.items.map((item) => {
+            if (item.itemId === itemId) {
+                const newPrice = parseFloat(value);
+                const quantity = item.itemquantity || 1;
+                const discount = item.discount || 0;
+                const discountedAmount = calculateDiscountedAmount(newPrice, quantity, discount);
+                return { ...item, price: newPrice, amount: discountedAmount };
+            }
+            return item;
         });
-      
-        setInvoiceData((prevData) => ({
-          ...prevData,
-          items: updatedItems,
-        }));
-      };
-      
-
-      const handlePriceBlur = (event, itemId) => {
-        const { value } = event.target;
-        const newPrice = parseFloat(value) || 0;
-        
-        const updatedItems = invoiceData.items.map((item) => {
-          if (item.itemId === itemId) {
-            const newAmount = newPrice * item.itemquantity;
-            return {
-              ...item,
-              price: roundOff(newPrice), // Format to two decimal places
-              amount: roundOff(newAmount),
-            };
-          }
-          return item;
-        });
-      
-        setInvoiceData((prevData) => ({
-          ...prevData,
-          items: updatedItems,
-        }));
-      };
-      
+        setestimateData({ ...estimateData, items: updatedItems });
+    };
+    
     const handleDescriptionChange = (editor, itemId) => {
         const value = editor.getData();
-        const updatedItems = invoiceData.items.map((item) => {
+        const updatedItems = estimateData.items.map((item) => {
             if (item.itemId === itemId) {
                 return { ...item, description: value };
             }
             return item;
         });
-        setInvoiceData({ ...invoiceData, items: updatedItems });
+        setestimateData({ ...estimateData, items: updatedItems });
     };
-    //   const handleDescriptionChange = (event, itemId) => {
-    //     if (event && event.target && typeof event.target.value !== 'undefined') {
-    //       const { value } = event.target;
-    //       setInvoiceData((prevData) => ({
-    //         ...prevData,
-    //         items: prevData.items.map((item) =>
-    //           item.itemId === itemId ? { ...item, description: value } : item
-    //         ),
-    //       }));
-    //     }
-    //   };
-      
-    // const handleDiscountChange = (e) => {
-    //     // Ensure you're setting the state to the new value entered by the user
-    //     setdiscountTotal(parseFloat(e.target.value)); // Assuming the input should accept decimal values
-    // }; 
+    
     const handleDiscountChange = (event) => {
         const value = event.target.value;
         // If the input is empty or NaN, set the value to 0
@@ -591,12 +525,12 @@ export default function Editinvoice() {
                         {/* <form> */}
                         <div className='row py-4 px-2 breadcrumbclr'>
                             <div className="col-lg-4 col-md-6 col-sm-6 col-7 me-auto">
-                                <p className='fs-35 fw-bold'>Invoice</p>
+                                <p className='fs-35 fw-bold'>Estimate</p>
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
                                         <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
-                                        <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Invoice</a></li>
-                                        <li class="breadcrumb-item active" aria-current="page">Edit Invoice</li>
+                                        <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Estimate</a></li>
+                                        <li class="breadcrumb-item active" aria-current="page">Edit Estimate</li>
                                     </ol>
                                 </nav>
                             </div>
@@ -612,9 +546,9 @@ export default function Editinvoice() {
                                 <div className="col-5">
                                         <div className="customerdetail p-3">
                                             <ul>
-                                                <li className='fw-bold fs-4'>{invoiceData.customername}</li>
+                                                <li className='fw-bold fs-4'>{estimateData.customername}</li>
                                             </ul>
-                                            <p>{invoiceData.customeremail}</p>
+                                            <p>{estimateData.customeremail}</p>
                                         </div>
                                 </div>    
                                 <div className="col-7">
@@ -622,13 +556,13 @@ export default function Editinvoice() {
                                         <div className="col-6">
                                             <div className="mb-3">
                                                 <label htmlFor="invoicenumbr" className="form-label">
-                                                    Invoice Number
+                                                Estimate Number
                                                 </label>
                                                 <input
                                                 type="text"
-                                                name="InvoiceNumber"
+                                                name="EstimateNumber"
                                                 className="form-control"
-                                                value={invoiceData.InvoiceNumber} 
+                                                value={estimateData.EstimateNumber} 
                                                 onChange={onchange}
                                                 // placeholder="Invoice Number"
                                                 id="invoicenumbr"
@@ -646,7 +580,7 @@ export default function Editinvoice() {
                                                 type="text"
                                                 name="purchaseorder"
                                                 className="form-control"
-                                                value={invoiceData.purchaseorder}
+                                                value={estimateData.purchaseorder}
                                                 onChange={onchange}
                                                 id="purchaseoder"
                                                 />
@@ -661,7 +595,7 @@ export default function Editinvoice() {
                                                 type="date"
                                                 name="date"
                                                 className="form-control"
-                                                value={new Date(invoiceData.date).toISOString().split('T')[0]} 
+                                                value={new Date(estimateData.date).toISOString().split('T')[0]} 
                                                 onChange={onchange}
                                                 // placeholder="Date"
                                                 id="Date"
@@ -678,25 +612,11 @@ export default function Editinvoice() {
                                                 type="text"
                                                 name="job"
                                                 className="form-control"
-                                                value={invoiceData.job} 
+                                                value={estimateData.job} 
                                                 onChange={onchange}
                                                 // placeholder="Date"
                                                 id="job"
-                                                />
-                                            </div>
-                                        </div>
-                                        <div className="col-6">
-                                            <div className="mb-3">
-                                                <label htmlFor="duedate" className="form-label">
-                                                    Due Date
-                                                </label>
-                                                <input
-                                                type="date"
-                                                name="duedate"
-                                                className="form-control"
-                                                value={new Date(invoiceData.duedate).toISOString().split('T')[0]} 
-                                                onChange={onchange}
-                                                id="duedate"
+                                                required
                                                 />
                                             </div>
                                         </div>
@@ -724,14 +644,13 @@ export default function Editinvoice() {
                                 </div>
 
                                 <div>
-                                    {console.log(invoiceData, "invoiceData")}
-                                {invoiceData.items && invoiceData.items.map((item) => (
+                                {estimateData.items && estimateData.items.map((item) => (
                                     <div className='row' key={item.itemId}>
                                     <div className="col-6 ">
                                         <div className="mb-3 d-flex align-items-baseline justify-content-between">
                                             <p>{item.itemname}</p>
                                             <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(item.itemId)}>
-                                            {/* <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(invoiceData.itemId)}> */}
+                                            {/* <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(estimateData.itemId)}> */}
  
                                                 <i className="fas fa-trash"></i>
                                             </button>
@@ -752,49 +671,201 @@ export default function Editinvoice() {
                                     </div>
                                     <div className="col-2">
                                         <div className="mb-3">
-                                          
+                                            {/* <input
+                                                type="number"
+                                                name="price"
+                                                className="form-control"
+                                                value={item.price}
+                                                id="price"
+                                                required
+                                                readOnly
+                                            /> */}
                                             <input
-                                                        type="text"
-                                                        name="price"
-                                                        className="form-control"
-                                                        value={item.price}
-                                                        id={`price-${item.itemId}`}
-                                                        required
-                                                        onChange={(event) => handlePriceChange(event, item.itemId)}
-                                                        onBlur={(event) => handlePriceBlur(event, item.itemId)}
-                                                    />
+                                                type="number"
+                                                name="price"
+                                                className="form-control"
+                                                value={item.price}
+                                                onChange={(event) => handlePriceChange(event, item.itemId)} // Add onChange handler
+                                                id={`price-${item.itemId}`}
+                                                required
+                                            />
                                         </div>
                                     </div>
-                                  
+                                    {/* <div className="col-2">
+                                        <p><CurrencySign />{item.discount}</p>
+                                    </div> */}
                                     <div className="col-2">
                                         <p><CurrencySign />{item.amount}</p>
                                     </div>
-                                    <div className="col-6">
+                                    {/* <div className="col-5">
                                                 <div class="mb-3">
                                                     <label htmlFor="description" className="form-label">Description</label>
-                                                  
-                                                    <CKEditor
-                                                        editor={ClassicEditor}
-                                                        data={item.description} // Make sure item.description is a valid string
-                                                        onChange={(event, editor) => {
-                                                            // Ensure handleDescriptionChange receives editor instance
+                                                    <textarea
+                                                        class="form-control"
+                                                        name='description'
+                                                        id='description'
+                                                        placeholder='Item Description'
+                                                        value={item.description}
+                                                        rows="3"
+                                                        readOnly
+                                                    >
+                                                    </textarea>
+                                                </div>
+                                    </div> */}
+                                    <div className="col-6">
+                                        <div className="mb-3">
+                                            <label htmlFor={`description-${item.itemId}`} className="form-label">Description</label>
+                                            {/* <textarea
+                                                className="form-control"
+                                                name={`description-${item.itemId}`}
+                                                id={`description-${item.itemId}`}
+                                                placeholder="Item Description"
+                                                value={item.description}
+                                                onChange={(event) => handleDescriptionChange(event, item.itemId)} // Add onChange handler
+                                                rows="3"
+                                            /> */}
+                                            <CKEditor
+                                                        editor={ ClassicEditor }
+                                                        data={item.description}
+                                                        // onReady={ editor => {
+                                                        //     console.log( 'Editor is ready to use!', editor );
+                                                        // } }
+                                                        
+                                                        onChange={( event, editor ) => {
                                                             handleDescriptionChange(editor, item.itemId);
-                                                        }}
-                                                        onBlur={(event, editor) => {
-                                                            console.log('Blur.', editor);
-                                                        }}
-                                                        onFocus={(event, editor) => {
-                                                            console.log('Focus.', editor);
-                                                        }}
+                                                        }
+                                                        }
+                                                        onBlur={ ( event, editor ) => {
+                                                            console.log( 'Blur.', editor );
+                                                        } }
+                                                        onFocus={ ( event, editor ) => {
+                                                            console.log( 'Focus.', editor );
+                                                        } }
+                                                    />
+                                        </div>
+                                    </div>
+                                            
+                                            {/* <div className="col-3">
+                                                <div class="mb-3">
+                                                    <label htmlFor="Discount" className="form-label">Discount</label>
+                                                    <input
+                                                        type='number'
+                                                        name='discount'
+                                                        className='form-control'
+                                                        value={item.discount}
+                                                        onChange={(event) => onDiscountpreitemChange(event, item.itemId)}
+                                                        placeholder='Discount'
+                                                        id={`discount-${item.itemId}`}
+                                                        min="0"
+                                                    />
+                                                </div>
+                                            </div> */}
+                                    
+                                    </div>
+                                        ))}
+                                {searchitemResults.map((item) => {
+                                    const selectedItem = items.find((i) => i._id === item.value);
+                                    const itemPrice = selectedItem?.price || 0;
+                                    const itemId = item.value;
+                                    const quantity = quantityMap[itemId] || 1;
+                                    const discount = discountMap[itemId] || 0;
+                                    const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+                                    const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
+                                    // style: 'currency',
+                                    // currency: 'INR',
+                                    });
+
+                                    return (
+                                        <div className='row'  key={item.itemId}>
+                                            <div className="col-6 ">
+                                                <div className="mb-3 d-flex align-items-baseline justify-content-between">
+                                                    <p>{item.label}</p>
+                                                    <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
+                                                        <i className="fas fa-trash"></i>
+                                                    </button>
+                                                </div>
+                                            </div>
+                                            <div className="col-2">
+                                                <div className="mb-3">
+                                                <input
+                                                    type="number"
+                                                    name={`quantity-${itemId}`}
+                                                    className="form-control"
+                                                    value={quantity}
+                                                    onChange={(event) => onChangeQuantity(event, itemId)}
+                                                    id={`quantity-${itemId}`}
+                                                    required
+                                                />
+                                                </div>
+                                            </div>
+                                            <div className="col-2">
+                                                <div className="mb-3">
+                                                    <input
+                                                        type="number"
+                                                        name="price"
+                                                        className="form-control"
+                                                        value={itemPrice}
+                                                        id="price"
+                                                        required
+                                                        readOnly
+                                                    />
+                                                </div>
+                                            </div>
+                                            {/* <div className="col-2 text-center">
+                                                <p><CurrencySign />{discount.toFixed(2)}</p>
+                                            </div> */}
+                                            <div className="col-2 text-center">
+                                                <p><CurrencySign />{formattedTotalAmount}</p>
+                                            </div>
+                                            <div className="col-6">
+                                                <div class="mb-3">
+                                                    <label htmlFor="description" className="form-label">Description</label>
+                                                    {/* <textarea
+                                                        class="form-control"
+                                                        name='description'
+                                                        id={`item-description-${itemId}`}
+                                                        placeholder='Item Description'
+                                                        rows="3"
+                                                        value={selectedItem?.description || ''}
+                                                        readOnly
+                                                    >
+                                                    </textarea> */}
+                                                    <CKEditor
+                                                        editor={ ClassicEditor }
+                                                        data={estimateData.description}
+                                                        // onReady={ editor => {
+                                                        //     console.log( 'Editor is ready to use!', editor );
+                                                        // } }
+                                                        
+                                                        onChange={handledescChange}
+                                                        onBlur={ ( event, editor ) => {
+                                                            console.log( 'Blur.', editor );
+                                                        } }
+                                                        onFocus={ ( event, editor ) => {
+                                                            console.log( 'Focus.', editor );
+                                                        } }
                                                     />
                                                 </div>
                                             </div>
                                             
-                                          
-                                    
-                                    </div>
-                                        ))}
-                               
+                                            {/* <div className="col-3">
+                                                <div class="mb-3">
+                                                    <label htmlFor="Discount" className="form-label">Discount</label>
+                                                    <input
+                                                        type='number'
+                                                        name={`discount-${itemId}`}
+                                                        className='form-control'
+                                                        value={discount}
+                                                        onChange={(event) => onDiscountChange(event, itemId)}
+                                                        placeholder='Discount'
+                                                        id={`discount-${itemId}`}
+                                                        min="0"
+                                                    />
+                                                </div>
+                                            </div> */}
+                                        </div>
+        );
+      })}
                                 </div>
                                 <hr />
 
@@ -821,9 +892,8 @@ export default function Editinvoice() {
                                         <div className="row">
                                             <div className="col-6">
                                                 <p>Subtotal</p>
-                                                {/* <p>GST</p> */}
-                                                <p>GST {invoiceData.taxpercentage}%</p>
-                                                <p>Discount</p>
+                                                <p className="mb-4">Discount</p>
+                                                <p>GST {estimateData.taxpercentage}%</p>
                                                 <p>Total</p>
                                             </div>
                                             <div className="col-6">
@@ -832,25 +902,9 @@ export default function Editinvoice() {
                                                     // currency: 'INR',
                                                 })}</p>
                                                 <div className="col-6">
-                                                {/* <div class="mb-3">
-                                                    <input
-                                                        type="number"
-                                                        name="tax"
-                                                        className="form-control"
-                                                        value={invoiceData.taxpercentage}
-                                                        onChange={handleTaxChange}
-                                                        placeholder="Enter Tax Percentage"
-                                                        id="taxInput"
-                                                        min="0"
-                                                    />
-                                                </div> */}
-                                            </div>
-                                                <p><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN', {
-                                                    // style: 'currency',
-                                                    // currency: 'INR',
-                                                })}</p>
                                                 
-                                                <div className="mb-3">
+                                            </div>
+                                            <div className="mb-3">
                                                     <input
                                                         type="number"
                                                         name="totaldiscount"
@@ -862,6 +916,12 @@ export default function Editinvoice() {
                                                         min="0"
                                                     />
                                                 </div>
+                                                <p><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN', {
+                                                    // style: 'currency',
+                                                    // currency: 'INR',
+                                                })}</p>
+                                                
+                                                
                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
                                                     // style: 'currency',
                                                     // currency: 'INR',
@@ -892,7 +952,7 @@ export default function Editinvoice() {
                             <div className='box1 rounded adminborder m-2 mt-5'>
                                 <CKEditor
                                     editor={ ClassicEditor }
-                                    data={invoiceData.information}
+                                    data={estimateData.information}
                                     // onReady={ editor => {
                                     //     console.log( 'Editor is ready to use!', editor );
                                     // } }

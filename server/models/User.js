@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const {Schema} = mongoose;
 
 const UserSchema = new Schema({
-    companyname: {
+      companyname: {
         type: String,
       },
       Businesstype: {
@@ -47,9 +47,13 @@ const UserSchema = new Schema({
       gstNumber: {
         type: String, // GST number field
       },
+      taxPercentage: {
+        type: String, // 
+        default: 0,
+      },
       TaxName: {
-        type: String, // GST number field
-        default: 'GST',
+        type: String, // 
+        default: 'TAX',
       },
       resetPasswordToken: String,
 });

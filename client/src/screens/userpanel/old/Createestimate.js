@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react'
-import { format, addDays } from 'date-fns';
+import React, { useState, useEffect } from 'react'
+import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom'
 import { ColorRing } from 'react-loader-spinner'
 import Usernav from './Usernav';
@@ -14,9 +14,8 @@ import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-st
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
 import Alertauthtoken from '../../components/Alertauthtoken';
 
-export default function Createinvoice() {
+export default function Createestimate() {
     const [loading, setloading] = useState(true);
-    const modalRef = useRef(null);
     const [customers, setcustomers] = useState([]);
     const [items, setitems] = useState([]);
     const [searchcustomerResults, setSearchcustomerResults] = useState([]);
@@ -27,140 +26,99 @@ export default function Createinvoice() {
     const [message, setmessage] = useState(false);
     const [alertShow, setAlertShow] = useState("");
     const [selectedCustomerDetails, setSelectedCustomerDetails] = useState({
-        name: '', email: '', phone: ''
+        name: '', email: ''
     });
     const [isCustomerSelected, setIsCustomerSelected] = useState(false);
     const [editedName, setEditedName] = useState('');
     const [editedEmail, setEditedEmail] = useState('');
-    const [editedPhone, setEditedPhone] = useState('');
-    const [taxPercentage, setTaxPercentage] = useState(0);
-    const [signUpData, setsignUpData] = useState(0);
+    const [taxPercentage, setTaxPercentage] = useState(5);
     const [discountTotal, setdiscountTotal] = useState(0);
-    const [invoiceData, setInvoiceData] = useState({
-        customername: '', itemname: '', customeremail: '',customerphone:'', invoice_id: '', InvoiceNumber: '', purchaseorder: '',
-        date: format(new Date(), 'yyyy-MM-dd'), job: '', duedate: format(addDays(new Date(), 15), 'yyyy-MM-dd'), description: '', itemquantity: '', price: '', discount: '',
-        amount: '', discountTotal: '', tax: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
+    const [estimateData, setestimateData] = useState({
+        customername: '', itemname: '', customeremail: '', estimate_id: '', EstimateNumber: '', purchaseorder: '',
+        job: '', date: format(new Date(), 'yyyy-MM-dd'), description: '', itemquantity: '', price: '', discount: '',
+        amount: '', tax: '',discountTotal:'', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
     });
+    
     // const [editorData, setEditorData] = useState("<p></p>");
     const [editorData, setEditorData] = useState(``);
     const [alertMessage, setAlertMessage] = useState('');
-    const [credentials, setCredentials] = useState({
-        name: '',
-        email: '',
-        number: '',
-        citydata: '',
-        statedata: '',
-        countrydata: '',
-        information: '',
-        address1: '',
-        address2: '',
-        post: '',
-    });
+    
+  const [credentials, setCredentials] = useState({
+    name: '',
+    email: '',
+    number: '',
+    citydata: '',
+    statedata: '',
+    countrydata: '',
+    information: '',
+    address1: '',
+    address2: '',
+    post: '',
+  });
 
     useEffect(() => {
-      
         const fetchData = async () => {
             if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") === "true") {
                 navigate("/");
             }
-            const getTaxOptions = localStorage.getItem("taxOptions")
-            console.log("getTaxOptions:===",JSON.parse(getTaxOptions)[0].name);
-            setsignUpData(JSON.parse(getTaxOptions)[0])
             await fetchcustomerdata();
             await fetchitemdata();
-            await fetchLastInvoiceNumber();
-            await fetchsignupdata();
+            await fetchLastEstimateNumber();
         };
-
-
         if (isNaN(discountTotal)) {
             setdiscountTotal(0);
         }
-
         fetchData();
         setloading(false);
     }, [])
     let navigate = useNavigate();
+    
 
     const [countryid, setcountryid] = useState(false);
     const [stateid, setstateid] = useState(false);
     const [cityid, setcityid] = useState(false);
-
+  
     const [country, setcountry] = useState(false);
     const [state, setstate] = useState(false);
     const [city, setcity] = useState(false);
 
     const [message1, setMessage1] = useState(false);
 
-    const roundOff = (value) => {
-        return Math.round(value * 100) / 100;
-      };
-    const fetchLastInvoiceNumber = async () => {
+    const fetchLastEstimateNumber = async () => {
         try {
             const userid = localStorage.getItem('userid');
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/lastinvoicenumber/${userid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`, {
                 headers: {
-                    'Authorization': authToken,
+                  'Authorization': authToken,
                 }
-            });
+              });
 
-            if (response.status === 401) {
+              if (response.status === 401) {
                 const json = await response.json();
                 setAlertMessage(json.message);
                 setloading(false);
-                window.scrollTo(0, 0);
+                window.scrollTo(0,0);
                 return; // Stop further execution
-            }
-            else {
+              }
+              else{
                 const json = await response.json();
 
-                // let nextInvoiceNumber = 1;
-                // if (json && json.lastInvoiceNumber) {
-                //     nextInvoiceNumber = json.lastInvoiceNumber + 1;
+                // let nextEstimateNumber = 1;
+                // if (json && json.lastEstimateNumber) {
+                //     nextEstimateNumber = json.lastEstimateNumber + 1;
                 // }
-                setInvoiceData({
-                    ...invoiceData,
-                    InvoiceNumber: `Invoice-${json.lastInvoiceId + 1}`,
-                    invoice_id: json.lastInvoiceId + 1,
+                setestimateData({
+                    ...estimateData,
+                    EstimateNumber: `Estimate-${json.lastEstimateId + 1}`,
+                    estimate_id: json.lastEstimateId + 1,
                 });
-            }
-
+              }
+            
         } catch (error) {
-            console.error('Error fetching last invoice number:', error);
+            console.error('Error fetching last estimate number:', error);
         }
     };
-    const fetchsignupdata = async () => {
-        try {
-          const userid = localStorage.getItem("userid");
-          const authToken = localStorage.getItem('authToken');
-          const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
-            headers: {
-              'Authorization': authToken,
-            }
-          });
-    
-          if (response.status === 401) {
-            const json = await response.json();
-            setAlertMessage(json.message);
-            setloading(false);
-            window.scrollTo(0, 0);
-            return; // Stop further execution
-          }
-          else {
-            const json = await response.json();
-    
-            // if (Array.isArray(json)) {
-            // setTaxPercentage(json.taxPercentage);
-            // setsignUpData(json)
-            console.log("json: ",json.taxPercentage);
-            // }
-          }
-    
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      }
 
 
     const fetchcustomerdata = async () => {
@@ -169,26 +127,25 @@ export default function Createinvoice() {
             const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
                 headers: {
-                    'Authorization': authToken,
+                  'Authorization': authToken,
                 }
-            });
+              });
 
-            if (response.status === 401) {
+              if (response.status === 401) {
                 const json = await response.json();
                 setAlertMessage(json.message);
                 setloading(false);
-                window.scrollTo(0, 0);
+                window.scrollTo(0,0);
                 return; // Stop further execution
-            }
-            else {
-                const json = await response.json();
+              }
+              else{
+               const json = await response.json();
 
                 if (Array.isArray(json)) {
-                    console.log("CustomerData:->    ", json)
                     setcustomers(json);
-                }
-            }
-
+                } 
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -200,23 +157,25 @@ export default function Createinvoice() {
             const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
                 headers: {
-                    'Authorization': authToken,
+                  'Authorization': authToken,
                 }
-            });
+              });
 
-            if (response.status === 401) {
+              if (response.status === 401) {
                 const json = await response.json();
                 setAlertMessage(json.message);
                 setloading(false);
-                window.scrollTo(0, 0);
+                window.scrollTo(0,0);
                 return; // Stop further execution
-            }
-            else {
+              }
+              else{
                 const json = await response.json();
+
                 if (Array.isArray(json)) {
                     setitems(json);
                 }
-            }
+              }
+            
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -226,30 +185,28 @@ export default function Createinvoice() {
     //     setSearchcustomerResults([...searchcustomerResults,event]);
     // }
 
-    // const onChangeitem=(event)=>{
-    //     setSearchitemResults([...searchitemResults,event]);
-    // }
-
     const onChangeitem = (event) => {
-        const newItemId = event.value;
-        const newItemLabel = event.label;
-
-        const isItemExists = searchitemResults.some((item) => item.value === newItemId);
-
-        if (!isItemExists) {
-            setSearchitemResults([...searchitemResults, { value: newItemId, label: newItemLabel }]);
-            setItemExistsMessage(''); // Clear any existing message
-        } else {
-            setItemExistsMessage('This item is already added!');
-        }
-    };
-
-
+        setSearchitemResults([...searchitemResults, event]);
+    }
 
     const handleEditorChange = (event, editor) => {
         const data = editor.getData();
         setEditorData(data);
     };
+    const handleEditorChange1 = (event, editor) => {
+        const data = editor.getData();
+        setEditorData(data);
+    };
+
+    // const onChangeQuantity = (event, itemId) => {
+    //     const newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
+
+    //     // Update quantity for the corresponding item
+    //     setQuantityMap((prevMap) => ({
+    //       ...prevMap,
+    //       [itemId]: newQuantity,
+    //     }));
+    //   };
 
     const onChangeQuantity = (event, itemId) => {
         let newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
@@ -272,17 +229,15 @@ export default function Createinvoice() {
         const selectedCustomer = customers.find((customer) => customer._id === selectedCustomerId);
 
         if (selectedCustomer) {
-            setInvoiceData({
-                ...invoiceData,
+            setestimateData({
+                ...estimateData,
                 customername: selectedCustomer.name,
                 customeremail: selectedCustomer.email,
-                customerphone: selectedCustomer.number,
             });
 
             setSelectedCustomerDetails({
                 name: selectedCustomer.name,
-                email: selectedCustomer.email,
-                phone: selectedCustomer.number
+                email: selectedCustomer.email
             });
             setIsCustomerSelected(true);
         }
@@ -303,13 +258,11 @@ export default function Createinvoice() {
         const updatedCustomerDetails = {
             name: editedName,
             email: editedEmail,
-            phone: editedPhone
         };
 
         setSelectedCustomerDetails({
             name: editedName,
-            email: editedEmail,
-            phone: editedPhone
+            email: editedEmail
         });
         console.log("Updated customer details:", updatedCustomerDetails);
     };
@@ -358,23 +311,42 @@ export default function Createinvoice() {
             const discount = discountMap[itemId] || 0;
 
             const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
-            console.log("discountedAmount:", discountedAmount);
+
             subtotal += discountedAmount;
         });
 
-        return roundOff(subtotal);
+        return subtotal;
     };
 
+    // Function to handle tax change
+    const handleTaxChange = (event) => {
+        let enteredTax = event.target.value;
+        // Restrict input to two digits after the decimal point
+        const regex = /^\d*\.?\d{0,2}$/; // Regex to allow up to two decimal places
+        if (regex.test(enteredTax)) {
+            // Ensure that the entered value is a valid number
+            enteredTax = parseFloat(enteredTax);
+            setTaxPercentage(enteredTax);
+            setestimateData({ ...estimateData, taxpercentage: enteredTax });
+        }
+    };
+
+    // Function to calculate tax amount
+    // const calculateTaxAmount = () => {
+    //     const subtotal = calculateSubtotal();
+    //     const taxAmount = (subtotal * taxPercentage) / 100;
+    //     return taxAmount;
+    // };
 
     const calculateTaxAmount = () => {
         const subtotal = calculateSubtotal();
         const totalDiscountedAmount = subtotal - discountTotal; // Apply overall discount first
-
+    
         // Calculate tax amount on the discounted amount
-        const taxAmount = (totalDiscountedAmount * signUpData.percentage) / 100;
+        const taxAmount = (totalDiscountedAmount * taxPercentage) / 100;
         // const taxAmount = ((subtotal-discountTotal) * taxPercentage) / 100;
         // console.log("taxAmount:", taxAmount, "subtotal:", subtotal, "discountTotal:",discountTotal);
-        return roundOff(taxAmount);
+        return taxAmount;
     };
 
     // Function to calculate total amount
@@ -383,7 +355,7 @@ export default function Createinvoice() {
         const taxAmount = calculateTaxAmount();
         const discountAmount = discountTotal;
         const totalAmount = subtotal + taxAmount - discountAmount;
-        return roundOff(totalAmount);
+        return totalAmount;
     };
 
     const handleSubmit = async (e) => {
@@ -391,7 +363,7 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem('userid'); // Assuming you have user ID stored in local storage
             const authToken = localStorage.getItem('authToken');
-            const invoiceItems = searchitemResults.map((item) => {
+            const estimateItems = searchitemResults.map((item) => {
                 const selectedItem = items.find((i) => i._id === item.value);
                 const itemPrice = selectedItem?.price || 0;
                 const itemId = item.value;
@@ -412,123 +384,112 @@ export default function Createinvoice() {
                 };
             });
 
-            // Summing up subtotal, total, and amount due for the entire invoice
-            const subtotal = invoiceItems.reduce((acc, curr) => acc + curr.amount, 0);
+            // Summing up subtotal, total, and amount due for the entire estimate
+            const subtotal = estimateItems.reduce((acc, curr) => acc + curr.amount, 0);
             const total = calculateTotal();
             const amountdue = total;
             const taxAmount = calculateTaxAmount(); // Calculate tax amount based on subtotal and tax percentage
 
-            const taxPercentageValue = taxPercentage; // Retrieve tax percentage from invoiceData state
+            const taxPercentageValue = taxPercentage; // Retrieve tax percentage from estimateData state
 
             const data = {
                 userid: userid,
-                customername: invoiceData.customername,
-                customeremail: invoiceData.customeremail,
-                customerphone: invoiceData.customerphone,
-                invoice_id: invoiceData.invoice_id,
-                InvoiceNumber: invoiceData.InvoiceNumber,
-                purchaseorder: invoiceData.purchaseorder,
-                job: invoiceData.job || 'No Job',
-                discountTotal: discountTotal || 0,
+                customername: estimateData.customername,
+                customeremail: estimateData.customeremail,
+                estimate_id: estimateData.estimate_id,
+                EstimateNumber: estimateData.EstimateNumber,
+                purchaseorder: estimateData.purchaseorder,
+                job: estimateData.job || 'No Job',
+                discountTotal: discountTotal || 'No Discount',
                 information: editorData,
-                date: invoiceData.date,
-                items: invoiceItems,
-                duedate: invoiceData.duedate,
+                date: estimateData.date,
+                items: estimateItems,
                 subtotal: subtotal,
                 total: total,
                 tax: taxAmount,
-                taxpercentage: signUpData.percentage,
+                taxpercentage: taxPercentageValue,
                 amountdue: amountdue
             };
-            console.log(data, "Invoice Data ====");
 
-            // Sending invoice data to the backend API
-            const response = await fetch('https://grithomes.onrender.com/api/savecreateinvoice', {
+
+            // Sending estimate data to the backend API
+            const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'Authorization': authToken,
                 },
-                body: JSON.stringify({ userid, invoiceData: data }),
+                body: JSON.stringify({ userid, estimateData: data }),
             });
             if (response.status === 401) {
                 const responseData = await response.json();
                 setAlertMessage(responseData.message);
                 setloading(false);
-                window.scrollTo(0, 0);
+                window.scrollTo(0,0);
                 return; // Stop further execution
             }
-            else {
+            else{
                 if (response.ok) {
                     const responseData = await response.json();
                     if (responseData.success) {
-                        const invoiceid = responseData.invoice._id;
-                        console.log("After Invoice responseData:", responseData);
-                        navigate('/userpanel/Invoicedetail', { state: { invoiceid } });
-                        console.log(responseData, 'Invoice saved successfully!');
+                        const estimateid = responseData.estimate._id;
+                        navigate('/userpanel/Estimatedetail', { state: { estimateid } });
+                        console.log('estimate saved successfully!');
                     } else {
-                        console.error('Failed to save the invoice.');
+                        console.error('Failed to save the estimate.');
                     }
                 } else {
                     const responseData = await response.json();
                     setmessage(true);
                     setAlertShow(responseData.error)
-                    console.error('Failed to save the invoice.');
-                }
+                    console.error('Failed to save the estimate.');
+                } 
             }
+
+            
         } catch (error) {
-            console.error('Error creating invoice:', error);
+            console.error('Error creating estimate:', error);
         }
     };
-
-    // Alert Component
-    const Alert = ({ message }) => {
-        return (
-            <div className="alert alert-danger" role="alert">
-                {message}
-            </div>
-
-        );
+    const handleDiscountChange = (event) => {
+        const value = event.target.value;
+        // If the input is empty or NaN, set the value to 0
+        const newValue = value === '' || isNaN(parseFloat(value)) ? 0 : parseFloat(value);
+        setdiscountTotal(newValue);
     };
 
+    // const onchange = (event) => {
+    //     setestimateData({ ...estimateData, [event.target.name]: event.target.value });
+    //   };
 
     const onchange = (event) => {
-        if (event.target.name == "InvoiceNumber") {
+        if (event.target.name == "EstimateNumber") {
             const parts = (event.target.value).split("-");
-            setInvoiceData({ ...invoiceData, ["invoice_id"]: parts[1], [event.target.name]: event.target.value });
+            setestimateData({ ...estimateData, ["estimate_id"]: parts[1], [event.target.name]: event.target.value });
         } else {
-            // invoice_id
-            setInvoiceData({ ...invoiceData, [event.target.name]: event.target.value });
+            // estimate_id_id
+            setestimateData({ ...estimateData, [event.target.name]: event.target.value });
         }
     };
 
     const onChangePrice = (event, itemId) => {
-  const { value } = event.target;
-  const numericValue = value.replace(/[^0-9.]/g, ''); // Remove any non-numeric characters except decimal point
+        const { value } = event.target;
+        const newPrice = parseFloat(value) || 0;
 
-  // Limit the numeric value to two decimal places
-  const decimalIndex = numericValue.indexOf('.');
-  let formattedValue = numericValue;
-  if (decimalIndex !== -1) {
-    formattedValue = numericValue.slice(0, decimalIndex + 1) + numericValue.slice(decimalIndex + 1).replace(/[^0-9]/g, '').slice(0, 2);
-  }
+        // Update the items array in the state with the new price for the specified item
+        const updatedItems = items.map((item) => {
+            if (item._id === itemId) {
+                return {
+                    ...item,
+                    price: newPrice,
+                };
+            }
+            return item;
+        });
 
-  const newPrice = parseFloat(formattedValue) || 0;
-
-  // Update the item's price in the items array
-  const updatedItems = items.map(item => {
-    if (item._id === itemId) {
-      return {
-        ...item,
-        price: formattedValue // Update with formatted value
-      };
-    }
-    return item;
-  });
-
-  setitems(updatedItems);
-};
-
+        // Update the state with the updated items array
+        setitems(updatedItems);
+    };
     const onChangeDescription = (event, editor, itemId) => {
         const value = editor.getData();
 
@@ -547,82 +508,79 @@ export default function Createinvoice() {
         setitems(updatedItems);
     };
 
-    const handleDiscountChange = (event) => {
-        const value = event.target.value;
-        // If the input is empty or NaN, set the value to 0
-        const newValue = value === '' || isNaN(parseFloat(value)) ? 0 : parseFloat(value);
-        setdiscountTotal(newValue);
-    };
     const handleAddCustomer = async (e) => {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
         const authToken = localStorage.getItem('authToken');
         const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authToken,
-            },
-            body: JSON.stringify({
-                userid: userid,
-                name: credentials.name,
-                email: credentials.email,
-                information: credentials.information,
-                number: credentials.number,
-                city: city,
-                state: state,
-                country: country,
-                citydata: credentials.citydata,
-                statedata: credentials.statedata,
-                countrydata: credentials.countrydata,
-                cityid: cityid,
-                stateid: stateid,
-                countryid: countryid,
-                address1: credentials.address1,
-                address2: credentials.address2,
-                post: credentials.post,
-            }),
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': authToken,
+          },
+          body: JSON.stringify({
+            userid: userid,
+            name: credentials.name,
+            email: credentials.email,
+            information: credentials.information,
+            number: credentials.number,
+            city: city,
+            state: state,
+            country: country,
+            citydata: credentials.citydata,
+            statedata: credentials.statedata,
+            countrydata: credentials.countrydata,
+            cityid: cityid,
+            stateid: stateid,
+            countryid: countryid,
+            address1: credentials.address1,
+            address2: credentials.address2,
+            post: credentials.post,
+          }),
         });
 
         if (response.status === 401) {
-            const json = await response.json();
-            setAlertMessage(json.message);
-            setloading(false);
-            window.scrollTo(0, 0);
-            return; // Stop further execution
+          const json = await response.json();
+          setAlertMessage(json.message);
+          setloading(false);
+          window.scrollTo(0,0);
+          return; // Stop further execution
         }
-        else {
-            const json = await response.json();
+        else{
+           const json = await response.json();
             console.log(json);
-
+        
             if (json.Success) {
-                setCredentials({
-                    name: '',
-                    email: '',
-                    number: '',
-                    citydata: '',
-                    statedata: '',
-                    countrydata: '',
-                    information: '',
-                    address1: '',
-                    address2: '',
-                    post: '',
-                });
-
-                setMessage1(true);
-                setAlertShow(json.message);
-                window.location.reload();
-                //   navigate('/userpanel/Customerlist');
+            setCredentials({
+                name: '',
+                email: '',
+                number: '',
+                citydata: '',
+                statedata: '',
+                countrydata: '',
+                information: '',
+                address1: '',
+                address2: '',
+                post: '',
+            });
+        
+            setMessage1(true);
+            setAlertShow(json.message);
+            window.location.reload();
+            //   navigate('/userpanel/Customerlist');
             }
-            else {
+        
+            else{
                 alert("This Customer Email already exist")
-            }
+            } 
         }
-    };
+    
+        
+      };
 
-    const onchangeaddcustomer = (event) => {
+      const onchangeaddcustomer = (event) => {
         setCredentials({ ...credentials, [event.target.name]: event.target.value });
-    };
+      };
 
 
     return (
@@ -657,18 +615,17 @@ export default function Createinvoice() {
                                     <form onSubmit={handleSubmit}>
                                         <div className='row py-4 px-2 breadcrumbclr'>
                                             <div className="col-lg-4 col-md-6 col-sm-12 col-7 me-auto">
-                                                <p className='fs-35 fw-bold'>Invoice</p>
+                                                <p className='fs-35 fw-bold'>Estimate</p>
                                                 <nav aria-label="breadcrumb">
                                                     <ol class="breadcrumb mb-0">
                                                         <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
-                                                        <li class="breadcrumb-item active" aria-current="page">Invoice</li>
+                                                        <li class="breadcrumb-item active" aria-current="page">Estimate</li>
                                                     </ol>
                                                 </nav>
                                             </div>
                                             <div className="col-lg-3 col-md-4 col-sm-12 col-5 text-right">
                                                 <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit">Save</button>
                                             </div>
-
                                             <div className='mt-4'>
                                                 {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                                             </div>
@@ -684,8 +641,7 @@ export default function Createinvoice() {
                                                                     <a href="" className='text-decoration-none' data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a>
                                                                 </li>
                                                             </ul>
-                                                            <p className='m-0'>{selectedCustomerDetails.email}</p>
-                                                            <p>{selectedCustomerDetails.phone}</p>
+                                                            <p>{selectedCustomerDetails.email}</p>
                                                         </div>
                                                     ) : (
                                                         <div className="search-container forms">
@@ -701,10 +657,8 @@ export default function Createinvoice() {
                                                                         required
                                                                         options={customers.map((customer, index) =>
                                                                             ({ label: customer.name, value: customer._id })
-
                                                                         )}
                                                                     />
-
                                                                 </div>
                                                                 <div className="col-3">
                                                                     <a role='button' className="btn btn-success btn-sm me-2 text-white mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal1">
@@ -714,7 +668,6 @@ export default function Createinvoice() {
                                                             </div>
                                                         </div>
                                                     )}
-
                                                 </div>
                                                 <div className="col-lg-7 col-md-6">
                                                     <div className="row">
@@ -728,17 +681,17 @@ export default function Createinvoice() {
                                                         )}
                                                         <div className="col-lg-6">
                                                             <div className="mb-3">
-                                                                <label htmlFor="invoicenumbr" className="form-label">
-                                                                    Invoice Number
+                                                                <label htmlFor="estimatenumbr" className="form-label">
+                                                                    Estimate Number
                                                                 </label>
                                                                 <input
                                                                     type="text"
-                                                                    name="InvoiceNumber"
+                                                                    name="EstimateNumber"
                                                                     className="form-control"
-                                                                    value={invoiceData.InvoiceNumber}
+                                                                    value={estimateData.EstimateNumber}
                                                                     onChange={onchange}
-                                                                    // placeholder="Invoice Number"
-                                                                    id="invoicenumbr"
+                                                                    // placeholder="estimate Number"
+                                                                    id="estimatenumbr"
                                                                     required
                                                                 />
                                                             </div>
@@ -766,7 +719,7 @@ export default function Createinvoice() {
                                                                     type="date"
                                                                     name="date"
                                                                     className="form-control"
-                                                                    value={invoiceData.date}
+                                                                    value={estimateData.date}
                                                                     onChange={onchange}
                                                                     // placeholder="Date"
                                                                     id="Date"
@@ -783,7 +736,7 @@ export default function Createinvoice() {
                                                                     type="text"
                                                                     name="job"
                                                                     className="form-control"
-                                                                    value={invoiceData.job}
+                                                                    value={estimateData.job}
                                                                     onChange={onchange}
                                                                     // placeholder="Date"
                                                                     id="job"
@@ -791,23 +744,6 @@ export default function Createinvoice() {
                                                                 />
                                                             </div>
                                                         </div>
-                                                        <div className="col-lg-6">
-                                                            <div className="mb-3">
-                                                                <label htmlFor="duedate" className="form-label">
-                                                                    Due Date
-                                                                </label>
-                                                                <input
-                                                                    type="date"
-                                                                    name="duedate"
-                                                                    className="form-control"
-                                                                    value={invoiceData.duedate}
-                                                                    onChange={onchange}
-                                                                    // placeholder="Due Date"
-                                                                    id="duedate"
-                                                                />
-                                                            </div>
-                                                        </div>
-
                                                     </div>
                                                 </div>
                                             </div>
@@ -850,7 +786,7 @@ export default function Createinvoice() {
                                                                             <div className="row">
                                                                                 <div className="col">
                                                                                     <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
-
+                                                                                   
                                                                                     <CKEditor
                                                                                         editor={ClassicEditor}
                                                                                         data={selectedItem?.description || ''}
@@ -863,9 +799,9 @@ export default function Createinvoice() {
                                                                                             console.log('Focus.', editor);
                                                                                         }}
                                                                                     />
-
+                                                                          
                                                                                 </div>
-
+                                                                              
                                                                             </div>
                                                                         </td>
                                                                         <td>
@@ -879,33 +815,35 @@ export default function Createinvoice() {
                                                                                 required
                                                                             />
                                                                         </td>
-
                                                                         <td>
+                                                                            {/* <input
+                                    type="number"
+                                    name="price"
+                                    className="form-control"
+                                    value={itemPrice}
+                                    id="price"
+                                    required
+                                    disabled
+                                /> */}
                                                                             <input
-                                                                                type="text"
-                                                                                name={`price-${itemId}`}
+                                                                                type="number"
+                                                                                name={`price-${itemId}`}  // Use a unique identifier for each item
                                                                                 className="form-control"
                                                                                 value={itemPrice}
-                                                                                onChange={(event) => onChangePrice(event, itemId)}
+                                                                                onChange={(event) => onChangePrice(event, itemId)} // Add onChange handler for price
                                                                                 id={`price-${itemId}`}
                                                                                 required
                                                                             />
                                                                         </td>
-
+                                                                        {/* <td className="text-center">
+                                                                            <p><CurrencySign />{discountTotal.toFixed(2)}</p>
+                                                                        </td> */}
                                                                         <td className="text-center">
                                                                             <p><CurrencySign />{formattedTotalAmount}</p>
                                                                         </td>
                                                                     </tr>
-
                                                                 );
-
                                                             })}
-
-                                                            {itemExistsMessage && (
-                                                                <div className="alert alert-warning" role="alert">
-                                                                    {itemExistsMessage}
-                                                                </div>
-                                                            )}
                                                         </tbody>
                                                     </table>
                                                 </div>
@@ -927,7 +865,6 @@ export default function Createinvoice() {
 
                                                             >
                                                             </VirtualizedSelect>
-
                                                         </div>
                                                     </div>
                                                     <div className="col-lg-6 col-md-12">
@@ -935,15 +872,15 @@ export default function Createinvoice() {
                                                             <div className="col-6 col-md-3">
                                                                 <p>Subtotal</p>
                                                                 <p>Discount</p>
-                                                                {console.log(signUpData, "====signUpData")}
                                                                 {/* <p>GST</p> */}
-                                                                <p className='pt-3'>{signUpData.name} {signUpData.percentage}%</p>
-
+                                                                <p className='pt-3'>GST {taxPercentage}%</p>
+                                                                
                                                                 <p>Total</p>
                                                             </div>
                                                             <div className="col-6 col-md-9">
-                                                                <p><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
-                                                                   
+                                                                <p className="mb-3"><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
+                                                                    // style: 'currency',
+                                                                    // currency: 'INR',
                                                                 })}</p>
                                                                 <div className="mb-3">
                                                                     <input
@@ -957,15 +894,23 @@ export default function Createinvoice() {
                                                                         min="0"
                                                                     />
                                                                 </div>
-                                                              
-
-                                                                <p>{console.log("check Tax Amount", calculateTaxAmount())}<CurrencySign />{
-
-                                                                    calculateTaxAmount().toLocaleString('en-IN', {
-                                                                        // style: 'currency',
-                                                                        // currency: 'INR',
-                                                                    })}</p>
-
+                                                                {/* <div className="mb-3">
+                                                                    <input
+                                                                        type="number"
+                                                                        name="tax"
+                                                                        className="form-control"
+                                                                        value={taxPercentage}
+                                                                        onChange={handleTaxChange}
+                                                                        placeholder="Enter GST Percentage"
+                                                                        id="taxInput"
+                                                                        min="0"
+                                                                    />
+                                                                </div> */}
+                                                                <p><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN', {
+                                                                    // style: 'currency',
+                                                                    // currency: 'INR',
+                                                                })}</p>
+                                                                
                                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
                                                                     // style: 'currency',
                                                                     // currency: 'INR',
@@ -983,7 +928,6 @@ export default function Createinvoice() {
                                                                 <p>Amount due</p>
                                                             </div>
                                                             <div className="col-6 col-md-9">
-                                                                {/* <p><CurrencySign /> {calculateTotal().toLocaleString}</p> */}
                                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
                                                                     // style: 'currency',
                                                                     // currency: 'INR',
@@ -998,15 +942,10 @@ export default function Createinvoice() {
 
 
 
-                                            <label htmlFor="" className='fs-4 ms-2 mt-5'>Note</label>
-                                            <div className='box1 rounded adminborder m-2'>
+                                            <div className='box1 rounded adminborder m-2 mt-5'>
                                                 <CKEditor
                                                     editor={ClassicEditor}
                                                     data={editorData}
-                                                    // onReady={ editor => {
-                                                    //     console.log( 'Editor is ready to use!', editor );
-                                                    // } }
-
                                                     onChange={handleEditorChange}
                                                     onBlur={(event, editor) => {
                                                         console.log('Blur.', editor);
@@ -1022,256 +961,252 @@ export default function Createinvoice() {
                                 </div>
                             </div>
                         </div>
-                    </div>
 
+                        <form action="">
+                            <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div className="modal-dialog modal-lg">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h1 className="modal-title fs-5" id="exampleModalLabel">Edit Customer</h1>
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div className="modal-body">
+                                            <div className="mb-3">
+                                                <label htmlFor="customerName" className="form-label">Name</label>
+                                                <select className="form-control" id="customerName" value={editedName} onChange={handleNameChange}>
+                                                    <option value="" disabled>Select Name</option>
+                                                    {customers.map(customer => (
+                                                        <option key={customer._id} value={customer.name}>{customer.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="mb-3">
+                                                <label htmlFor="customerEmail" className="form-label">Email</label>
+                                                <input type="email" className="form-control" id="customerEmail" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} />
+                                            </div>
+                                        </div>
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleEditCustomer}>Save changes</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        {/* add customer */}
+
+<form action="">
+            <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-lg">
+                    <div className="modal-content">
+                        <div className="modal-header">
+                            <h1 className="modal-title fs-5" id="exampleModalLabel">Add Customer</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body">
+                        <div className="row">
+                            <div className="col-12 col-sm-6 col-lg-4">
+                                <div className="mb-3">
+                                <label htmlFor="exampleInputtext1" className="form-label">
+                                Customer Name
+                                </label>
+                                <input
+                                type="text"
+                                className="form-control"
+                                name="name"
+                                value={credentials.name}
+                                onChange={onchangeaddcustomer}
+                                placeholder="Customer Name"
+                                id="exampleInputtext1"
+                                required
+                                />
+                            </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-4">
+                          <div className="mb-3">
+                            <label htmlFor="exampleInputEmail1" className="form-label">
+                              Contact Email
+                            </label>
+                            <input
+                              type="email"
+                              className="form-control"
+                              name="email"
+                              value={credentials.email}
+                              onChange={onchangeaddcustomer}
+                              placeholder="Contact Email"
+                              id="email"
+                              aria-describedby="emailHelp"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-4">
+                          <div className="mb-3">
+                            <label htmlFor="Number" className="form-label">
+                              Phone Number
+                            </label>
+                            <input
+                              type="text"
+                              name="number"
+                              className="form-control"
+                              onChange={onchangeaddcustomer}
+                              placeholder="Phone Number"
+                              id="phonenumber"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-12 col-lg-12">
+                          <div className="mb-3">
+                            <label htmlFor="information" className="form-label">
+                            Additional Information
+                            </label>
+                            <textarea
+                              type="text"
+                              className="form-control"
+                              name="information"
+                              onChange={onchangeaddcustomer}
+                              placeholder="Information"
+                              id="information"
+                              
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="Address1" className="form-label">
+                              Address 1
+                            </label>
+                            <input
+                              type="message"
+                              name="address1"
+                              onChange={onchangeaddcustomer}
+                              className="form-control"
+                              placeholder="Address 1"
+                              id="Address1"
+                              
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="Address2" className="form-label">
+                              Address 2
+                            </label>
+                            <input
+                              type="message"
+                              name="address2"
+                              onChange={onchangeaddcustomer}
+                              className="form-control"
+                              placeholder="Address 2"
+                              id="Address2"
+                              
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="Country" className="form-label">
+                              Country
+                            </label>
+                            <CountrySelect
+                              name="country"
+                              value={credentials.countryid}
+                              onChange={(val) => {
+                                console.log(val);
+                                setcountryid(val.id);
+                                setcountry(val.name);
+                                    // setCredentials({ ...credentials, country: val.name })
+                                    // setCredentials({ ...credentials, countryid: val.id })
+                                    setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
+                                  
+                              }}
+                              valueType="short"
+                              class="form-control" 
+                              placeHolder="Select Country"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="State" className="form-label">
+                              State
+                            </label>
+                            <StateSelect
+                                name="state"
+                                countryid={countryid} // Set the country selected in the CountryDropdown
+                                onChange={(val) => {
+                                    console.log(val);
+                                    setstateid(val.id);
+                                    setstate(val.name);
+                                    // setCredentials({ ...credentials, state: val.name })
+                                    // setCredentials({ ...credentials, stateid: val.id })
+                                    setCredentials({ ...credentials, statedata: JSON.stringify(val) })
+                                }}
+                                placeHolder="Select State"
+                                />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="City" className="form-label">
+                              City
+                            </label>
+                            <CitySelect
+                                countryid={countryid}
+                                stateid={stateid}
+                                onChange={(val) => {
+                                console.log(val);
+                                setcityid(val.id);
+                                setcity(val.name);
+                                // setCredentials({ ...credentials, city: val.name })
+                                // setCredentials({ ...credentials, cityid: val.id })
+                                setCredentials({ ...credentials, citydata: JSON.stringify(val) })
+                                }}
+                                placeHolder="Select City"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="post" className="form-label">
+                            Post Code
+                            </label>
+                            <input
+                              type="text"
+                              name="post"
+                              onChange={onchangeaddcustomer}
+                              className="form-control"
+                              placeholder="Post Code"
+                              id="post"
+                           
+                            />
+                          </div>
+                        </div>
+                      </div>
+                        </div>
+                        <div className="modal-footer">
+                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                            <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+</form>
+                    </div>
 
 
             }
-
-
-
-            <form action="">
-                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h1 className="modal-title fs-5" id="exampleModalLabel">Edit Customer</h1>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="mb-3">
-                                    <label htmlFor="customerName" className="form-label">Name</label>
-                                    <select className="form-control" id="customerName" value={editedName} onChange={handleNameChange}>
-                                        <option value="" disabled>Select Name</option>
-                                        {customers.map(customer => (
-                                            <option key={customer._id} value={customer.name}>{customer.name}</option>
-                                        ))}
-                                    </select>
-                                </div>
-                                <div className="mb-3">
-                                    <label htmlFor="customerEmail" className="form-label">Email</label>
-                                    <input type="email" className="form-control" id="customerEmail" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} />
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleEditCustomer}>Save changes</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
-            {/* add customer */}
-
-            <form action="">
-                <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h1 className="modal-title fs-5" id="exampleModalLabel">Add Customer</h1>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="row">
-                                    <div className="col-12 col-sm-6 col-lg-4">
-                                        <div className="mb-3">
-                                            <label htmlFor="exampleInputtext1" className="form-label">
-                                                Customer Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                name="name"
-                                                value={credentials.name}
-                                                onChange={onchangeaddcustomer}
-                                                placeholder="Customer Name"
-                                                id="exampleInputtext1"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-4">
-                                        <div className="mb-3">
-                                            <label htmlFor="exampleInputEmail1" className="form-label">
-                                                Contact Email
-                                            </label>
-                                            <input
-                                                type="email"
-                                                className="form-control"
-                                                name="email"
-                                                value={credentials.email}
-                                                onChange={onchangeaddcustomer}
-                                                placeholder="Contact Email"
-                                                id="email"
-                                                aria-describedby="emailHelp"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-4">
-                                        <div className="mb-3">
-                                            <label htmlFor="Number" className="form-label">
-                                                Phone Number
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="number"
-                                                className="form-control"
-                                                onChange={onchangeaddcustomer}
-                                                placeholder="Phone Number"
-                                                id="phonenumber"
-                                                required
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12 col-sm-12 col-lg-12">
-                                        <div className="mb-3">
-                                            <label htmlFor="information" className="form-label">
-                                                Additional Information
-                                            </label>
-                                            <textarea
-                                                type="text"
-                                                className="form-control"
-                                                name="information"
-                                                onChange={onchangeaddcustomer}
-                                                placeholder="Information"
-                                                id="information"
-
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="Address1" className="form-label">
-                                                Address 1
-                                            </label>
-                                            <input
-                                                type="message"
-                                                name="address1"
-                                                onChange={onchangeaddcustomer}
-                                                className="form-control"
-                                                placeholder="Address 1"
-                                                id="Address1"
-
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="Address2" className="form-label">
-                                                Address 2
-                                            </label>
-                                            <input
-                                                type="message"
-                                                name="address2"
-                                                onChange={onchangeaddcustomer}
-                                                className="form-control"
-                                                placeholder="Address 2"
-                                                id="Address2"
-
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="Country" className="form-label">
-                                                Country
-                                            </label>
-                                            <CountrySelect
-                                                name="country"
-                                                value={credentials.countryid}
-                                                onChange={(val) => {
-                                                    console.log(val);
-                                                    setcountryid(val.id);
-                                                    setcountry(val.name);
-                                                    // setCredentials({ ...credentials, country: val.name })
-                                                    // setCredentials({ ...credentials, countryid: val.id })
-                                                    setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
-
-                                                }}
-                                                valueType="short"
-                                                class="form-control"
-                                                placeHolder="Select Country"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="State" className="form-label">
-                                                State
-                                            </label>
-                                            <StateSelect
-                                                name="state"
-                                                countryid={countryid} // Set the country selected in the CountryDropdown
-                                                onChange={(val) => {
-                                                    console.log(val);
-                                                    setstateid(val.id);
-                                                    setstate(val.name);
-                                                    // setCredentials({ ...credentials, state: val.name })
-                                                    // setCredentials({ ...credentials, stateid: val.id })
-                                                    setCredentials({ ...credentials, statedata: JSON.stringify(val) })
-                                                }}
-                                                placeHolder="Select State"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="City" className="form-label">
-                                                City
-                                            </label>
-                                            <CitySelect
-                                                countryid={countryid}
-                                                stateid={stateid}
-                                                onChange={(val) => {
-                                                    console.log(val);
-                                                    setcityid(val.id);
-                                                    setcity(val.name);
-                                                    // setCredentials({ ...credentials, city: val.name })
-                                                    // setCredentials({ ...credentials, cityid: val.id })
-                                                    setCredentials({ ...credentials, citydata: JSON.stringify(val) })
-                                                }}
-                                                placeHolder="Select City"
-                                            />
-                                        </div>
-                                    </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="post" className="form-label">
-                                                Post Code
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="post"
-                                                onChange={onchangeaddcustomer}
-                                                className="form-control"
-                                                placeholder="Post Code"
-                                                id="post"
-
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </form>
-
         </div>
     )
 }

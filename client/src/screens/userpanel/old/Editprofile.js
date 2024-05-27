@@ -36,7 +36,7 @@ export default function Editprofile() {
               }
               else{
                 const json = await response.json();
-            console.log("Json:",json);
+            
             // if (Array.isArray(json)) {
                 setsignupdata(json);
               }
@@ -52,7 +52,26 @@ export default function Editprofile() {
         setsignupdata({ ...signupdata, [name]: value });
     };
 
-   
+    // const handleSaveClick = async () => {
+    //     try {
+    //         const userid = localStorage.getItem("userid");
+    
+    //         const response = await fetch(`https://grithomes.onrender.com/api/updatesignupdata/${userid}`, {
+    //             method: 'POST',
+    //             body: formData,
+    //         });
+    
+    //         const json = await response.json();
+    
+    //         if (json.Success) {
+    //             navigate('/userpanel/Customerlist');
+    //         } else {
+    //             console.error('Error updating Signupdata:', json.message);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error updating Signupdata:', error);
+    //     }
+    // };
     
     const handleSaveClick = async () => {
         try {
@@ -61,7 +80,6 @@ export default function Editprofile() {
             const updatedsignupdata = {
                 ...signupdata
             };
-            console.log("updatedsignupdata:->",updatedsignupdata);
             const response = await fetch(`https://grithomes.onrender.com/api/updatesignupdata/${userid}`, {
                 method: 'POST',
                 headers: {
@@ -70,8 +88,6 @@ export default function Editprofile() {
                 },
                 body: JSON.stringify(updatedsignupdata)
             });
-
-            
 
             if (response.status === 401) {
               const json = await response.json();
@@ -85,8 +101,6 @@ export default function Editprofile() {
 
                 if (json.Success) {
                     navigate('/userpanel/Userdashboard');
-                    // localStorage.setItem("taxOptions", `[{"id":"${updatedsignupdata.TaxName}!${updatedsignupdata.taxPercentage}"},"name":"${updatedsignupdata.TaxName}","percentage":${updatedsignupdata.taxPercentage}]`)
-                    localStorage.setItem("taxOptions", `[{"id":"${updatedsignupdata.TaxName}!${updatedsignupdata.taxPercentage}","name":"${updatedsignupdata.TaxName}","percentage":${updatedsignupdata.taxPercentage}}]`)
                     console.log(updatedsignupdata);
                 } else {
                     console.error('Error updating Signupdata:', json.message);
@@ -227,12 +241,6 @@ export default function Editprofile() {
                                             <div class="form-group pt-3">
                                                 <label class="label py-2" for="TaxName">Business Tax Name</label>
                                                 <input type="text" class="form-control" name="TaxName" value={signupdata.TaxName || ''} onChange={handleInputChange} placeholder="Tax Name" />
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                                            <div class="form-group pt-3">
-                                                <label class="label py-2" for="taxPercentage">Tax in Percentage</label>
-                                                <input type="text" class="form-control" name="taxPercentage" value={signupdata.taxPercentage || 'No'} onChange={handleInputChange} placeholder="Tax Percentage (5%)" />
                                             </div>
                                         </div>
                                         

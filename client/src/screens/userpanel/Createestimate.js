@@ -31,36 +31,40 @@ export default function Createestimate() {
     const [isCustomerSelected, setIsCustomerSelected] = useState(false);
     const [editedName, setEditedName] = useState('');
     const [editedEmail, setEditedEmail] = useState('');
-    const [taxPercentage, setTaxPercentage] = useState(5);
+    const [taxPercentage, setTaxPercentage] = useState(0);
+    const [signUpData, setsignUpData] = useState(0);
     const [discountTotal, setdiscountTotal] = useState(0);
     const [estimateData, setestimateData] = useState({
         customername: '', itemname: '', customeremail: '', estimate_id: '', EstimateNumber: '', purchaseorder: '',
         job: '', date: format(new Date(), 'yyyy-MM-dd'), description: '', itemquantity: '', price: '', discount: '',
-        amount: '', tax: '',discountTotal:'', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
+        amount: '', tax: '', discountTotal: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
     });
-    
+
     // const [editorData, setEditorData] = useState("<p></p>");
     const [editorData, setEditorData] = useState(``);
     const [alertMessage, setAlertMessage] = useState('');
-    
-  const [credentials, setCredentials] = useState({
-    name: '',
-    email: '',
-    number: '',
-    citydata: '',
-    statedata: '',
-    countrydata: '',
-    information: '',
-    address1: '',
-    address2: '',
-    post: '',
-  });
+
+    const [credentials, setCredentials] = useState({
+        name: '',
+        email: '',
+        number: '',
+        citydata: '',
+        statedata: '',
+        countrydata: '',
+        information: '',
+        address1: '',
+        address2: '',
+        post: '',
+    });
 
     useEffect(() => {
         const fetchData = async () => {
             if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") === "true") {
                 navigate("/");
             }
+            const getTaxOptions = localStorage.getItem("taxOptions")
+            // console.log("getTaxOptions:===",JSON.parse(getTaxOptions)[0].name);
+            setsignUpData(JSON.parse(getTaxOptions)[0])
             await fetchcustomerdata();
             await fetchitemdata();
             await fetchLastEstimateNumber();
@@ -72,12 +76,12 @@ export default function Createestimate() {
         setloading(false);
     }, [])
     let navigate = useNavigate();
-    
+
 
     const [countryid, setcountryid] = useState(false);
     const [stateid, setstateid] = useState(false);
     const [cityid, setcityid] = useState(false);
-  
+
     const [country, setcountry] = useState(false);
     const [state, setstate] = useState(false);
     const [city, setcity] = useState(false);
@@ -90,18 +94,18 @@ export default function Createestimate() {
             const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`, {
                 headers: {
-                  'Authorization': authToken,
+                    'Authorization': authToken,
                 }
-              });
+            });
 
-              if (response.status === 401) {
+            if (response.status === 401) {
                 const json = await response.json();
                 setAlertMessage(json.message);
                 setloading(false);
-                window.scrollTo(0,0);
+                window.scrollTo(0, 0);
                 return; // Stop further execution
-              }
-              else{
+            }
+            else {
                 const json = await response.json();
 
                 // let nextEstimateNumber = 1;
@@ -113,8 +117,8 @@ export default function Createestimate() {
                     EstimateNumber: `Estimate-${json.lastEstimateId + 1}`,
                     estimate_id: json.lastEstimateId + 1,
                 });
-              }
-            
+            }
+
         } catch (error) {
             console.error('Error fetching last estimate number:', error);
         }
@@ -127,29 +131,36 @@ export default function Createestimate() {
             const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
                 headers: {
-                  'Authorization': authToken,
+                    'Authorization': authToken,
                 }
-              });
+            });
 
-              if (response.status === 401) {
+            if (response.status === 401) {
                 const json = await response.json();
                 setAlertMessage(json.message);
                 setloading(false);
-                window.scrollTo(0,0);
+                window.scrollTo(0, 0);
                 return; // Stop further execution
-              }
-              else{
-               const json = await response.json();
+            }
+            else {
+                const json = await response.json();
 
                 if (Array.isArray(json)) {
                     setcustomers(json);
-                } 
-              }
-            
+                }
+            }
+
         } catch (error) {
             console.error('Error fetching data:', error);
         }
     }
+    const roundOff1 = (amount) => {
+        return parseFloat(amount).toFixed(2);
+    };
+
+    const roundOff = (value) => {
+        return Math.round(value * 100) / 100;
+    };
 
     const fetchitemdata = async () => {
         try {
@@ -157,25 +168,25 @@ export default function Createestimate() {
             const authToken = localStorage.getItem('authToken');
             const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
                 headers: {
-                  'Authorization': authToken,
+                    'Authorization': authToken,
                 }
-              });
+            });
 
-              if (response.status === 401) {
+            if (response.status === 401) {
                 const json = await response.json();
                 setAlertMessage(json.message);
                 setloading(false);
-                window.scrollTo(0,0);
+                window.scrollTo(0, 0);
                 return; // Stop further execution
-              }
-              else{
+            }
+            else {
                 const json = await response.json();
 
                 if (Array.isArray(json)) {
                     setitems(json);
                 }
-              }
-            
+            }
+
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -341,12 +352,12 @@ export default function Createestimate() {
     const calculateTaxAmount = () => {
         const subtotal = calculateSubtotal();
         const totalDiscountedAmount = subtotal - discountTotal; // Apply overall discount first
-    
+
         // Calculate tax amount on the discounted amount
-        const taxAmount = (totalDiscountedAmount * taxPercentage) / 100;
+        const taxAmount = (totalDiscountedAmount * signUpData.percentage) / 100;
         // const taxAmount = ((subtotal-discountTotal) * taxPercentage) / 100;
         // console.log("taxAmount:", taxAmount, "subtotal:", subtotal, "discountTotal:",discountTotal);
-        return taxAmount;
+        return roundOff(taxAmount);
     };
 
     // Function to calculate total amount
@@ -355,7 +366,7 @@ export default function Createestimate() {
         const taxAmount = calculateTaxAmount();
         const discountAmount = discountTotal;
         const totalAmount = subtotal + taxAmount - discountAmount;
-        return totalAmount;
+        return roundOff(totalAmount);
     };
 
     const handleSubmit = async (e) => {
@@ -407,7 +418,7 @@ export default function Createestimate() {
                 subtotal: subtotal,
                 total: total,
                 tax: taxAmount,
-                taxpercentage: taxPercentageValue,
+                taxpercentage: signUpData.percentage,
                 amountdue: amountdue
             };
 
@@ -425,10 +436,10 @@ export default function Createestimate() {
                 const responseData = await response.json();
                 setAlertMessage(responseData.message);
                 setloading(false);
-                window.scrollTo(0,0);
+                window.scrollTo(0, 0);
                 return; // Stop further execution
             }
-            else{
+            else {
                 if (response.ok) {
                     const responseData = await response.json();
                     if (responseData.success) {
@@ -443,10 +454,10 @@ export default function Createestimate() {
                     setmessage(true);
                     setAlertShow(responseData.error)
                     console.error('Failed to save the estimate.');
-                } 
+                }
             }
 
-            
+
         } catch (error) {
             console.error('Error creating estimate:', error);
         }
@@ -474,20 +485,28 @@ export default function Createestimate() {
 
     const onChangePrice = (event, itemId) => {
         const { value } = event.target;
-        const newPrice = parseFloat(value) || 0;
+        const numericValue = value.replace(/[^0-9.]/g, ''); // Remove any non-numeric characters except decimal point
 
-        // Update the items array in the state with the new price for the specified item
-        const updatedItems = items.map((item) => {
+        // Limit the numeric value to two decimal places
+        const decimalIndex = numericValue.indexOf('.');
+        let formattedValue = numericValue;
+        if (decimalIndex !== -1) {
+            formattedValue = numericValue.slice(0, decimalIndex + 1) + numericValue.slice(decimalIndex + 1).replace(/[^0-9]/g, '').slice(0, 2);
+        }
+
+        const newPrice = parseFloat(formattedValue) || 0;
+
+        // Update the item's price in the items array
+        const updatedItems = items.map(item => {
             if (item._id === itemId) {
                 return {
                     ...item,
-                    price: newPrice,
+                    price: formattedValue // Update with formatted value
                 };
             }
             return item;
         });
 
-        // Update the state with the updated items array
         setitems(updatedItems);
     };
     const onChangeDescription = (event, editor, itemId) => {
@@ -513,74 +532,74 @@ export default function Createestimate() {
         let userid = localStorage.getItem('userid');
         const authToken = localStorage.getItem('authToken');
         const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authToken,
-          },
-          body: JSON.stringify({
-            userid: userid,
-            name: credentials.name,
-            email: credentials.email,
-            information: credentials.information,
-            number: credentials.number,
-            city: city,
-            state: state,
-            country: country,
-            citydata: credentials.citydata,
-            statedata: credentials.statedata,
-            countrydata: credentials.countrydata,
-            cityid: cityid,
-            stateid: stateid,
-            countryid: countryid,
-            address1: credentials.address1,
-            address2: credentials.address2,
-            post: credentials.post,
-          }),
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken,
+            },
+            body: JSON.stringify({
+                userid: userid,
+                name: credentials.name,
+                email: credentials.email,
+                information: credentials.information,
+                number: credentials.number,
+                city: city,
+                state: state,
+                country: country,
+                citydata: credentials.citydata,
+                statedata: credentials.statedata,
+                countrydata: credentials.countrydata,
+                cityid: cityid,
+                stateid: stateid,
+                countryid: countryid,
+                address1: credentials.address1,
+                address2: credentials.address2,
+                post: credentials.post,
+            }),
         });
 
         if (response.status === 401) {
-          const json = await response.json();
-          setAlertMessage(json.message);
-          setloading(false);
-          window.scrollTo(0,0);
-          return; // Stop further execution
+            const json = await response.json();
+            setAlertMessage(json.message);
+            setloading(false);
+            window.scrollTo(0, 0);
+            return; // Stop further execution
         }
-        else{
-           const json = await response.json();
+        else {
+            const json = await response.json();
             console.log(json);
-        
-            if (json.Success) {
-            setCredentials({
-                name: '',
-                email: '',
-                number: '',
-                citydata: '',
-                statedata: '',
-                countrydata: '',
-                information: '',
-                address1: '',
-                address2: '',
-                post: '',
-            });
-        
-            setMessage1(true);
-            setAlertShow(json.message);
-            window.location.reload();
-            //   navigate('/userpanel/Customerlist');
-            }
-        
-            else{
-                alert("This Customer Email already exist")
-            } 
-        }
-    
-        
-      };
 
-      const onchangeaddcustomer = (event) => {
+            if (json.Success) {
+                setCredentials({
+                    name: '',
+                    email: '',
+                    number: '',
+                    citydata: '',
+                    statedata: '',
+                    countrydata: '',
+                    information: '',
+                    address1: '',
+                    address2: '',
+                    post: '',
+                });
+
+                setMessage1(true);
+                setAlertShow(json.message);
+                window.location.reload();
+                //   navigate('/userpanel/Customerlist');
+            }
+
+            else {
+                alert("This Customer Email already exist")
+            }
+        }
+
+
+    };
+
+    const onchangeaddcustomer = (event) => {
         setCredentials({ ...credentials, [event.target.name]: event.target.value });
-      };
+    };
 
 
     return (
@@ -786,7 +805,7 @@ export default function Createestimate() {
                                                                             <div className="row">
                                                                                 <div className="col">
                                                                                     <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
-                                                                                   
+
                                                                                     <CKEditor
                                                                                         editor={ClassicEditor}
                                                                                         data={selectedItem?.description || ''}
@@ -799,9 +818,9 @@ export default function Createestimate() {
                                                                                             console.log('Focus.', editor);
                                                                                         }}
                                                                                     />
-                                                                          
+
                                                                                 </div>
-                                                                              
+
                                                                             </div>
                                                                         </td>
                                                                         <td>
@@ -816,24 +835,17 @@ export default function Createestimate() {
                                                                             />
                                                                         </td>
                                                                         <td>
-                                                                            {/* <input
-                                    type="number"
-                                    name="price"
-                                    className="form-control"
-                                    value={itemPrice}
-                                    id="price"
-                                    required
-                                    disabled
-                                /> */}
+                                                          
                                                                             <input
-                                                                                type="number"
-                                                                                name={`price-${itemId}`}  // Use a unique identifier for each item
+                                                                                type="text"
+                                                                                name={`price-${itemId}`}
                                                                                 className="form-control"
                                                                                 value={itemPrice}
-                                                                                onChange={(event) => onChangePrice(event, itemId)} // Add onChange handler for price
+                                                                                onChange={(event) => onChangePrice(event, itemId)}
                                                                                 id={`price-${itemId}`}
                                                                                 required
                                                                             />
+
                                                                         </td>
                                                                         {/* <td className="text-center">
                                                                             <p><CurrencySign />{discountTotal.toFixed(2)}</p>
@@ -873,8 +885,8 @@ export default function Createestimate() {
                                                                 <p>Subtotal</p>
                                                                 <p>Discount</p>
                                                                 {/* <p>GST</p> */}
-                                                                <p className='pt-3'>GST {taxPercentage}%</p>
-                                                                
+                                                                <p className='pt-3'>{signUpData.name} {signUpData.percentage}%</p>
+
                                                                 <p>Total</p>
                                                             </div>
                                                             <div className="col-6 col-md-9">
@@ -910,7 +922,7 @@ export default function Createestimate() {
                                                                     // style: 'currency',
                                                                     // currency: 'INR',
                                                                 })}</p>
-                                                                
+
                                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
                                                                     // style: 'currency',
                                                                     // currency: 'INR',
@@ -996,213 +1008,213 @@ export default function Createestimate() {
 
                         {/* add customer */}
 
-<form action="">
-            <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                <div className="modal-dialog modal-lg">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <h1 className="modal-title fs-5" id="exampleModalLabel">Add Customer</h1>
-                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div className="modal-body">
-                        <div className="row">
-                            <div className="col-12 col-sm-6 col-lg-4">
-                                <div className="mb-3">
-                                <label htmlFor="exampleInputtext1" className="form-label">
-                                Customer Name
-                                </label>
-                                <input
-                                type="text"
-                                className="form-control"
-                                name="name"
-                                value={credentials.name}
-                                onChange={onchangeaddcustomer}
-                                placeholder="Customer Name"
-                                id="exampleInputtext1"
-                                required
-                                />
+                        <form action="">
+                            <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div className="modal-dialog modal-lg">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h1 className="modal-title fs-5" id="exampleModalLabel">Add Customer</h1>
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div className="modal-body">
+                                            <div className="row">
+                                                <div className="col-12 col-sm-6 col-lg-4">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="exampleInputtext1" className="form-label">
+                                                            Customer Name
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="name"
+                                                            value={credentials.name}
+                                                            onChange={onchangeaddcustomer}
+                                                            placeholder="Customer Name"
+                                                            id="exampleInputtext1"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-4">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="exampleInputEmail1" className="form-label">
+                                                            Contact Email
+                                                        </label>
+                                                        <input
+                                                            type="email"
+                                                            className="form-control"
+                                                            name="email"
+                                                            value={credentials.email}
+                                                            onChange={onchangeaddcustomer}
+                                                            placeholder="Contact Email"
+                                                            id="email"
+                                                            aria-describedby="emailHelp"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-4">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="Number" className="form-label">
+                                                            Phone Number
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="number"
+                                                            className="form-control"
+                                                            onChange={onchangeaddcustomer}
+                                                            placeholder="Phone Number"
+                                                            id="phonenumber"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-12 col-lg-12">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="information" className="form-label">
+                                                            Additional Information
+                                                        </label>
+                                                        <textarea
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="information"
+                                                            onChange={onchangeaddcustomer}
+                                                            placeholder="Information"
+                                                            id="information"
+
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="Address1" className="form-label">
+                                                            Address 1
+                                                        </label>
+                                                        <input
+                                                            type="message"
+                                                            name="address1"
+                                                            onChange={onchangeaddcustomer}
+                                                            className="form-control"
+                                                            placeholder="Address 1"
+                                                            id="Address1"
+
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="Address2" className="form-label">
+                                                            Address 2
+                                                        </label>
+                                                        <input
+                                                            type="message"
+                                                            name="address2"
+                                                            onChange={onchangeaddcustomer}
+                                                            className="form-control"
+                                                            placeholder="Address 2"
+                                                            id="Address2"
+
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="Country" className="form-label">
+                                                            Country
+                                                        </label>
+                                                        <CountrySelect
+                                                            name="country"
+                                                            value={credentials.countryid}
+                                                            onChange={(val) => {
+                                                                console.log(val);
+                                                                setcountryid(val.id);
+                                                                setcountry(val.name);
+                                                                // setCredentials({ ...credentials, country: val.name })
+                                                                // setCredentials({ ...credentials, countryid: val.id })
+                                                                setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
+
+                                                            }}
+                                                            valueType="short"
+                                                            class="form-control"
+                                                            placeHolder="Select Country"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="State" className="form-label">
+                                                            State
+                                                        </label>
+                                                        <StateSelect
+                                                            name="state"
+                                                            countryid={countryid} // Set the country selected in the CountryDropdown
+                                                            onChange={(val) => {
+                                                                console.log(val);
+                                                                setstateid(val.id);
+                                                                setstate(val.name);
+                                                                // setCredentials({ ...credentials, state: val.name })
+                                                                // setCredentials({ ...credentials, stateid: val.id })
+                                                                setCredentials({ ...credentials, statedata: JSON.stringify(val) })
+                                                            }}
+                                                            placeHolder="Select State"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="City" className="form-label">
+                                                            City
+                                                        </label>
+                                                        <CitySelect
+                                                            countryid={countryid}
+                                                            stateid={stateid}
+                                                            onChange={(val) => {
+                                                                console.log(val);
+                                                                setcityid(val.id);
+                                                                setcity(val.name);
+                                                                // setCredentials({ ...credentials, city: val.name })
+                                                                // setCredentials({ ...credentials, cityid: val.id })
+                                                                setCredentials({ ...credentials, citydata: JSON.stringify(val) })
+                                                            }}
+                                                            placeHolder="Select City"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="post" className="form-label">
+                                                            Post Code
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="post"
+                                                            onChange={onchangeaddcustomer}
+                                                            className="form-control"
+                                                            placeholder="Post Code"
+                                                            id="post"
+
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-
-                        <div className="col-12 col-sm-6 col-lg-4">
-                          <div className="mb-3">
-                            <label htmlFor="exampleInputEmail1" className="form-label">
-                              Contact Email
-                            </label>
-                            <input
-                              type="email"
-                              className="form-control"
-                              name="email"
-                              value={credentials.email}
-                              onChange={onchangeaddcustomer}
-                              placeholder="Contact Email"
-                              id="email"
-                              aria-describedby="emailHelp"
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-12 col-sm-6 col-lg-4">
-                          <div className="mb-3">
-                            <label htmlFor="Number" className="form-label">
-                              Phone Number
-                            </label>
-                            <input
-                              type="text"
-                              name="number"
-                              className="form-control"
-                              onChange={onchangeaddcustomer}
-                              placeholder="Phone Number"
-                              id="phonenumber"
-                              required
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-12 col-sm-12 col-lg-12">
-                          <div className="mb-3">
-                            <label htmlFor="information" className="form-label">
-                            Additional Information
-                            </label>
-                            <textarea
-                              type="text"
-                              className="form-control"
-                              name="information"
-                              onChange={onchangeaddcustomer}
-                              placeholder="Information"
-                              id="information"
-                              
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-12 col-sm-6 col-lg-6">
-                          <div className="mb-3">
-                            <label htmlFor="Address1" className="form-label">
-                              Address 1
-                            </label>
-                            <input
-                              type="message"
-                              name="address1"
-                              onChange={onchangeaddcustomer}
-                              className="form-control"
-                              placeholder="Address 1"
-                              id="Address1"
-                              
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-12 col-sm-6 col-lg-6">
-                          <div className="mb-3">
-                            <label htmlFor="Address2" className="form-label">
-                              Address 2
-                            </label>
-                            <input
-                              type="message"
-                              name="address2"
-                              onChange={onchangeaddcustomer}
-                              className="form-control"
-                              placeholder="Address 2"
-                              id="Address2"
-                              
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-12 col-sm-6 col-lg-6">
-                          <div className="mb-3">
-                            <label htmlFor="Country" className="form-label">
-                              Country
-                            </label>
-                            <CountrySelect
-                              name="country"
-                              value={credentials.countryid}
-                              onChange={(val) => {
-                                console.log(val);
-                                setcountryid(val.id);
-                                setcountry(val.name);
-                                    // setCredentials({ ...credentials, country: val.name })
-                                    // setCredentials({ ...credentials, countryid: val.id })
-                                    setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
-                                  
-                              }}
-                              valueType="short"
-                              class="form-control" 
-                              placeHolder="Select Country"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-12 col-sm-6 col-lg-6">
-                          <div className="mb-3">
-                            <label htmlFor="State" className="form-label">
-                              State
-                            </label>
-                            <StateSelect
-                                name="state"
-                                countryid={countryid} // Set the country selected in the CountryDropdown
-                                onChange={(val) => {
-                                    console.log(val);
-                                    setstateid(val.id);
-                                    setstate(val.name);
-                                    // setCredentials({ ...credentials, state: val.name })
-                                    // setCredentials({ ...credentials, stateid: val.id })
-                                    setCredentials({ ...credentials, statedata: JSON.stringify(val) })
-                                }}
-                                placeHolder="Select State"
-                                />
-                          </div>
-                        </div>
-
-                        <div className="col-12 col-sm-6 col-lg-6">
-                          <div className="mb-3">
-                            <label htmlFor="City" className="form-label">
-                              City
-                            </label>
-                            <CitySelect
-                                countryid={countryid}
-                                stateid={stateid}
-                                onChange={(val) => {
-                                console.log(val);
-                                setcityid(val.id);
-                                setcity(val.name);
-                                // setCredentials({ ...credentials, city: val.name })
-                                // setCredentials({ ...credentials, cityid: val.id })
-                                setCredentials({ ...credentials, citydata: JSON.stringify(val) })
-                                }}
-                                placeHolder="Select City"
-                            />
-                          </div>
-                        </div>
-
-                        <div className="col-12 col-sm-6 col-lg-6">
-                          <div className="mb-3">
-                            <label htmlFor="post" className="form-label">
-                            Post Code
-                            </label>
-                            <input
-                              type="text"
-                              name="post"
-                              onChange={onchangeaddcustomer}
-                              className="form-control"
-                              placeholder="Post Code"
-                              id="post"
-                           
-                            />
-                          </div>
-                        </div>
-                      </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                            <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-</form>
+                        </form>
                     </div>
 
 

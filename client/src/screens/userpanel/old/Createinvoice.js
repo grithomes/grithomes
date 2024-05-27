@@ -33,8 +33,7 @@ export default function Createinvoice() {
     const [editedName, setEditedName] = useState('');
     const [editedEmail, setEditedEmail] = useState('');
     const [editedPhone, setEditedPhone] = useState('');
-    const [taxPercentage, setTaxPercentage] = useState(0);
-    const [signUpData, setsignUpData] = useState(0);
+    const [taxPercentage, setTaxPercentage] = useState(5);
     const [discountTotal, setdiscountTotal] = useState(0);
     const [invoiceData, setInvoiceData] = useState({
         customername: '', itemname: '', customeremail: '',customerphone:'', invoice_id: '', InvoiceNumber: '', purchaseorder: '',
@@ -63,16 +62,10 @@ export default function Createinvoice() {
             if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") === "true") {
                 navigate("/");
             }
-            const getTaxOptions = localStorage.getItem("taxOptions")
-            console.log("getTaxOptions:===",JSON.parse(getTaxOptions)[0].name);
-            setsignUpData(JSON.parse(getTaxOptions)[0])
             await fetchcustomerdata();
             await fetchitemdata();
             await fetchLastInvoiceNumber();
-            await fetchsignupdata();
         };
-
-
         if (isNaN(discountTotal)) {
             setdiscountTotal(0);
         }
@@ -92,9 +85,7 @@ export default function Createinvoice() {
 
     const [message1, setMessage1] = useState(false);
 
-    const roundOff = (value) => {
-        return Math.round(value * 100) / 100;
-      };
+
     const fetchLastInvoiceNumber = async () => {
         try {
             const userid = localStorage.getItem('userid');
@@ -130,37 +121,6 @@ export default function Createinvoice() {
             console.error('Error fetching last invoice number:', error);
         }
     };
-    const fetchsignupdata = async () => {
-        try {
-          const userid = localStorage.getItem("userid");
-          const authToken = localStorage.getItem('authToken');
-          const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
-            headers: {
-              'Authorization': authToken,
-            }
-          });
-    
-          if (response.status === 401) {
-            const json = await response.json();
-            setAlertMessage(json.message);
-            setloading(false);
-            window.scrollTo(0, 0);
-            return; // Stop further execution
-          }
-          else {
-            const json = await response.json();
-    
-            // if (Array.isArray(json)) {
-            // setTaxPercentage(json.taxPercentage);
-            // setsignUpData(json)
-            console.log("json: ",json.taxPercentage);
-            // }
-          }
-    
-        } catch (error) {
-          console.error('Error fetching data:', error);
-        }
-      }
 
 
     const fetchcustomerdata = async () => {
@@ -362,19 +322,41 @@ export default function Createinvoice() {
             subtotal += discountedAmount;
         });
 
-        return roundOff(subtotal);
+        return subtotal;
     };
 
+    // Function to handle tax change
+    const handleTaxChange = (event) => {
+        let enteredTax = event.target.value;
+        // console.log("enteredTax:", enteredTax);
+
+        // Restrict input to two digits after the decimal point
+        const regex = /^\d*\.?\d{0,2}$/; // Regex to allow up to two decimal places
+        if (regex.test(enteredTax)) {
+            // Ensure that the entered value is a valid number
+            enteredTax = parseFloat(enteredTax);
+            // console.log("enteredTaxValue:", enteredTax);
+            setTaxPercentage(enteredTax);
+            setInvoiceData({ ...invoiceData, taxpercentage: enteredTax });
+        }
+    };
+
+    // Function to calculate tax amount
+    // const calculateTaxAmount = () => {
+    //     const subtotal = calculateSubtotal();
+    //     const taxAmount = (subtotal * taxPercentage) / 100;
+    //     return taxAmount;
+    // };
 
     const calculateTaxAmount = () => {
         const subtotal = calculateSubtotal();
         const totalDiscountedAmount = subtotal - discountTotal; // Apply overall discount first
 
         // Calculate tax amount on the discounted amount
-        const taxAmount = (totalDiscountedAmount * signUpData.percentage) / 100;
+        const taxAmount = (totalDiscountedAmount * taxPercentage) / 100;
         // const taxAmount = ((subtotal-discountTotal) * taxPercentage) / 100;
         // console.log("taxAmount:", taxAmount, "subtotal:", subtotal, "discountTotal:",discountTotal);
-        return roundOff(taxAmount);
+        return taxAmount;
     };
 
     // Function to calculate total amount
@@ -383,7 +365,7 @@ export default function Createinvoice() {
         const taxAmount = calculateTaxAmount();
         const discountAmount = discountTotal;
         const totalAmount = subtotal + taxAmount - discountAmount;
-        return roundOff(totalAmount);
+        return totalAmount;
     };
 
     const handleSubmit = async (e) => {
@@ -437,7 +419,7 @@ export default function Createinvoice() {
                 subtotal: subtotal,
                 total: total,
                 tax: taxAmount,
-                taxpercentage: signUpData.percentage,
+                taxpercentage: taxPercentageValue,
                 amountdue: amountdue
             };
             console.log(data, "Invoice Data ====");
@@ -503,31 +485,19 @@ export default function Createinvoice() {
     };
 
     const onChangePrice = (event, itemId) => {
-  const { value } = event.target;
-  const numericValue = value.replace(/[^0-9.]/g, ''); // Remove any non-numeric characters except decimal point
-
-  // Limit the numeric value to two decimal places
-  const decimalIndex = numericValue.indexOf('.');
-  let formattedValue = numericValue;
-  if (decimalIndex !== -1) {
-    formattedValue = numericValue.slice(0, decimalIndex + 1) + numericValue.slice(decimalIndex + 1).replace(/[^0-9]/g, '').slice(0, 2);
-  }
-
-  const newPrice = parseFloat(formattedValue) || 0;
-
-  // Update the item's price in the items array
-  const updatedItems = items.map(item => {
-    if (item._id === itemId) {
-      return {
-        ...item,
-        price: formattedValue // Update with formatted value
-      };
-    }
-    return item;
-  });
-
-  setitems(updatedItems);
-};
+        const newPrice = parseFloat(event.target.value);
+        // Update the item's price in the items array
+        const updatedItems = items.map(item => {
+            if (item._id === itemId) {
+                return {
+                    ...item,
+                    price: newPrice
+                };
+            }
+            return item;
+        });
+        setitems(updatedItems);
+    };
 
     const onChangeDescription = (event, editor, itemId) => {
         const value = editor.getData();
@@ -882,7 +852,7 @@ export default function Createinvoice() {
 
                                                                         <td>
                                                                             <input
-                                                                                type="text"
+                                                                                type="number"
                                                                                 name={`price-${itemId}`}
                                                                                 className="form-control"
                                                                                 value={itemPrice}
@@ -935,15 +905,15 @@ export default function Createinvoice() {
                                                             <div className="col-6 col-md-3">
                                                                 <p>Subtotal</p>
                                                                 <p>Discount</p>
-                                                                {console.log(signUpData, "====signUpData")}
                                                                 {/* <p>GST</p> */}
-                                                                <p className='pt-3'>{signUpData.name} {signUpData.percentage}%</p>
+                                                                <p className='pt-3'>GST {taxPercentage}%</p>
 
                                                                 <p>Total</p>
                                                             </div>
                                                             <div className="col-6 col-md-9">
                                                                 <p><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
-                                                                   
+                                                                    // style: 'currency',
+                                                                    // currency: 'INR',
                                                                 })}</p>
                                                                 <div className="mb-3">
                                                                     <input
@@ -957,7 +927,18 @@ export default function Createinvoice() {
                                                                         min="0"
                                                                     />
                                                                 </div>
-                                                              
+                                                                {/* <div className="mb-3">
+                                                                    <input
+                                                                        type="number"
+                                                                        name="tax"
+                                                                        className="form-control"
+                                                                        value={taxPercentage}
+                                                                        onChange={handleTaxChange}
+                                                                        placeholder="Enter Tax Percentage"
+                                                                        id="taxInput"
+                                                                        min="0"
+                                                                    />
+                                                                </div> */}
 
                                                                 <p>{console.log("check Tax Amount", calculateTaxAmount())}<CurrencySign />{
 

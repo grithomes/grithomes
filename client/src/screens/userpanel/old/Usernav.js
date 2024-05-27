@@ -17,7 +17,6 @@ export default function Usernav() {
     localStorage.removeItem('isTeamMember');
     localStorage.removeItem('startTime');
     localStorage.removeItem('currencyType');
-    localStorage.removeItem('taxOptions');
     navigate('/');
   };
   useEffect(()=>{

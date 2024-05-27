@@ -4,9 +4,10 @@ import Usernav from './Usernav';
 import {useNavigate} from 'react-router-dom';
 import Alertauthtoken from '../../components/Alertauthtoken';
 
-export default function Editprofile() {
+export default function Imageupload() {
     
     const [signupdata, setsignupdata] = useState([]);
+    const [imageFile, setImageFile] = useState(null);
     const [alertMessage, setAlertMessage] = useState('');
     let navigate = useNavigate();
 
@@ -17,6 +18,57 @@ export default function Editprofile() {
         }
         fetchsignupdata();
     },[])
+
+    const imageupload = async () => {
+
+        const data = new FormData();
+      
+        if (!imageFile) {
+          alert("No image selected.")
+          throw new Error("No image selected.");
+        }
+      // Check the file type
+      const allowedTypes = ["image/png", "image/jpeg"];
+      if (!allowedTypes.includes(imageFile.type)) {
+        alert("Invalid file type. Please select a PNG or JPG file.")
+        throw new Error("Invalid file type. Please select a PNG or JPG file.");
+      }
+      
+      // Check the file size (in bytes)
+      const maxSizeMB = 2; // Set the maximum file size in megabytes
+      const maxSizeBytes = maxSizeMB * 1024 * 1024;
+      if (imageFile.size > maxSizeBytes) {
+        alert(`File size exceeds the maximum limit of ${maxSizeMB} MB.`)
+        throw new Error(`File size exceeds the maximum limit of ${maxSizeMB} MB.`);
+      }
+      
+      data.append("file", imageFile);
+        data.append("upload_preset", "employeeApp");
+        data.append("cloud_name", "dxwge5g8f");
+      
+        try {
+          const cloudinaryResponse = await fetch(
+            "https://api.cloudinary.com/v1_1/dxwge5g8f/image/upload",
+            {
+              method: "post",
+              body: data,
+            }
+          );
+      
+          if (!cloudinaryResponse.ok) {
+            console.error("Error uploading image to Cloudinary:", cloudinaryResponse.statusText);
+            return;
+          }
+      
+          const cloudinaryData = await cloudinaryResponse.json();
+          console.log("Cloudinary URL:", cloudinaryData.url);
+      
+          return cloudinaryData.url;
+        } catch (error) {
+          console.error("Error uploading image to Cloudinary:", error.message);
+          return null;
+        }
+      };
       
     const fetchsignupdata = async () => {
         try {
@@ -36,68 +88,100 @@ export default function Editprofile() {
               }
               else{
                 const json = await response.json();
-            console.log("Json:",json);
+            
             // if (Array.isArray(json)) {
                 setsignupdata(json);
+            // }
               }
             
-            // }
         } catch (error) {
             console.error('Error fetching data:', error);
         }
     }
 
     const handleInputChange = (event) => {
-        const { name, value } = event.target;
-        setsignupdata({ ...signupdata, [name]: value });
+        const { name, value, files } = event.target;
+        if (files) {
+            setImageFile(files[0]);
+            console.log(files[0], "");
+            const imageUrl = URL.createObjectURL(files[0]);
+            setsignupdata({ ...signupdata, [name]: imageUrl });
+        } else {
+            setsignupdata({ ...signupdata, [name]: value });
+        }
     };
 
-   
-    
     const handleSaveClick = async () => {
         try {
-            const userid =  localStorage.getItem("userid");
+            const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const updatedsignupdata = {
-                ...signupdata
-            };
-            console.log("updatedsignupdata:->",updatedsignupdata);
-            const response = await fetch(`https://grithomes.onrender.com/api/updatesignupdata/${userid}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': authToken,
-                },
-                body: JSON.stringify(updatedsignupdata)
+            const imgurl = await imageupload();
+    
+            const formData = new FormData();
+            formData.append("companyImageUrl", imgurl);
+    
+            // Append other form data properties
+            Object.entries(signupdata).forEach(([key, value]) => {
+                if (key !== "companyImageUrl") {
+                    formData.append(key, value);
+                }
             });
-
-            
-
+    
+            const response = await fetch(`https://grithomes.onrender.com/api/updatesignupdatadata/${userid}`, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Authorization': authToken,
+                }
+            });
             if (response.status === 401) {
-              const json = await response.json();
-              setAlertMessage(json.message);
-            //   setloading(false);
-              window.scrollTo(0,0);
-              return; // Stop further execution
+                const json = await response.json();
+                setAlertMessage(json.message);
+                // setloading(false);
+                window.scrollTo(0,0);
+                return; // Stop further execution
             }
             else{
-                const json = await response.json();
-
+               const json = await response.json();
+    
                 if (json.Success) {
                     navigate('/userpanel/Userdashboard');
-                    // localStorage.setItem("taxOptions", `[{"id":"${updatedsignupdata.TaxName}!${updatedsignupdata.taxPercentage}"},"name":"${updatedsignupdata.TaxName}","percentage":${updatedsignupdata.taxPercentage}]`)
-                    localStorage.setItem("taxOptions", `[{"id":"${updatedsignupdata.TaxName}!${updatedsignupdata.taxPercentage}","name":"${updatedsignupdata.TaxName}","percentage":${updatedsignupdata.taxPercentage}}]`)
-                    console.log(updatedsignupdata);
                 } else {
                     console.error('Error updating Signupdata:', json.message);
-                }
+                } 
             }
-
             
         } catch (error) {
             console.error('Error updating Signupdata:', error);
         }
     };
+    
+    // const handleSaveClick = async () => {
+    //     try {
+    //         const userid =  localStorage.getItem("userid");
+    //         const updatedsignupdata = {
+    //             ...signupdata
+    //         };
+    //         const response = await fetch(`https://grithomes.onrender.com/api/updatesignupdatadata/${userid}`, {
+    //             method: 'POST',
+    //             headers: {
+    //                 'Content-Type': 'application/json'
+    //             },
+    //             body: JSON.stringify(updatedsignupdata)
+    //         });
+
+    //         const json = await response.json();
+
+    //         if (json.Success) {
+    //             navigate('/userpanel/Customerlist');
+    //             console.log(updatedsignupdata);
+    //         } else {
+    //             console.error('Error updating Signupdata:', json.message);
+    //         }
+    //     } catch (error) {
+    //         console.error('Error updating Signupdata:', error);
+    //     }
+    // };
 
 
   return (
@@ -124,8 +208,15 @@ export default function Editprofile() {
                                     {console.log(signupdata, "signupdata")}
 
                                     <div className="row">
-
                                         <div className="col-12 col-sm-12 col-md-6 col-lg-6">
+                                            <div class="form-group pt-3">
+                                                <label class="label py-2" for="company_image">Choose Company Image</label><br />
+                                                <input type="file" name="companyImageUrl" onChange={handleInputChange} /> 
+                                                <img src={signupdata.companyImageUrl} className='w-25'  alt=""  />
+                                           </div>
+                                        </div>
+
+                                        {/* <div className="col-12 col-sm-12 col-md-6 col-lg-6">
                                             <div class="form-group pt-3">
                                                 <label class="label py-2" for="company_name">Company name</label>
                                                 <input type="text" class="form-control" name="companyname" value={signupdata.companyname} onChange={handleInputChange} placeholder="Company name" />
@@ -161,6 +252,7 @@ export default function Editprofile() {
                                                 value={signupdata.CurrencyType}
                                                 onChange={handleInputChange}
                                                 aria-label="Default select example"
+                                                
                                                 >
                                                     <option value="">Select Currency Type</option>
                                                     <option value="AUD"> AUD - Australian Dollar </option>
@@ -169,46 +261,17 @@ export default function Editprofile() {
                                                 </select>
                                             </div>
                                         </div>
+                                        
                                         <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                                            <div className="form-group mb-3 pt-3">
-                                                <label htmlFor="address" className="form-label">Address</label>
-                                                <textarea type="message" className="form-control" name="address" value={signupdata.address} onChange={handleInputChange} placeholder="Address" id="exampleInputaddress" />
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-sm-12 col-md-4 col-lg-4">
                                             <div class="form-group pt-3">
                                                 <label class="label py-2" for="First_Name">First Name</label>
                                                 <input type="text" class="form-control" name="FirstName" value={signupdata.FirstName} onChange={handleInputChange} placeholder="First Name" />
                                             </div>
                                         </div>
-                                        <div className="col-12 col-sm-12 col-md-4 col-lg-4">
+                                        <div className="col-12 col-sm-12 col-md-6 col-lg-6">
                                             <div class="form-group pt-3">
                                                 <label class="label py-2" for="Last_Name">Last Name</label>
                                                 <input type="text" class="form-control" name="LastName" value={signupdata.LastName} onChange={handleInputChange} placeholder="Last Name"  />
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-sm-12 col-md-4 col-lg-4">
-                                            <div class="form-group pt-3">
-                                                <label class="label py-2" for="User1_Mobile_Number">Number</label>
-                                                <input type="text" class="form-control" name="User1_Mobile_Number" value={signupdata.User1_Mobile_Number} onChange={handleInputChange} placeholder="Number"  />
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-sm-12 col-md-4 col-lg-4">
-                                            <div class="form-group pt-3">
-                                                <label class="label py-2" for="First_Name1">First Name</label>
-                                                <input type="text" class="form-control" name="User2FirstName" value={signupdata.User2FirstName} onChange={handleInputChange} placeholder="First Name" />
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-sm-12 col-md-4 col-lg-4">
-                                            <div class="form-group pt-3">
-                                                <label class="label py-2" for="Last_Name">Last Name</label>
-                                                <input type="text" class="form-control" name="LastName" value={signupdata.User2LastName} onChange={handleInputChange} placeholder="Last Name"  />
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-sm-12 col-md-4 col-lg-4">
-                                            <div class="form-group pt-3">
-                                                <label class="label py-2" for="User2_Mobile_Number">Number</label>
-                                                <input type="text" class="form-control" name="User2_Mobile_Number" value={signupdata.User2_Mobile_Number} onChange={handleInputChange} placeholder="Number"  />
                                             </div>
                                         </div>
                                         <div className="col-12 col-sm-12 col-md-6 col-lg-6">
@@ -218,25 +281,11 @@ export default function Editprofile() {
                                             </div>
                                         </div>
                                         <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                                            <div class="form-group pt-3">
-                                                <label class="label py-2" for="gstNumber">Business Tax Number</label>
-                                                <input type="text" class="form-control" name="gstNumber" value={signupdata.gstNumber} onChange={handleInputChange} placeholder="Abn" />
+                                            <div className="form-group mb-3 pt-3">
+                                                <label htmlFor="address" className="form-label">Address</label>
+                                                <textarea type="message" className="form-control" name="address" value={signupdata.address} onChange={handleInputChange} placeholder="Address" id="exampleInputaddress" />
                                             </div>
-                                        </div>
-                                        <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                                            <div class="form-group pt-3">
-                                                <label class="label py-2" for="TaxName">Business Tax Name</label>
-                                                <input type="text" class="form-control" name="TaxName" value={signupdata.TaxName || ''} onChange={handleInputChange} placeholder="Tax Name" />
-                                            </div>
-                                        </div>
-                                        <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                                            <div class="form-group pt-3">
-                                                <label class="label py-2" for="taxPercentage">Tax in Percentage</label>
-                                                <input type="text" class="form-control" name="taxPercentage" value={signupdata.taxPercentage || 'No'} onChange={handleInputChange} placeholder="Tax Percentage (5%)" />
-                                            </div>
-                                        </div>
-                                        
-
+                                        </div> */}
                                     </div>
                                 <button type="button" className='btn btnclr text-white me-2' onClick={handleSaveClick}>Save</button>
                                 </div>

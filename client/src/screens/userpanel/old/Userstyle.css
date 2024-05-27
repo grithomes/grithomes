@@ -13,28 +13,6 @@ body {
   font-family: monospace;
 }
 
-.sent{
-  font-size: 12px;
-  background: #e1effe;
-  color: #1a56db;
-  padding:4px 8px !important
-}
-.paid{
-  font-size: 12px;
-  background: #def7ec;
-  color: #046c4e;
-  padding:4px 8px !important
-}
-.grey-3 {
-  color: #374151;
-}
-.saved{
-  font-size: 12px;
-  background: #f3f4f6;
-  color: #374151;
-  padding:4px 8px !important
-}
-
 .fs-25{
   font-size: 20px !important;
 }
@@ -568,7 +546,7 @@ display: none;}
   margin-left: 10px;
 }
 
-.fs-121{
+.fs-12{
   font-size: 12px;
 }
 

@@ -23,7 +23,6 @@ export default function Usernavbar() {
     localStorage.removeItem('isTeamMember');
     localStorage.removeItem('startTime');
     localStorage.removeItem('currencyType');
-    localStorage.removeItem('taxOptions');
     navigate('/');
   };
   useEffect(() => {
@@ -34,7 +33,7 @@ export default function Usernavbar() {
   })
 
   return (
-    <div className='bg-white b-shadow'>
+    <div className='bg-white'>
       <div className="sidebar-offcanvas pl-0" id="sidebar" role="navigation" style={{ backgroundColor: '#fff' }}>
         <header className="header d-xl-block menu" id="menu">
           <div className="d-flex flex-column ">

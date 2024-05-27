@@ -13,7 +13,7 @@ export default function Timeview() {
   const currentDate = new Date();
   const [alertMessage, setAlertMessage] = useState('');
   const [currentPage, setCurrentPage] = useState(1); // Current page number
-  const [entriesPerPage] = useState(13); // Number of entries per page
+  const [entriesPerPage] = useState(10); // Number of entries per page
 if(location == null || location.state == null || location.state.teamid == null)
 {
     navigate('/userpanel/Team')

@@ -16,18 +16,16 @@ const EstimateSchema = new Schema({
     purchaseorder: {
         type: String,
     },
-    discountTotal: {
-        type: String,
-    },
     job: {
         type: String,
     },
     date: {
         type: Date,
     },
-    // duedate: {
-    //     type: Date,
-    // },
+    emailsent: {
+        type: String,
+        default:'no'
+    },
     description: {
         type: String,
     },
