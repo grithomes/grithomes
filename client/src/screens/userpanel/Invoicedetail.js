@@ -1517,7 +1517,8 @@ thead{
                                       <td>
                                         <div>
                                           <span><strong>{item.itemname}</strong></span>
-                                          <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div>
+                                          <div dangerouslySetInnerHTML={{ __html: item.description }} />
+                                          {/* <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div> */}
                                         </div>
                                       </td>
                                       <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
