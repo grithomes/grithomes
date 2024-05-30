@@ -832,11 +832,22 @@ thead{
             <td className='text-md-end' width="22%">Subtotal</td>
             <td className='text-end' width="22%">${roundOff(estimateData.subtotal)}</td>
           </tr>
-          <tr>
+
+          {
+  estimateData.discountTotal > 0 
+  ?
+<tr>
+<td className='text-md-end' width="22%">Discount</td>
+                                      <td className='text-end' width="22%">${roundOff(estimateData.discountTotal)}</td>
+                                    </tr>
+                                    :
+                                    null
+}
+          {/* <tr>
 
             <td className='text-md-end' width="22%">Discount</td>
             <td className='text-end' width="22%">${roundOff(estimateData.discountTotal)}</td>
-          </tr>
+          </tr> */}
           <tr>
 
             <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%) </td>
