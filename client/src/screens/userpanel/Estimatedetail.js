@@ -41,10 +41,9 @@ export default function Estimatedetail() {
   const [alertMessage, setAlertMessage] = useState('');
 
   
-  const roundOff = (amount) => {
-    return parseFloat(amount).toFixed(2);
-  };
-  
+  const roundOff = (value) => {
+    return Math.round(value * 100) / 100;
+};
   useEffect(() => {
 
     console.log("estimateid ===========", estimateid);
@@ -840,7 +839,7 @@ thead{
           </tr>
           <tr>
 
-            <td className='text-md-end' width="22%">GST (13%)</td>
+            <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%) </td>
             <td className='text-end' width="22%">${roundOff(estimateData.tax)}</td>
           </tr>
           <tr>
