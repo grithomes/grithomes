@@ -1422,9 +1422,6 @@ thead{
                                 <address className='m-t-5 m-b-5'>
                                   <div className='mb-2'>
                                     <div className=''>{signupdata.address}</div>
-                                    {/* <div className=''>Eucumbene Dr</div>
-                                    <div className=''>Ravenhall VIC 3023</div>
-                                    <div className=''>AU</div> */}
                                   </div>
                                   <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
                                   <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
