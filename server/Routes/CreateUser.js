@@ -3632,7 +3632,17 @@ router.post('/login', [
           const mostRecentClockEntry = await Timeschema.findOne({ endTime: null, userid:user._id }).sort({ startTime: -1 });
           const mostRecentClockEntrystartTime = mostRecentClockEntry != null ? mostRecentClockEntry.startTime : "";
           const authToken = jwt.sign(data, jwrsecret);
-          return res.json({ Success: true, authToken, userid: user._id, username: user.FirstName, CurrencyType: user.CurrencyType, startTime:mostRecentClockEntrystartTime, isTeamMember: false, });
+          return res.json(
+            { 
+                Success: true, 
+                authToken, userid: user._id, 
+                username: user.FirstName, 
+                CurrencyType: user.CurrencyType, 
+                startTime:mostRecentClockEntrystartTime, 
+                isTeamMember: false, 
+                taxPercentage: user.taxPercentage,
+                TaxName: user.TaxName,
+            });
         }
       }
   

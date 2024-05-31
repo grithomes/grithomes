@@ -91,7 +91,9 @@ const handleSubmit = async (e) => {
       localStorage.setItem("isTeamMember", json.isTeamMember);
       localStorage.setItem("startTime", json.startTime);
       localStorage.setItem("currencyType", json.CurrencyType);
+      console.log("taxOptions", `[{"id":"${json.TaxName}!${json.taxPercentage}","name":"${json.TaxName}","percentage":${json.taxPercentage}}]`);
       localStorage.setItem("taxOptions", `[{"id":"${json.TaxName}!${json.taxPercentage}","name":"${json.TaxName}","percentage":${json.taxPercentage}}]`);
+      // localStorage.setItem("taxOptions", `[{"id":"${json.TaxName}!${json.taxPercentage}","name":"${json.TaxName}","percentage":${json.taxPercentage}}]`);
 console.log("json:>----", json);
       if (json.isTeamMember) {
         navigate('/Teammemberpanel/Teammenberdashboard');
