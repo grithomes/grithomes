@@ -75,7 +75,7 @@ export default function Estimate() {
     console.log(estimateid);
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://mycabinet.onrender.com/api/converttoinvoice/${estimateid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/converttoinvoice/${estimateid}`, {
         method: 'POST',
         headers: {
           'Authorization': authToken,
