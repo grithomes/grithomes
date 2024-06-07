@@ -49,7 +49,7 @@ export default function Invoicedetail() {
   const [depositpercentage, setdepositPercentage] = useState('');
   const [amount, setAmount] = useState('');
   const [pdfExportVisible, setPdfExportVisible] = useState(false);
-  
+
 
 
   useEffect(() => {
@@ -74,9 +74,12 @@ export default function Invoicedetail() {
   let navigate = useNavigate();
 
   const roundOff = (value) => {
-    return Math.round(value * 100) / 100;
-};
-
+    const roundedValue = Math.round(value * 100) / 100;
+    return roundedValue.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+    });
+  };
   const handlePercentageChange = (event) => {
     setdepositPercentage(event.target.value);
     calculateAmount(event.target.value);
@@ -142,31 +145,30 @@ export default function Invoicedetail() {
               setsavedDepositData('');
               const setamountDue = roundOff(invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0) - responseData.transaction.paidamount)
               console.log("setamountDue Mark Depoist: ==============", setamountDue);
-  
-  
-              const updatedData = { 
-  
-                ...invoiceData,  
-                amountdue: setamountDue, 
-                status: `${
-                  setamountDue == 0
-                  ?
-                  "Paid"
-                  :
-                  "Partially Paid"
-                }`
-              
-              
+
+
+              const updatedData = {
+
+                ...invoiceData,
+                amountdue: setamountDue,
+                status: `${setamountDue == 0
+                    ?
+                    "Paid"
+                    :
+                    "Partially Paid"
+                  }`
+
+
               }; // Update emailsent status
-          await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': authToken,
-            },
-            body: JSON.stringify(updatedData),
-          });
-  
+              await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': authToken,
+                },
+                body: JSON.stringify(updatedData),
+              });
+
 
               console.log('Payment added successfully!');
               // Fetch updated transaction data after payment addition
@@ -178,7 +180,7 @@ export default function Invoicedetail() {
               // Update amount due by subtracting totalPaidAmount from total invoice amount
               const updatedAmountDue = invoiceData.total - totalPaidAmount;
               setInvoiceData({ ...invoiceData, amountdue: updatedAmountDue });
-              
+
               // Close the modal after adding payment
               document.getElementById('closebutton').click();
               if (modalRef.current) {
@@ -647,30 +649,29 @@ export default function Invoicedetail() {
             console.log("setamountDue: ==============", setamountDue);
 
 
-            const updatedData = { 
+            const updatedData = {
 
-              ...invoiceData,  
-              amountdue: setamountDue, 
-              status: `${
-                setamountDue == 0
-                ?
-                "Paid"
-                :
-                "Partially Paid"
-              }`
-            
-            
+              ...invoiceData,
+              amountdue: setamountDue,
+              status: `${setamountDue == 0
+                  ?
+                  "Paid"
+                  :
+                  "Partially Paid"
+                }`
+
+
             }; // Update emailsent status
-        await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authToken,
-          },
-          body: JSON.stringify(updatedData),
-        });
+            await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken,
+              },
+              body: JSON.stringify(updatedData),
+            });
 
-        
+
             await fetchtransactiondata();
 
             // Calculate total paid amount from transactions
@@ -1119,9 +1120,8 @@ thead{
         // setShowModal(false);
         setShowEmailAlert(true);
 
-        if(invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid')
-        {
-          const updatedData = {invoiceData }
+        if (invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid') {
+          const updatedData = { invoiceData }
           await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
@@ -1130,8 +1130,8 @@ thead{
             },
             body: JSON.stringify(updatedData),
           });
-        }else {
-          const updatedData = { ...invoiceData,status:"Send", emailsent: 'yes' }
+        } else {
+          const updatedData = { ...invoiceData, status: "Send", emailsent: 'yes' }
           await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
@@ -1194,9 +1194,8 @@ thead{
         setShowSendEmailModal(false)
         setShowEmailAlert(true);
         // Update the database with emailsent status
-        if(invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid')
-        {
-          const updatedData = {invoiceData }
+        if (invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid') {
+          const updatedData = { invoiceData }
           await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
@@ -1205,8 +1204,8 @@ thead{
             },
             body: JSON.stringify(updatedData),
           });
-        }else {
-          const updatedData = { ...invoiceData,status:"Send", emailsent: 'yes' }
+        } else {
+          const updatedData = { ...invoiceData, status: "Send", emailsent: 'yes' }
           await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
@@ -1426,7 +1425,17 @@ thead{
                                   <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
                                   <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
                                   <div>{signupdata.email}</div>
-                                  <div>{signupdata.TaxName}: {signupdata.gstNumber}</div>
+                                  <div>
+                                    {signupdata.gstNumber == '' || signupdata.gstNumber == null
+                                      ?
+                                      ''
+                                      :
+                                      <div>
+                                        {signupdata.TaxName}: {signupdata.gstNumber}
+                                      </div>
+                                    }
+                                  </div>
+                                 
 
                                 </address>
                               </div>
@@ -1474,22 +1483,22 @@ thead{
                                   </div>
                                   <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(invoiceData.duedate)}</div>
                                 </div> */}
-                                
 
-                                  {
-                                    invoiceData.job == "" ||  invoiceData.job == null
+
+                                {
+                                  invoiceData.job == "" || invoiceData.job == null
                                     ?
                                     ""
                                     :
                                     <div className='row text-md-end'>
-                                    <div className='col-6 col-md'>
-                                    <strong>Job</strong>
-                                  </div>
-                                  <div className='col-6 col-md invoice-detail-right'>{invoiceData.job}</div>
-                                  </div>
-                                  }
-                                 
-                               
+                                      <div className='col-6 col-md'>
+                                        <strong>Job</strong>
+                                      </div>
+                                      <div className='col-6 col-md invoice-detail-right'>{invoiceData.job}</div>
+                                    </div>
+                                }
+
+
 
                               </div>
                             </div>
@@ -1519,8 +1528,8 @@ thead{
                                         </div>
                                       </td>
                                       <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
-                                      <td className="text-end d-none d-md-table-cell">{roundOff(item.price)}</td>
-                                      <td className='text-end'>{roundOff(item.amount)}</td>
+                                      <td className="text-end d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
+                                      <td className='text-end'><CurrencySign />{roundOff(item.amount)}</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -1536,32 +1545,32 @@ thead{
                                     <tr>
                                       <td className='d-none d-md-table-cell' rowspan="10"></td>
                                       <td className='text-md-end' width="22%">Subtotal</td>
-                                      <td className='text-end' width="22%">${roundOff(invoiceData.subtotal)}</td>
+                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.subtotal)}</td>
                                     </tr>
                                     {
-  invoiceData.discountTotal > 0 
-  ?
-<tr>
-<td className='text-md-end' width="22%">Discount</td>
-                                      <td className='text-end' width="22%">${roundOff(invoiceData.discountTotal)}</td>
-                                    </tr>
-                                    :
-                                    null
-}
+                                      invoiceData.discountTotal > 0
+                                        ?
+                                        <tr>
+                                          <td className='text-md-end' width="22%">Discount</td>
+                                          <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.discountTotal)}</td>
+                                        </tr>
+                                        :
+                                        null
+                                    }
                                     <tr>
 
                                       <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%)</td>
-                                      <td className='text-end' width="22%">${roundOff(invoiceData.tax)}</td>
+                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.tax)}</td>
                                     </tr>
                                     <tr>
 
                                       <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
-                                      <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${roundOff(invoiceData.total)}</td>
+                                      <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{roundOff(invoiceData.total)}</td>
                                     </tr>
                                     {transactions.map((transaction) => (
                                       <tr key={transaction._id}>
                                         <td className='text-md-end' width="22%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
-                                        <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${transaction.paidamount}</td>
+                                        <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount}</td>
                                       </tr>
                                     ))}
                                   </tbody>

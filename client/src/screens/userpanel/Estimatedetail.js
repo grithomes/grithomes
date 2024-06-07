@@ -42,7 +42,11 @@ export default function Estimatedetail() {
 
   
   const roundOff = (value) => {
-    return Math.round(value * 100) / 100;
+    const roundedValue = Math.round(value * 100) / 100;
+    return roundedValue.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+  });
 };
   useEffect(() => {
 
@@ -179,6 +183,10 @@ export default function Estimatedetail() {
       <head>
         <title>Print Invoice</title>
         <style>
+        body{
+          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
+        }
+        
       
         .print-page{
           // width:80%;
@@ -369,7 +377,7 @@ export default function Estimatedetail() {
         }
         .invoice-header {
           background: #f0f3f4;
-          padding: 25px 50px;
+          padding: 20px 38px 10px;
         }
         @media print {
           body {
@@ -377,7 +385,7 @@ export default function Estimatedetail() {
           }
           .invoice-header {
             background: #f0f3f4;
-            padding: 25px 50px;
+            padding: 20px 38px 10px;
           }
           @page {
             /* Hide header and footer */
@@ -729,7 +737,17 @@ thead{
                                   <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
                                   <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
                                   <div>{signupdata.email}</div>
-                                  <div>{signupdata.TaxName}: {signupdata.gstNumber}</div>
+                                  <div>
+                                    {signupdata.gstNumber == '' || signupdata.gstNumber == null
+                                      ?
+                                      ''
+                                      :
+                                      <div>
+                                        {signupdata.TaxName}: {signupdata.gstNumber}
+                                      </div>
+                                    }
+                                  </div>
+                                  {/* <div>{signupdata.TaxName}: {signupdata.gstNumber}</div> */}
 
                                 </address>
                               </div>
@@ -761,13 +779,13 @@ thead{
         <div className='col-6 col-md'>
           <strong>Date</strong>
         </div>
-        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.date)}</div>
+        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.createdAt)}</div>
       </div>
       <div className='row text-md-end'>
         <div className='col-6 col-md'>
           <strong>Due date</strong>
         </div>
-        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
+        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.date)}</div>
       </div>
       {/* <div className='row text-md-end'>
         <div className='col-6 col-md'>
@@ -811,8 +829,8 @@ thead{
               </div>
             </td>
             <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
-            <td className="text-end d-none d-md-table-cell">{roundOff(item.price)}</td>
-            <td className='text-end'>{roundOff(item.amount)}</td>
+            <td className="text-end d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
+            <td className='text-end'><CurrencySign />{roundOff(item.amount)}</td>
           </tr>
         ))}
       </tbody>
@@ -828,7 +846,7 @@ thead{
           <tr>
             <td className='d-none d-md-table-cell' rowspan="5"></td>
             <td className='text-md-end' width="22%">Subtotal</td>
-            <td className='text-end' width="22%">${roundOff(estimateData.subtotal)}</td>
+            <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.subtotal)}</td>
           </tr>
 
           {
@@ -836,7 +854,7 @@ thead{
   ?
 <tr>
 <td className='text-md-end' width="22%">Discount</td>
-                                      <td className='text-end' width="22%">${roundOff(estimateData.discountTotal)}</td>
+                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.discountTotal)}</td>
                                     </tr>
                                     :
                                     null
@@ -849,12 +867,12 @@ thead{
           <tr>
 
             <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%) </td>
-            <td className='text-end' width="22%">${roundOff(estimateData.tax)}</td>
+            <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.tax)}</td>
           </tr>
           <tr>
 
             <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
-            <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${roundOff(estimateData.total)}</td>
+            <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{roundOff(estimateData.total)}</td>
           </tr>
           {transactions.map((transaction) => (
             <tr key={transaction._id}>
@@ -912,7 +930,7 @@ thead{
                               <p>Total</p>
                             </div>
                             <div className="col-6 text-end">
-                              <p><CurrencySign />{estimateData.total}</p>
+                              <p><CurrencySign />{roundOff(estimateData.total)}</p>
                             </div>
 
                           </div><hr />

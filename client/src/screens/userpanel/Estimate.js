@@ -26,7 +26,11 @@ export default function Estimate() {
   }, [])
 
   const roundOff = (value) => {
-    return Math.round(value * 100) / 100;
+    const roundedValue = Math.round(value * 100) / 100;
+    return roundedValue.toLocaleString('en-IN', {
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2
+  });
 };
 
   const fetchData = async () => {
