@@ -609,15 +609,17 @@ export default function Editinvoice() {
                         </div>
                         <div className='box1 rounded adminborder p-4 m-2 mb-5'>
                             <div className='row me-2'>
-                                <div className="col-5">
-                                        <div className="customerdetail p-3">
+                                <div className="col-12 col-md-5">
+                                        <div className="customerdetail ">
                                             <ul>
                                                 <li className='fw-bold fs-4'>{invoiceData.customername}</li>
+                                                <li>{invoiceData.customeremail}</li>
                                             </ul>
-                                            <p>{invoiceData.customeremail}</p>
+                                           
                                         </div>
+                                        <hr />
                                 </div>    
-                                <div className="col-7">
+                                <div className="col-12 col-md-7">
                                     <div className="row">
                                         <div className="col-6">
                                             <div className="mb-3">
@@ -703,103 +705,94 @@ export default function Editinvoice() {
                                     </div>
                                 </div>    
                             </div>
+                            <div class="table-responsive">
+                                            <table class="table">
+                                                <thead>
+                                                    <tr>
+                                                        <th scope="col">ITEM</th>
+                                                        <th scope="col">QUANTITY</th>
+                                                        <th scope="col">PRICE</th>
+                                                        <th scope="col">AMOUNT</th>
+
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+
+                                                    {invoiceData.items && invoiceData.items.map((item) => (
+
+                                                        <tr key={item.itemId}>
+                                                            <td>
+                                                                <p>{item.itemname} 
+                                                                <span className='btn btn-danger btn-sm me-2' onClick={() => handleDeleteClick(item.itemId)}>
+                                                                <i className=" fas fa-trash"></i>
+                                                                </span>
+                                                                </p>
+                                                               
+                                                                <CKEditor
+                                                                    editor={ClassicEditor}
+                                                                    data={item.description}
+                                                                    // onReady={ editor => {
+                                                                    //     console.log( 'Editor is ready to use!', editor );
+                                                                    // } }
+
+                                                                    onChange={(event, editor) => {
+                                                                        handleDescriptionChange(editor, item.itemId);
+                                                                    }
+                                                                    }
+                                                                    onBlur={(event, editor) => {
+                                                                        console.log('Blur.', editor);
+                                                                    }}
+                                                                    onFocus={(event, editor) => {
+                                                                        console.log('Focus.', editor);
+                                                                    }}
+                                                                />
+                                                            </td>
+
+                                                            <td>
+                                                                <input
+                                                                    type="number"
+                                                                    name="quantity"
+                                                                    className="form-control"
+                                                                    value={item.itemquantity}
+                                                                    onChange={(event) => handleQuantityChange(event, item.itemId)}
+                                                                    id={`quantity-${item.itemId}`}
+                                                                    required
+                                                                />
+                                                            </td>
+
+                                                            <td>
+                                                            <input
+                                                                    type="number"
+                                                                    name="price"
+                                                                    className="form-control"
+                                                                    value={item.price}
+                                                                    onChange={(event) => handlePriceChange(event, item.itemId)} // Add onChange handler
+                                                                    id={`price-${item.itemId}`}
+                                                                    required
+                                                                />
+                                                            </td>
+
+                                                            <td>
+                                                            <p><CurrencySign />{item.amount}</p>
+                                                            </td>
+
+                                                        </tr>
+
+                                                    ))}
+
+                                                  
+                                                </tbody>
+                                            </table>
+                                        </div>
 
                             <div className='box1 rounded adminborder p-4 m-2'>
-                                <div className="row pt-3">
-                                    <div className="col-6">
-                                        <p>ITEM</p>
-                                    </div>
-                                    <div className="col-2">
-                                        <p>QUANTITY</p>
-                                    </div>
-                                    <div className="col-2">
-                                        <p>PRICE</p>
-                                    </div>
-                                    {/* <div className="col-2">
-                                        <p>DISCOUNT</p>
-                                    </div> */}
-                                    <div className="col-2">
-                                        <p>AMOUNT</p>
-                                    </div>
-                                </div>
+                                
 
-                                <div>
-                                    {console.log(invoiceData, "invoiceData")}
-                                {invoiceData.items && invoiceData.items.map((item) => (
-                                    <div className='row' key={item.itemId}>
-                                    <div className="col-6 ">
-                                        <div className="mb-3 d-flex align-items-baseline justify-content-between">
-                                            <p>{item.itemname}</p>
-                                            <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(item.itemId)}>
-                                            {/* <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(invoiceData.itemId)}> */}
- 
-                                                <i className="fas fa-trash"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <div className="col-2">
-                                        <div className="mb-3">
-                                        <input
-                                            type="number"
-                                            name="quantity"
-                                            className="form-control"
-                                            value={item.itemquantity}
-                                            onChange={(event) => handleQuantityChange (event, item.itemId)}
-                                            id={`quantity-${item.itemId}`}
-                                            required
-                                        />
-                                        </div>
-                                    </div>
-                                    <div className="col-2">
-                                        <div className="mb-3">
-                                          
-                                            <input
-                                                        type="text"
-                                                        name="price"
-                                                        className="form-control"
-                                                        value={item.price}
-                                                        id={`price-${item.itemId}`}
-                                                        required
-                                                        onChange={(event) => handlePriceChange(event, item.itemId)}
-                                                        onBlur={(event) => handlePriceBlur(event, item.itemId)}
-                                                    />
-                                        </div>
-                                    </div>
-                                  
-                                    <div className="col-2">
-                                        <p><CurrencySign />{item.amount}</p>
-                                    </div>
-                                    <div className="col-6">
-                                                <div class="mb-3">
-                                                    <label htmlFor="description" className="form-label">Description</label>
-                                                  
-                                                    <CKEditor
-                                                        editor={ClassicEditor}
-                                                        data={item.description} // Make sure item.description is a valid string
-                                                        onChange={(event, editor) => {
-                                                            // Ensure handleDescriptionChange receives editor instance
-                                                            handleDescriptionChange(editor, item.itemId);
-                                                        }}
-                                                        onBlur={(event, editor) => {
-                                                            console.log('Blur.', editor);
-                                                        }}
-                                                        onFocus={(event, editor) => {
-                                                            console.log('Focus.', editor);
-                                                        }}
-                                                    />
-                                                </div>
-                                            </div>
-                                            
-                                          
-                                    
-                                    </div>
-                                        ))}
-                               
-                                </div>
+                                
                                 <hr />
 
                                 <div className="row pt-3">
-                                    <div className="col-7">
+                                    <div className="col-12 col-md-7">
                                         <div className="search-container forms">
                                             <p className='fs-20 mb-0'>Select Item</p>
                                             <VirtualizedSelect
@@ -817,7 +810,7 @@ export default function Editinvoice() {
                                             </VirtualizedSelect> 
                                         </div>
                                     </div>
-                                    <div className="col-5">
+                                    <div className="col-12 col-md-5 pt-4">
                                         <div className="row">
                                             <div className="col-6">
                                                 <p>Subtotal</p>
@@ -872,8 +865,8 @@ export default function Editinvoice() {
                                 </div>
                                 <hr />
                                 <div className="row pt-3">
-                                    <div className="col-7"></div>
-                                    <div className="col-5">
+                                    <div className="col-12 col-md-7"></div>
+                                    <div className="col-12 col-md-5">
                                         <div className="row">
                                             <div className="col-6">
                                                 <p>Amount due</p>
