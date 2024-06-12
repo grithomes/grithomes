@@ -64,6 +64,13 @@ export default function Invoicedetail() {
     }
   }, [invoiceid])
 
+  const getSecureUrl = (url) => {
+    if (url.startsWith('http://')) {
+      return url.replace('http://', 'https://');
+    }
+    return url;
+  };
+
   useEffect(() => {
     console.log('Customer Email:', invoiceData.customeremail);
     if (invoiceData.customeremail) {
@@ -152,10 +159,10 @@ export default function Invoicedetail() {
                 ...invoiceData,
                 amountdue: setamountDue,
                 status: `${setamountDue == 0
-                    ?
-                    "Paid"
-                    :
-                    "Partially Paid"
+                  ?
+                  "Paid"
+                  :
+                  "Partially Paid"
                   }`
 
 
@@ -654,10 +661,10 @@ export default function Invoicedetail() {
               ...invoiceData,
               amountdue: setamountDue,
               status: `${setamountDue == 0
-                  ?
-                  "Paid"
-                  :
-                  "Partially Paid"
+                ?
+                "Paid"
+                :
+                "Partially Paid"
                 }`
 
 
@@ -1407,11 +1414,17 @@ thead{
 
                           <div className="invoice-body">
                             <div className='row'>
+                              {console.log(signupdata, "signupdata")}
                               <div className='col-sm-12 col-md-6 mb-3 mb-md-0 pt-3'>
-                                {signupdata.companyImageUrl !== "" ?
-                                  <img src={signupdata.companyImageUrl} className='w-50 logoimage' alt="testing imahe" /> :
+                                {signupdata.companyImageUrl !== "" ? (
+                                  <img
+                                    src={getSecureUrl(signupdata.companyImageUrl)}
+                                    className='w-50 logoimage'
+                                    alt="testing image"
+                                  />
+                                ) : (
                                   <p className='h4 fw-bold'>{signupdata.companyname}</p>
-                                }
+                                )}
                               </div>
                               <div className='col-sm-12 col-md-6 text-md-end'>
                                 <h1>Invoice</h1>
@@ -1435,7 +1448,7 @@ thead{
                                       </div>
                                     }
                                   </div>
-                                 
+
 
                                 </address>
                               </div>
@@ -1881,7 +1894,7 @@ thead{
                 </div>
                 <div class="mb-3 row">
                   <div className="col-5">
-                    <label for="number" class="form-label">Percentage</label>
+                    <label for={'number'} class="form-label">Percentage</label>
                     <div className='input-group mb-4'>
                       <input type="number" className="form-control" id="depositpercentage" value={depositpercentage} onChange={handlePercentageChange} min="0" />
                       <span class="input-group-text">%</span>
@@ -1891,14 +1904,14 @@ thead{
                     <p className='pt-3 fs-2 ps-5'>=</p>
                   </div>
                   <div className="col-5">
-                    <label for="text" class="form-label">Amount</label>
+                    <label for={'text'} class="form-label">Amount</label>
                     <div className='input-group mb-4'>
                       <input type="text" className="form-control" id="amount" value={amount} readOnly />
                       <span class="input-group-text"><CurrencySign /></span>
                     </div>
                   </div>
                   <div className="col-5">
-                    <label for="date" class="form-label" id='duedepositdate'>Due Date</label>
+                    <label for={''} class="form-label" id='duedepositdate'>Due Date</label>
                     <input type="date" class="form-control" value={duedepositDate} onChange={handleDateChange} />
                   </div>
                 </div>
