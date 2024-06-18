@@ -10,6 +10,9 @@ const InvoiceSchema = new Schema({
     customername: {
         type: String,
     },
+    job: {
+        type: String,
+    },
     customeremail: {
         type: String,
     },

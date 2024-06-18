@@ -102,6 +102,7 @@ export default function Invoice() {
   const handleViewClick = (invoice) => {
     let invoiceid = invoice._id;
     navigate('/userpanel/Invoicedetail', { state: { invoiceid } });
+
   };
 
   const formatCustomDate = (dateString) => {
