@@ -29,13 +29,13 @@ export default function Timeschemahistory() {
 
   const fetchAllEntries = async () => {
     try {
-      // Fetch all entries for the merchant's team (teamid)
-    const authToken = localStorage.getItem('authToken');
+      const authToken = localStorage.getItem('authToken');
       const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`, {
         headers: {
           'Authorization': authToken,
         }
       });
+  
       if (response.status === 401) {
         const data = await response.json();
         setAlertMessage(data.message);
@@ -43,29 +43,68 @@ export default function Timeschemahistory() {
         window.scrollTo(0,0);
         return; // Stop further execution
       }
-      else{
-          const data = await response.json();
-    
-          setUserEntries(data.userEntries);
-          // Extract unique months from the entries
-          const months = [...new Set(data.userEntries.map((entry) => new Date(entry.startTime).getMonth()))];
-          setUniqueMonths(months);
-      
-          const initialPageByMonth = {};
-          months.forEach((monthIndex) => {
-            initialPageByMonth[monthIndex] = 0;
-          });
-          setCurrentPageByMonth(initialPageByMonth);
-      
-          setTimeout(() => {
-            setLoading(false);
-          }, 2000);
-      }
-      
+  
+      const data = await response.json();
+      const sortedEntries = data.userEntries.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+      setUserEntries(sortedEntries);
+  
+      // Extract unique months from the sorted entries
+      const months = [...new Set(sortedEntries.map((entry) => new Date(entry.startTime).getMonth()))];
+      setUniqueMonths(months);
+  
+      const initialPageByMonth = {};
+      months.forEach((monthIndex) => {
+        initialPageByMonth[monthIndex] = 0;
+      });
+      setCurrentPageByMonth(initialPageByMonth);
+  
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
     } catch (error) {
       console.error(error);
     }
   };
+  
+  // const fetchAllEntries = async () => {
+  //   try {
+  //     // Fetch all entries for the merchant's team (teamid)
+  //   const authToken = localStorage.getItem('authToken');
+  //     const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`, {
+  //       headers: {
+  //         'Authorization': authToken,
+  //       }
+  //     });
+  //     if (response.status === 401) {
+  //       const data = await response.json();
+  //       setAlertMessage(data.message);
+  //       setLoading(false);
+  //       window.scrollTo(0,0);
+  //       return; // Stop further execution
+  //     }
+  //     else{
+  //         const data = await response.json();
+    
+  //         setUserEntries(data.userEntries);
+  //         // Extract unique months from the entries
+  //         const months = [...new Set(data.userEntries.map((entry) => new Date(entry.startTime).getMonth()))];
+  //         setUniqueMonths(months);
+      
+  //         const initialPageByMonth = {};
+  //         months.forEach((monthIndex) => {
+  //           initialPageByMonth[monthIndex] = 0;
+  //         });
+  //         setCurrentPageByMonth(initialPageByMonth);
+      
+  //         setTimeout(() => {
+  //           setLoading(false);
+  //         }, 2000);
+  //     }
+      
+  //   } catch (error) {
+  //     console.error(error);
+  //   }
+  // };
 
   // const fetchAllEntries = async () => {
   //   try {

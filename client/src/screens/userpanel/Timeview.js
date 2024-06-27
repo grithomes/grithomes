@@ -28,45 +28,46 @@ useEffect(() => {
 
   const fetchAllEntries = async () => {
     try {
-      // Calculate the start and end timestamps for the current month
-      const currentMonthIndex = currentDate.getMonth(); // Get the current month (0-indexed)
-      const currentYear = currentDate.getFullYear();
+      const currentMonthIndex = new Date().getMonth(); // Get the current month (0-indexed)
+      const currentYear = new Date().getFullYear();
       const startOfMonth = new Date(currentYear, currentMonthIndex, 1, 0, 0, 0);
       const endOfMonth = new Date(currentYear, currentMonthIndex + 1, 0, 23, 59, 59);
       const authToken = localStorage.getItem('authToken');
-
+  
       const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`, {
         headers: {
           'Authorization': authToken,
         }
       });
+  
       if (response.status === 401) {
         const data = await response.json();
         setAlertMessage(data.message);
         setloading(false);
-        window.scrollTo(0,0);
+        window.scrollTo(0, 0);
         return; // Stop further execution
       }
-      else{
-        const data = await response.json();
-
+  
+      const data = await response.json();
+  
       // Filter userEntries to include only entries for the current month
-        const filteredEntries = data.userEntries.filter((entry) => {
-          const entryTime = new Date(entry.startTime).getTime();
-          return entryTime >= startOfMonth.getTime() && entryTime <= endOfMonth.getTime();
-        });
-
-        setUserEntries(filteredEntries);
-
-        setTimeout(() => {
-          setloading(false);
-        }, 2000); 
-      }
-      
+      const filteredEntries = data.userEntries.filter((entry) => {
+        const entryTime = new Date(entry.startTime).getTime();
+        return entryTime >= startOfMonth.getTime() && entryTime <= endOfMonth.getTime();
+      });
+  
+      // Sort the filtered entries by start time
+      const sortedEntries = filteredEntries.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+      setUserEntries(sortedEntries);
+  
+      setTimeout(() => {
+        setloading(false);
+      }, 2000);
     } catch (error) {
       console.error(error);
     }
   };
+  
 
 const GoToHistory = () => {
   navigate('/Timeschemahistory', { state: { teamid } });

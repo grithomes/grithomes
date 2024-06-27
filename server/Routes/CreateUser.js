@@ -2938,6 +2938,7 @@
 const express = require('express');
 const router = express.Router();
 const momentTimezone = require('moment-timezone');
+const moment = require('moment');
 const User = require('../models/User');
 const Restaurant = require('../models/Restaurent')
 const { body, validationResult } = require('express-validator');
@@ -2975,6 +2976,120 @@ const getCurrencySign = (currencyType) => {
             return '₹';
     }
 };
+
+router.get('/currentMonthReceivedAmount/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const startOfMonth = moment().startOf('month');
+        const endOfMonth = moment().endOf('month');
+
+        // Parse and format the dates using moment
+        const formattedStartDate = moment(startOfMonth).format('YYYY-MM-DD');
+        const formattedEndDate = moment(endOfMonth).format('YYYY-MM-DD');
+
+        // Aggregate total amount from Invoices for the current month
+        const invoiceResult = await Invoice.aggregate([
+            {
+                $match: {
+                    userid: userId,
+                    date: {
+                        $gte: new Date(formattedStartDate),
+                        $lte: new Date(formattedEndDate)
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    curMonTotalAmount: { $sum: "$total" }
+                }
+            }
+        ]);
+
+        const allTransactions = await Transactions.find({
+            userid: userId,
+            paiddate: {
+                $gte: formattedStartDate,
+                $lte: formattedEndDate
+            }
+        });
+
+        // Calculate the total paid amount
+        const totalPaidAmount = allTransactions.reduce(
+            (total, transaction) => total + parseFloat(transaction.paidamount),
+            0
+        );
+
+        // Calculate the unpaid amount
+        const curMonTotalAmount = invoiceResult.length > 0 ? invoiceResult[0].curMonTotalAmount : 0;
+        const curMonUnpaidAmount = curMonTotalAmount - totalPaidAmount;
+
+        res.json({
+            curMonTotalAmount,
+            curMonPaidAmount: totalPaidAmount,
+            curMonUnpaidAmount
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.get('/totalPaymentReceived/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+
+        // Fetch transactions for the user
+        const transactions = await Transactions.find({ userid: userId });
+
+        // Fetch invoices for the user
+        const invoices = await Invoice.find({ userid: userId });
+
+        // Calculate total payment received from transactions
+        const totalPaymentReceivedFromTransactions = transactions.reduce(
+            (total, transaction) => total + parseFloat(transaction.paidamount),
+            0
+        );
+
+        // Calculate total invoice amount
+        const totalInvoiceAmount = invoices.reduce(
+            (total, invoice) => total + parseFloat(invoice.total),
+            0
+        );
+
+        // Calculate unpaid amount
+        const totalUnpaidAmount = totalInvoiceAmount - totalPaymentReceivedFromTransactions;
+
+        res.json({
+            totalPaymentReceived: totalPaymentReceivedFromTransactions,
+            totalInvoiceAmount,
+            totalUnpaidAmount
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.get('/overdueInvoices/:userId', async (req, res) => {
+    try {
+        const userId = req.params.userId;
+        const currentDate = new Date();
+
+        const overdueInvoices = await Invoice.find({
+            userid: userId,
+            duedate: { $lt: currentDate },
+            status: { $ne: 'Paid' }
+        });
+
+        const overdueCount = overdueInvoices.length;
+
+        res.json({ overdueCount, overdueInvoices });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
 
 router.post('/send-invoice-email', async (req, res) => {
     const {
