@@ -5,7 +5,7 @@ const mongoDB = require("./db")
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 var path = require('path');
-// const { job } = require('./cron');
+const { job } = require('./cron');
 mongoDB();
 
 // Set maximum payload size limit
@@ -13,7 +13,7 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Start the cron job
-// job.start();
+job.start();
 
 app.use((req, res, next) => {
   // res.setHeader("Access-Control-Allow-Origin", "https://restro-wbno.vercel.app");
