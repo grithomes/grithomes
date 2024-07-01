@@ -291,7 +291,7 @@ const handleOverdue = () => {
               <div className='txt px-4 py-4'>
                 {console.log(signupdata, "signupdata")}
                 <h2 className='fs-35 fw-bold'>Dashboard</h2>
-                <p>Hi, {signupdata.FirstName} ! &#128075;</p>
+                // <p>Hi, {signupdata.FirstName} ! &#128075;</p>
               </div>
               <div className='row'>
                 <div className='col-12 col-sm-12 col-md-8 col-lg-8 '>
