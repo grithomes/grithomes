@@ -111,12 +111,12 @@ export default function Itemlist() {
     );
 
     // Pagination functions
-    const getPageCount = () => Math.ceil(items.length / entriesPerPage);
+    const getPageCount = () => Math.ceil(filteredItems.length / entriesPerPage);
   
     const getCurrentPageItems = () => {
       const startIndex = currentPage * entriesPerPage;
       const endIndex = startIndex + entriesPerPage;
-      return items.slice(startIndex, endIndex);
+      return filteredItems.slice(startIndex, endIndex);
     };
   
     const handlePrevPage = () => {

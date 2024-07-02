@@ -119,12 +119,12 @@ export default function Customerlist() {
     
 
   // Pagination functions
-  const getPageCount = () => Math.ceil(customers.length / entriesPerPage);
+  const getPageCount = () => Math.ceil(filteredCustomers.length / entriesPerPage);
 
   const getCurrentPageCustomers = () => {
     const startIndex = currentPage * entriesPerPage;
     const endIndex = startIndex + entriesPerPage;
-    return customers.slice(startIndex, endIndex);
+    return filteredCustomers.slice(startIndex, endIndex);
   };
 
   const handlePrevPage = () => {

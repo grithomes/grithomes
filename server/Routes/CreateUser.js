@@ -3079,7 +3079,7 @@ router.get('/overdueInvoices/:userId', async (req, res) => {
         const overdueInvoices = await Invoice.find({
             userid: userId,
             duedate: { $lt: currentDate },
-            status: { $ne: 'Paid' }
+            status: 'Saved'
         });
 
         const overdueCount = overdueInvoices.length;
@@ -4204,6 +4204,80 @@ router.post("/addcustomer",
             res.status(500).json({ message: 'Internal server error' });
         }
     });
+
+    router.post("/addcustomer", [
+    body('email').isEmail(),
+    body('name').isLength({ min: 3 }),
+    body('information').isLength(),
+    body('number').isNumeric(),
+    body('city').isLength(),
+    body('state').isLength(),
+    body('country').isLength(),
+    body('post').isLength(),
+], async (req, res) => {
+    const errors = validationResult(req);
+    let authtoken = req.headers.authorization;
+
+    try {
+        // Verify JWT token
+        const decodedToken = jwt.verify(authtoken, jwrsecret);
+        console.log(decodedToken);
+
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ errors: errors.array() });
+        }
+
+        const email = req.body.email;
+        const existingCustomer = await Customerlist.findOne({ email });
+
+        if (existingCustomer) {
+            console.log('Email already registered:', email);
+            return res.status(400).json({
+                success: false,
+                message: "This Customer Email already exists!"
+            });
+        } else {
+            // Create new customer record
+            const newCustomer = await Customerlist.create({
+                userid: req.body.userid,
+                name: req.body.name,
+                information: req.body.information,
+                email: req.body.email,
+                number: req.body.number,
+                country: req.body.country,
+                countryid: req.body.countryid,
+                city: req.body.city,
+                cityid: req.body.cityid,
+                state: req.body.state,
+                stateid: req.body.stateid,
+                countrydata: req.body.countrydata,
+                statedata: req.body.statedata,
+                citydata: req.body.citydata,
+                zip: req.body.zip,
+                address1: req.body.address1,
+                address2: req.body.address2,
+                post: req.body.post,
+            });
+
+            res.json({
+                success: true,
+                message: "Congratulations! Your Customer has been successfully added!",
+                data: newCustomer
+            });
+        }
+    } catch (error) {
+        console.error(error);
+
+        // Handle token verification errors
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+
+        // Handle other errors
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 
 // router.post(
 //         '/savecreateinvoice',

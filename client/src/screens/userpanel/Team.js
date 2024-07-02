@@ -114,12 +114,12 @@ export default function Team() {
         team.name.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
-    const getPageCount = () => Math.ceil(teammembers.length / entriesPerPage);
+    const getPageCount = () => Math.ceil(filteredTeamMembers.length / entriesPerPage);
 
   const getCurrentPageItems = () => {
     const startIndex = currentPage * entriesPerPage;
     const endIndex = startIndex + entriesPerPage;
-    return teammembers.slice(startIndex, endIndex);
+    return filteredTeamMembers.slice(startIndex, endIndex);
   };
 
   const handlePrevPage = () => {

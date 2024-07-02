@@ -68,12 +68,13 @@ const handleSubmit = async (e) => {
   setloginbtnloader(true);
 
   try {
+    const sanitizedEmail = credentials.email.toLowerCase().replace(/\s+/g, '');
     const response = await fetch("https://grithomes.onrender.com/api/login", {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ email: credentials.email, password: credentials.password })
+      body: JSON.stringify({ email: sanitizedEmail, password: credentials.password })
     });
 
     const json = await response.json();
