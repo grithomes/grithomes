@@ -68,6 +68,9 @@ const InvoiceSchema = new Schema({
     userid:{
         type: String,
     },
+    noteimageUrl:{
+        type: String,
+    },
     createdAt: {
         type: Date,
         default: Date.now,

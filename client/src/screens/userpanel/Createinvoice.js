@@ -6,13 +6,58 @@ import Usernav from './Usernav';
 import Usernavbar from './Usernavbar';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import VirtualizedSelect from 'react-virtualized-select';
-import 'react-virtualized-select/styles.css';
-import 'react-virtualized/styles.css'
+import Select from 'react-select';
+// import VirtualizedSelect from 'react-virtualized-select';
+// import 'react-virtualized-select/styles.css';
+// import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
 import Alertauthtoken from '../../components/Alertauthtoken';
+
+class MyCustomUploadAdapter {
+    constructor(loader) {
+        // Save Loader instance to use later
+        this.loader = loader;
+    }
+
+    upload() {
+        return this.loader.file.then(file => {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', 'employeeApp'); // Replace with your Cloudinary upload preset
+                formData.append('cloud_name', 'dxwge5g8f'); // Replace with your Cloudinary cloud name
+
+                // Upload image to Cloudinary
+                fetch('https://api.cloudinary.com/v1_1/dxwge5g8f/image/upload', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resolve({
+                        default: data.secure_url
+                    });
+                    console.log(data.secure_url, "================================================================");
+                })
+                .catch(error => {
+                    reject(error.message || 'Failed to upload image to Cloudinary');
+                });
+            });
+        });
+    }
+
+    abort() {
+        // Implement if needed
+    }
+}
+
+function MyCustomUploadAdapterPlugin(editor) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+        return new MyCustomUploadAdapter(loader);
+    };
+}
 
 export default function Createinvoice() {
     const [loading, setloading] = useState(true);
@@ -43,6 +88,7 @@ export default function Createinvoice() {
     });
     // const [editorData, setEditorData] = useState("<p></p>");
     const [editorData, setEditorData] = useState(``);
+    const [noteimageUrl, setnoteImageUrl] = useState(''); 
     const [alertMessage, setAlertMessage] = useState('');
     const [credentials, setCredentials] = useState({
         name: '',
@@ -244,8 +290,6 @@ export default function Createinvoice() {
         }
     };
 
-
-
     const handleEditorChange = (event, editor) => {
         const data = editor.getData();
         setEditorData(data);
@@ -438,7 +482,8 @@ export default function Createinvoice() {
                 total: total,
                 tax: taxAmount,
                 taxpercentage: signUpData.percentage,
-                amountdue: amountdue
+                amountdue: amountdue,
+                noteimageUrl: noteimageUrl,
             };
             console.log(data, "Invoice Data ====");
 
@@ -692,7 +737,7 @@ export default function Createinvoice() {
                                                             <p className='fs-20 mb-0'>Select Customers</p>
                                                             <div className="row">
                                                                 <div className="col-6">
-                                                                    <VirtualizedSelect
+                                                                    {/* <VirtualizedSelect
                                                                         id="searchitems"
                                                                         name="customername"
                                                                         className="form-control zindex op pl-0"
@@ -703,6 +748,16 @@ export default function Createinvoice() {
                                                                             ({ label: customer.name, value: customer._id })
 
                                                                         )}
+                                                                    /> */}
+
+                                                                    <Select
+                                                                        value={searchcustomerResults}
+                                                                        onChange={onChangecustomer}
+                                                                        options={customers.map(customer => ({
+                                                                            value: customer._id,
+                                                                            label: customer.name,
+                                                                        }))}
+                                                                        placeholder=""
                                                                     />
 
                                                                 </div>
@@ -914,7 +969,7 @@ export default function Createinvoice() {
                                                     <div className="col-lg-6 col-md-12">
                                                         <div className="search-container forms">
                                                             <p className='fs-20 mb-0'>Select Item</p>
-                                                            <VirtualizedSelect
+                                                            {/* <VirtualizedSelect
                                                                 id="searchitems"
                                                                 name="itemname"
                                                                 className="form-control zindex op pl-0"
@@ -926,7 +981,16 @@ export default function Createinvoice() {
                                                                 )}
 
                                                             >
-                                                            </VirtualizedSelect>
+                                                            </VirtualizedSelect> */}
+                                                            <Select
+                                                                value={searchitemResults}
+                                                                onChange={onChangeitem}
+                                                                options={items.map(item => ({
+                                                                    value: item._id,
+                                                                    label: item.itemname,
+                                                                }))}
+                                                                placeholder=""
+                                                            />
 
                                                         </div>
                                                     </div>
@@ -1008,6 +1072,9 @@ export default function Createinvoice() {
                                                     // } }
 
                                                     onChange={handleEditorChange}
+                                                    config={{
+                                                        extraPlugins: [MyCustomUploadAdapterPlugin],
+                                                    }}
                                                     onBlur={(event, editor) => {
                                                         console.log('Blur.', editor);
                                                     }}

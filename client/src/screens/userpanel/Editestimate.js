@@ -6,11 +6,56 @@ import Usernav from './Usernav';
 import Usernavbar from './Usernavbar';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import VirtualizedSelect from 'react-virtualized-select';
-import 'react-virtualized-select/styles.css';
-import 'react-virtualized/styles.css'
+import Select from 'react-select';
+// import VirtualizedSelect from 'react-virtualized-select';
+// import 'react-virtualized-select/styles.css';
+// import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
 import Alertauthtoken from '../../components/Alertauthtoken';
+
+class MyCustomUploadAdapter {
+    constructor(loader) {
+        // Save Loader instance to use later
+        this.loader = loader;
+    }
+
+    upload() {
+        return this.loader.file.then(file => {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', 'employeeApp'); // Replace with your Cloudinary upload preset
+                formData.append('cloud_name', 'dxwge5g8f'); // Replace with your Cloudinary cloud name
+
+                // Upload image to Cloudinary
+                fetch('https://api.cloudinary.com/v1_1/dxwge5g8f/image/upload', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resolve({
+                        default: data.secure_url
+                    });
+                    console.log(data.secure_url, "================================================================");
+                })
+                .catch(error => {
+                    reject(error.message || 'Failed to upload image to Cloudinary');
+                });
+            });
+        });
+    }
+
+    abort() {
+        // Implement if needed
+    }
+}
+
+function MyCustomUploadAdapterPlugin(editor) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+        return new MyCustomUploadAdapter(loader);
+    };
+}
 
 export default function Editestimate() {
 
@@ -801,7 +846,7 @@ export default function Editestimate() {
                                                 <div className="col-12 col-md-5">
                                                     <div className="search-container forms">
                                                         <p className='fs-20 mb-0'>Select Item</p>
-                                                        <VirtualizedSelect
+                                                        {/* <VirtualizedSelect
                                                             id="searchitems"
                                                             name="itemname"
                                                             className="form-control zindex op pl-0"
@@ -813,7 +858,16 @@ export default function Editestimate() {
                                                             )}
 
                                                         >
-                                                        </VirtualizedSelect>
+                                                        </VirtualizedSelect> */}
+                                                        <Select
+                                                            value={searchitemResults}
+                                                            onChange={onChangeitem}
+                                                            options={items.map(item => ({
+                                                                value: item._id,
+                                                                label: item.itemname,
+                                                            }))}
+                                                            placeholder=""
+                                                        />
                                                     </div>
                                                 </div>
                                                 <div className="col-12 col-md-5 pt-4">
@@ -883,6 +937,7 @@ export default function Editestimate() {
                                                 // } }
 
                                                 onChange={handleEditorChange}
+                                                config={{ extraPlugins: [MyCustomUploadAdapterPlugin] }}
                                                 onBlur={(event, editor) => {
                                                     console.log('Blur.', editor);
                                                 }}

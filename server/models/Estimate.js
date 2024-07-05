@@ -6,6 +6,9 @@ const EstimateSchema = new Schema({
     estimate_id: { 
         type: Number
     },
+    noteimageUrl:{
+        type: String,
+    },
     EstimateNumber: { type: String },
     customername: {
         type: String,

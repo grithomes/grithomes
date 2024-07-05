@@ -6,13 +6,58 @@ import Usernav from './Usernav';
 import Usernavbar from './Usernavbar';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import VirtualizedSelect from 'react-virtualized-select';
-import 'react-virtualized-select/styles.css';
-import 'react-virtualized/styles.css'
+import Select from 'react-select';
+// import VirtualizedSelect from 'react-virtualized-select';
+// import 'react-virtualized-select/styles.css';
+// import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
 import Alertauthtoken from '../../components/Alertauthtoken';
+
+class MyCustomUploadAdapter {
+    constructor(loader) {
+        // Save Loader instance to use later
+        this.loader = loader;
+    }
+
+    upload() {
+        return this.loader.file.then(file => {
+            return new Promise((resolve, reject) => {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', 'employeeApp'); // Replace with your Cloudinary upload preset
+                formData.append('cloud_name', 'dxwge5g8f'); // Replace with your Cloudinary cloud name
+
+                // Upload image to Cloudinary
+                fetch('https://api.cloudinary.com/v1_1/dxwge5g8f/image/upload', {
+                    method: 'POST',
+                    body: formData,
+                })
+                .then(response => response.json())
+                .then(data => {
+                    resolve({
+                        default: data.secure_url
+                    });
+                    console.log(data.secure_url, "================================================================");
+                })
+                .catch(error => {
+                    reject(error.message || 'Failed to upload image to Cloudinary');
+                });
+            });
+        });
+    }
+
+    abort() {
+        // Implement if needed
+    }
+}
+
+function MyCustomUploadAdapterPlugin(editor) {
+    editor.plugins.get('FileRepository').createUploadAdapter = (loader) => {
+        return new MyCustomUploadAdapter(loader);
+    };
+}
 
 export default function Createestimate() {
     const [loading, setloading] = useState(true);
@@ -419,7 +464,8 @@ export default function Createestimate() {
                 total: total,
                 tax: taxAmount,
                 taxpercentage: signUpData.percentage,
-                amountdue: amountdue
+                amountdue: amountdue,
+                noteimageUrl: noteimageUrl,
             };
 
 
@@ -667,7 +713,7 @@ export default function Createestimate() {
                                                             <p className='fs-20 mb-0'>Select Customers</p>
                                                             <div className="row">
                                                                 <div className="col-6">
-                                                                    <VirtualizedSelect
+                                                                    {/* <VirtualizedSelect
                                                                         id="searchitems"
                                                                         name="customername"
                                                                         className="form-control zindex op pl-0"
@@ -677,6 +723,15 @@ export default function Createestimate() {
                                                                         options={customers.map((customer, index) =>
                                                                             ({ label: customer.name, value: customer._id })
                                                                         )}
+                                                                    /> */}
+                                                                    <Select
+                                                                        value={searchcustomerResults}
+                                                                        onChange={onChangecustomer}
+                                                                        options={customers.map(customer => ({
+                                                                            value: customer._id,
+                                                                            label: customer.name,
+                                                                        }))}
+                                                                        placeholder=""
                                                                     />
                                                                 </div>
                                                                 <div className="col-3">
@@ -864,7 +919,7 @@ export default function Createestimate() {
                                                     <div className="col-lg-6 col-md-12">
                                                         <div className="search-container forms">
                                                             <p className='fs-20 mb-0'>Select Item</p>
-                                                            <VirtualizedSelect
+                                                            {/* <VirtualizedSelect
                                                                 id="searchitems"
                                                                 name="itemname"
                                                                 className="form-control zindex op pl-0"
@@ -876,7 +931,16 @@ export default function Createestimate() {
                                                                 )}
 
                                                             >
-                                                            </VirtualizedSelect>
+                                                            </VirtualizedSelect> */}
+                                                            <Select
+                                                                value={searchitemResults}
+                                                                onChange={onChangeitem}
+                                                                options={items.map(item => ({
+                                                                    value: item._id,
+                                                                    label: item.itemname,
+                                                                }))}
+                                                                placeholder=""
+                                                            />
                                                         </div>
                                                     </div>
                                                     <div className="col-lg-6 col-md-12">
@@ -959,6 +1023,9 @@ export default function Createestimate() {
                                                     editor={ClassicEditor}
                                                     data={editorData}
                                                     onChange={handleEditorChange}
+                                                    config={{
+                                                        extraPlugins: [MyCustomUploadAdapterPlugin],
+                                                    }}
                                                     onBlur={(event, editor) => {
                                                         console.log('Blur.', editor);
                                                     }}
