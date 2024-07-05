@@ -87,6 +87,7 @@ export default function Createestimate() {
 
     // const [editorData, setEditorData] = useState("<p></p>");
     const [editorData, setEditorData] = useState(``);
+    const [noteimageUrl, setnoteImageUrl] = useState(''); 
     const [alertMessage, setAlertMessage] = useState('');
 
     const [credentials, setCredentials] = useState({
