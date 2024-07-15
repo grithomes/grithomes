@@ -3091,6 +3091,42 @@ router.get('/overdueInvoices/:userId', async (req, res) => {
     }
 });
 
+router.get('/currentMonthReceivedAmount2/:userid', async (req, res) => {
+    try {
+        const userid = req.params.userid;
+        const { startOfMonth, endOfMonth } = req.query;
+
+        const formattedStartDate = moment(startOfMonth).format('YYYY-MM-DD');
+        const formattedEndDate = moment(endOfMonth).format('YYYY-MM-DD');
+
+        const result = await Transactions.aggregate([
+            {
+                $match: {
+                    userid: userid,
+                    paiddate: {
+                        $gte: formattedStartDate,
+                        $lte: formattedEndDate
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$paiddate",
+                    totalReceivedAmount: { $sum: "$paidamount" }
+                }
+            },
+            {
+                $sort: { _id: 1 } 
+            }
+        ]);
+
+        res.json(result);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 router.post('/send-invoice-email', async (req, res) => {
     const {
         to,
