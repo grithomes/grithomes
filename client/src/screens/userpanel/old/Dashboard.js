@@ -70,7 +70,7 @@ export default function Dashboard() {
   // const fetchUserEntries = async (start, end) => {
   //   try {
   //     const userid = localStorage.getItem('userid');
-  //     const response = await fetch(`http://localhost:3001/api/userEntries/${userid}`);
+  //     const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${userid}`);
   //     const data = await response.json();
 
   //     // Filter userEntries to include only entries for the current month
@@ -100,7 +100,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -128,7 +128,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      let url = `http://localhost:3001/api/invoicedata/${userid}`;
+      let url = `https://grithomes.onrender.com/api/invoicedata/${userid}`;
      // Add the status query parameter if provided
      if (status) {
       url += `?status=${encodeURIComponent(status)}`;
@@ -158,7 +158,7 @@ export default function Dashboard() {
        setinvoices(json);
 
         const transactionPromises = json.map(async (invoice) => {
-          const response = await fetch(`http://localhost:3001/api/gettransactiondata/${invoice._id}`, {
+          const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
             headers: {
               'Authorization': authToken,
             }

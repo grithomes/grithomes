@@ -69,7 +69,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/getestimatedata/${estimateid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -100,7 +100,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/gettransactiondata/${estimateid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -137,7 +137,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -485,7 +485,7 @@ thead{
   const handleRemove = async (estimateid) => {
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/delestimatedata/${estimateid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
         method: 'GET',
         headers: {
           'Authorization': authToken,
@@ -535,7 +535,7 @@ thead{
     const contentAsPdf = await generatePdfFromHtml();
     try {
       const finalContent = content.trim() || `Thank you for Business With Us`; // If content is empty, use default value
-      const response = await fetch('http://localhost:3001/api/send-estimate-email', {
+      const response = await fetch('https://grithomes.onrender.com/api/send-estimate-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -561,7 +561,7 @@ thead{
         setShowEmailAlert(true);
         // Update the database with emailsent status
         const updatedData = { ...estimateData, emailsent: 'yes' }; // Update emailsent status
-        await fetch(`http://localhost:3001/api/updateestimateData/${estimateid}`, {
+        await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
