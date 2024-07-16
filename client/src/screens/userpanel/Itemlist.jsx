@@ -168,7 +168,7 @@ export default function Itemlist() {
                                 <p className='h5 fw-bold'>Items</p>
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
-                                        <li class="breadcrumb-item"><a href="/itempanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
+                                        <li class="breadcrumb-item"><a href="/userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
                                         <li class="breadcrumb-item active" aria-current="page">Items</li>
                                     </ol>
                                 </nav>

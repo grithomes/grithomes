@@ -176,7 +176,7 @@ export default function Customerlist() {
                                 <p className='h5 fw-bold'>Customers</p>
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
-                                        <li class="breadcrumb-item"><a href="/customerpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
+                                        <li class="breadcrumb-item"><a href="/userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
                                         <li class="breadcrumb-item active" aria-current="page">Customers</li>
                                     </ol>
                                 </nav>

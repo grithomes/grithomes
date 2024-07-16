@@ -45,7 +45,7 @@ export default function Usernav() {
       <div class="offcanvas-body nav">
       <ul>
                     <li className='text-center'>
-                      <Link to="/Userpanel/Userdashboard" className={`nav-link scrollto icones text-black ${location.pathname == '/Userpanel/Userdashboard' ? 'active' : ''}`} >
+                      <Link to="/userpanel/Userdashboard" className={`nav-link scrollto icones text-black ${location.pathname == '/userpanel/Userdashboard' ? 'active' : ''}`} >
                         <span>Dashboard</span>
                       </Link>
                     </li>
@@ -133,7 +133,7 @@ export default function Usernav() {
     //             <div className="nav">
     //               <ul>
     //                 <li className='text-center'>
-    //                   <Link to="/Userpanel/Userdashboard" className='nav-link scrollto icones text-black' >
+    //                   <Link to="/userpanel/Userdashboard" className='nav-link scrollto icones text-black' >
     //                     <span>Dashboard</span>
     //                   </Link>
     //                 </li>
