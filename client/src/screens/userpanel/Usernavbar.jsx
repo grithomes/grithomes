@@ -47,7 +47,7 @@ export default function Usernavbar() {
                 <div className="nav">
                   <ul>
                     <li className='text-center'>
-                      <Link to="/userpanel/Userdashboard" className={`nav-link scrollto w-100 icones text-black ${location.pathname == '/userpanel/Userdashboard' ? 'active' : ''}`} >
+                      <Link to="/Userpanel/Userdashboard" className={`nav-link scrollto w-100 icones text-black ${location.pathname == '/Userpanel/Userdashboard' ? 'active' : ''}`} >
                         <span >Dashboard</span>
                       </Link>
                     </li>
