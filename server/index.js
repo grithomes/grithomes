@@ -13,7 +13,7 @@ app.use(bodyParser.json({ limit: '10mb' }));
 app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 // Start the cron job
-// job.start();
+job.start();
 
 app.use((req, res, next) => {
   // res.setHeader("Access-Control-Allow-Origin", "https://restro-wbno.vercel.app");
