@@ -113,7 +113,8 @@ export default function Customerlist() {
 
     // Filtering function
     const filteredCustomers = customers.filter(customer =>
-        customer.name.toLowerCase().includes(searchQuery.toLowerCase())
+        customer.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        customer.email.toLowerCase().includes(searchQuery.toLowerCase())
     );
 
     
@@ -191,7 +192,7 @@ export default function Customerlist() {
                                 <input
                                     type="text"
                                     className="form-control mb-2"
-                                    placeholder="Search by name"
+                                    placeholder="Search by name or email"
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />

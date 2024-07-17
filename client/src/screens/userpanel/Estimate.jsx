@@ -17,6 +17,7 @@ export default function Estimate() {
   const [currentPage, setCurrentPage] = useState(0);
   const [alertMessage, setAlertMessage] = useState('');
   const entriesPerPage = 10;
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true") {
@@ -118,14 +119,31 @@ export default function Estimate() {
     }
   };
 
+  const getFilteredEstimates = () => {
+    if (!searchQuery) {
+      return estimates;
+    }
+    return estimates.filter(estimate =>
+      estimate.customername.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      estimate.job.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
   // Pagination functions
-  const getPageCount = () => Math.ceil(estimates.length / entriesPerPage);
+  const getPageCount = () => Math.ceil(getFilteredEstimates.length / entriesPerPage);
 
   const getCurrentPageEstimates = () => {
+    const filteredEstimates = getFilteredEstimates();
     const startIndex = currentPage * entriesPerPage;
     const endIndex = startIndex + entriesPerPage;
-    return estimates.slice(startIndex, endIndex);
+    return filteredEstimates.slice(startIndex, endIndex);
   };
+
+  // const getCurrentPageEstimates = () => {
+  //   const startIndex = currentPage * entriesPerPage;
+  //   const endIndex = startIndex + entriesPerPage;
+  //   return estimates.slice(startIndex, endIndex);
+  // };
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
@@ -182,6 +200,18 @@ export default function Estimate() {
                     </div>
                   </div>
                   <hr />
+
+                  <div className="row mb-3">
+                    <div className='col-3'>
+                      <input
+                        type="text"
+                        className="form-control mb-2"
+                        placeholder="Search by name or job"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                  </div>
 
                   <div className='row px-2 table-responsive'>
                     <table className='table table-bordered'>
