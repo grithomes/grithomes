@@ -5,7 +5,7 @@ const mongoDB = require("./db")
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
 var path = require('path');
-// const { job } = require('./cron');
+const { job } = require('./cron');
 mongoDB();
 
 // Set maximum payload size limit
