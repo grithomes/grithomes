@@ -4547,6 +4547,32 @@ router.get('/invoicedata/:userid', async (req, res) => {
     }
 });
 
+router.get('/customerwisedata/:customeremail', async (req, res) => {
+    try {
+        let customeremail = req.params.customeremail;
+        let authtoken = req.headers.authorization;
+        
+        // Verify JWT token
+        const decodedToken = jwt.verify(authtoken, jwrsecret);
+        console.log(decodedToken);
+        
+        // Find invoice data for the specified customer email sorted by creation date in descending order
+        const invoicedata = await Invoice.find({ customeremail: customeremail }).sort({ createdAt: -1 });
+        
+        res.json(invoicedata);
+    } catch (error) {
+        console.error('Error fetching customer-wise data:', error);
+        
+        // Handle token verification errors
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+        
+        // Handle other errors
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
 router.post('/converttoinvoice/:estimateid', async (req, res) => {
     try {
         const { estimateid } = req.params;

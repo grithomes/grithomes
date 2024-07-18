@@ -140,6 +140,12 @@ export default function Customerlist() {
     }
   };
 
+  const handleViewClick = (customer) => {
+    let customerid = customer._id;
+    let customerEmail = customer.email;
+    navigate('/userpanel/Customerwiseinvoice', { state: { customerid, customerEmail } });
+};
+
   return (
     <div className='bg'>
     {
@@ -208,6 +214,7 @@ export default function Customerlist() {
                                         <th scope="col">Email </th>
                                         <th scope="col">Date</th>
                                         <th scope="col">Phone Number  </th>
+                                        <th scope='col'>View</th>
                                         <th scope="col">Edit/Delete </th>
                                     </tr>
                                 </thead>
@@ -219,6 +226,11 @@ export default function Customerlist() {
                                         <td>{customer.email}</td>
                                         <td>{formatDate(customer.createdAt)}</td>
                                         <td>{customer.number}</td>
+                                        <td className='text-center'>
+                                            <a role='button' className='text-black text-center' onClick={() => handleViewClick(customer)}>
+                                            <i className='fa-solid fa-eye'></i>
+                                            </a>
+                                        </td>
                                         <td>
                                             <div className="d-flex">
                                                 <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={() => handleEditClick(customer)}>

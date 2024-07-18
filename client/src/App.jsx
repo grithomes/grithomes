@@ -29,6 +29,7 @@ import Imageupload from './screens/userpanel/Imageupload';
 import Editprofile from './screens/userpanel/Editprofile';
 import Overdue from './screens/userpanel/Overdue';
 import Reports from './screens/userpanel/Reports';
+import Customerwiseinvoice from './screens/userpanel/Customerwiseinvoice'
 // import { InvoiceProvider } from './components/InvoiceContext';
 import {
   BrowserRouter as Router,
@@ -70,6 +71,7 @@ function App() {
             <Route exact path='/userpanel/Editprofile' element={<Editprofile/>} />
             <Route exact path='/userpanel/Overdue' element={<Overdue/>} />
             <Route exact path='/userpanel/Reports' element={<Reports/>} />
+            <Route exact path='/userpanel/Customerwiseinvoice' element={<Customerwiseinvoice/>} />
             <Route exact path='/Timeschemahistory' element={<Timeschemahistory/>} />
             <Route exact path='/Teammemberpanel/Teammenberdashboard' element={<Teammenberdashboard/>} />
             <Route exact path='/Teammemberpanel/History' element={<Teamhistory/>} />
