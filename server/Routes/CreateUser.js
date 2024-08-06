@@ -2959,6 +2959,9 @@ const Invoice = require('../models/Invoice');
 const Estimate = require('../models/Estimate');
 const Transactions = require('../models/Transactions');
 const Deposit = require('../models/Deposit');
+const Signature = require('../models/Signature')
+const Ownwesignature = require('../models/Ownwesignature')
+const CustomerSignatureSchema = require('../models/CustomerSignature')
 const crypto = require('crypto');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
@@ -2976,6 +2979,303 @@ const getCurrencySign = (currencyType) => {
             return '₹';
     }
 };
+
+
+
+router.get('/check-signature/:ownerId', (req, res) => {
+    const ownerId = req.params.ownerId;
+  
+    Ownwesignature.findOne({ ownerId })
+      .then(signature => {
+        if (signature) {
+          res.json({ hasSignature: true, signatureData: signature.data });
+        } else {
+          res.json({ hasSignature: false });
+        }
+      })
+      .catch(err => res.json({ hasSignature: false }));
+  });
+  
+
+  router.get('/getallesigncustomerdata', async (req, res) => {
+    try {
+        // Fetch all customer data
+        let userid = req.params.userid;
+        let authtoken = req.headers.authorization;
+
+        // Verify JWT token
+        const decodedToken = jwt.verify(authtoken, jwrsecret);
+        console.log(decodedToken);
+        const allCustomerData = await CustomerSignatureSchema.find();
+
+        if (allCustomerData.length === 0) {
+            return res.status(404).json({ message: 'No customer data found' });
+        }
+
+        res.json(allCustomerData);
+    } catch (error) {
+        console.error(error);
+        // Handle token verification errors
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
+  router.get('/getesigncustomerdata/:userid', async (req, res) => {
+    try {
+        const { userid } = req.params;
+        let authtoken = req.headers.authorization;
+
+        // Verify JWT token
+        const decodedToken = jwt.verify(authtoken, jwrsecret);
+        console.log(decodedToken);
+        const customeremailData = await CustomerSignatureSchema.find({"userid":userid}); // Assuming you have an `Owner` model
+
+        if (!customeremailData) {
+            return res.status(404).json({ message: 'Customer not found' });
+        }
+        res.status(200).json(customeremailData);
+    } catch (error) {
+        console.error(error);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.get('/checkcustomersignature/:estimateIds', (req, res) => {
+    const { estimateIds } = req.params;
+      CustomerSignatureSchema.findOne({estimateId: estimateIds })
+      .then(signature => {
+        if (signature) {
+          res.status(200).json({ hasSignature: true, signatureData: signature });
+        } else {
+          res.status(200).json({ hasSignature: false });
+        }
+      })
+      .catch(err => res.status(200).json({ hasSignature: false }));
+  });
+
+router.post('/ownersignature', (req, res) => {
+    const { signature, ownerId, email,companyname } = req.body;
+  
+    const newSignature = new Ownwesignature({
+      ownerId,
+      email,
+      companyname,
+      data: signature,
+    });
+  
+    newSignature.save()
+      .then(signature => res.json({ message: 'Signature saved successfully', id: signature._id }))
+      .catch(err => res.status(500).send('Error saving signature'));
+});
+
+// Route for updating an existing signature
+router.put('/update-ownersignature', async (req, res) => {
+    const { signature, ownerId, email, companyname } = req.body;
+
+    // console.log('Update Request Data:', { signature, ownerId, email, companyname });
+
+    try {
+        const updatedSignature = await Ownwesignature.findOneAndUpdate(
+            { ownerId }, 
+            { data: signature, email, companyname }, 
+            { new: true }
+        );
+
+        // console.log('Updated Signature:', updatedSignature);
+
+        if (updatedSignature) {
+            res.json({ message: 'Signature updated successfully', signature: updatedSignature });
+        } else {
+            res.status(404).json({ message: 'Signature not found for this ownerId' });
+        }
+    } catch (err) {
+        console.error('Error updating signature:', err);
+        res.status(500).send('Error updating signature');
+    }
+});
+
+router.post('/customersignature', (req, res) => {
+    const { customersign, estimateId,userid, customerName, customerEmail,documentNumber,lastupdated,completeButtonVisible } = req.body;
+
+    if (!estimateId) {
+      return res.status(400).json({ message: 'Invalid Estimate ID' });
+    }
+
+    const newSignature = new CustomerSignatureSchema({
+        estimateId,
+        customerName,
+        customerEmail,
+        userid,
+        customersign,
+        documentNumber,
+        lastupdated,
+        completeButtonVisible
+    });
+
+    newSignature.save()
+        .then(signature => res.json({ message: 'Signature saved successfully', id: signature._id }))
+        .catch(err => res.status(500).send('Error saving signature'));
+});
+
+// Add this route to update customer signature
+router.put('/updatecustomersignature/:estimateId', async (req, res) => {
+    const { estimateId } = req.params;
+    const { customersign, customerName, documentNumber, status,lastupdated,completeButtonVisible } = req.body;
+  
+    try {
+      const customerSignature = await CustomerSignatureSchema.findOneAndUpdate(
+        { estimateId: estimateId },
+        {
+          customersign,
+          estimateId,
+          customerName,
+          documentNumber,
+          status,
+          lastupdated,
+          completeButtonVisible
+        },
+        { new: true }
+      );
+  
+      if (customerSignature) {
+        res.status(200).json({ message: 'Customer signature updated successfully', customerSignature });
+      } else {
+        res.status(404).json({ message: 'Customer signature not found' });
+      }
+    } catch (error) {
+      console.error('Error updating customer signature:', error);
+      res.status(500).json({ message: 'Server error' });
+    }
+  });
+
+  router.delete('/customersignature/:email', async (req, res) => {
+    const { email } = req.params;
+
+    try {
+        const customerSignature = await CustomerSignatureSchema.findOneAndDelete({ customerEmail: email });
+
+        if (customerSignature) {
+            res.status(200).json({ message: 'Customer signature deleted successfully', customerSignature });
+        } else {
+            res.status(404).json({ message: 'Customer signature not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting customer signature:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+  
+
+// Backend route to fetch owner data by ownerId
+router.get('/getownerdata/:ownerId', async (req, res) => {
+    try {
+        const ownerId = req.params.ownerId;
+        let authtoken = req.headers.authorization;
+
+        // Verify JWT token
+        const decodedToken = jwt.verify(authtoken, jwrsecret);
+        console.log(decodedToken);
+
+        // Fetch owner data from the database
+        const ownerData = await Ownwesignature.find({"ownerId":ownerId}); // Assuming you have an `Owner` model
+
+        if (!ownerData) {
+            return res.status(404).json({ message: 'Owner not found' });
+        }
+
+        res.json(ownerData);
+    } catch (error) {
+        console.error(error);
+        // Handle token verification errors
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+        // Handle other errors
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.get('/getemailownerdata/:ownerId', async (req, res) => {
+    try {
+        const ownerId = req.params.ownerId;
+        // let authtoken = req.headers.authorization;
+
+        // Verify JWT token
+        // const decodedToken = jwt.verify(authtoken, jwrsecret);
+        // console.log(decodedToken);
+
+        // Fetch owner data from the database
+        const ownerData = await Ownwesignature.find({"ownerId":ownerId}); // Assuming you have an `Owner` model
+
+        if (!ownerData) {
+            return res.status(404).json({ message: 'Owner not found' });
+        }
+
+        res.json(ownerData);
+    } catch (error) {
+        console.error(error);
+        // Handle token verification errors
+        // if (error.name === 'JsonWebTokenError') {
+        //     return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        // }
+        // Handle other errors
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+  
+  // Get signature route
+router.get('/ownersignature/:id', (req, res) => {
+    Ownwesignature.findById(req.params.id)
+      .then(signature => {
+        if (signature) {
+          res.json({ data: signature.data });
+        } else {
+          res.status(404).send('Signature not found');
+        }
+      })
+      .catch(err => res.status(500).send('Error retrieving signature'));
+});
+
+router.get('/getemailestimatedata/:estimateid', async (req, res) => {
+    try {
+        const estimateid = req.params.estimateid;
+        const estimatedetail = await Estimate.findById(estimateid);
+
+        res.json(estimatedetail);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.get('/getemailsignupdata/:userid', async (req, res) => {
+    try {
+        const userid = req.params.userid;
+        const signupdetail = await User.findById(userid);
+        res.json(signupdetail);
+    } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+router.get('/getemailtransactiondata/:invoiceid', async (req, res) => {
+    try {
+        const invoiceid = req.params.invoiceid;
+        const transactiondata = await Transactions.find({ invoiceid: invoiceid }).sort({ paiddate: 1 });
+        res.json(transactiondata);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 router.get('/currentMonthReceivedAmount/:userId', async (req, res) => {
     try {
@@ -3337,8 +3637,18 @@ router.post('/send-estimate-email', async (req, res) => {
         EstimateNumber,
         amountdue,
         currencyType,
+        estimateId,
+        ownerId,
         amountdue1
     } = req.body;
+
+    // const transporter = nodemailer.createTransport({
+    //     service: 'gmail',
+    //     auth: {
+    //         user: "jdwebservices1@gmail.com",
+    //         pass: "cwoxnbrrxvsjfbmr"
+    //     },
+    // });
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -3388,11 +3698,94 @@ router.post('/send-estimate-email', async (req, res) => {
                 </div>
                 <div style="margin: 20px 0px 10px;">
                     <p style="color:#222">This email contains a unique link just for you. Please do not share this email or link or others will have access to your document.</p>
+                    <a href="https://grithomes.vercel.app/customersign?estimateId=${estimateId}" style="display:inline-block;padding:10px 20px;background-color:#4CAF50;color:#fff;text-decoration:none;border-radius:5px;">View this Estimate</a>
                 </div>
             </section>
             <section style="font-family:sans-serif; width: 50%; margin: auto; background-color:#f5f4f4; padding: 35px 30px; margin-bottom: 40px;">
                 <div>
                     <p style="font-size: 15px; color:#222">Make your Estimate</p>
+                    <h1 style="font-size: 35px; margin-bottom: 0; margin-top: 0; color:#222">ESTIMATE</h1>
+                </div>
+                <div>
+                    <ul style="text-align: center;display: inline-flex;list-style:none;padding-left:0px">
+                        <li>
+                            <a href="">
+                                <img src="https://static.xx.fbcdn.net/rsrc.php/yb/r/hLRJ1GG_y0J.ico" alt="facebook icon" style="margin: 0px 5px;">
+                            </a>
+                        </li>
+                        <li>
+                            <a href="">
+                                <img src="https://static.cdninstagram.com/rsrc.php/y4/r/QaBlI0OZiks.ico" alt="instagram icon" style="margin: 0px 5px;">
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </section>
+        </body>
+            </html>`,
+    };
+
+    try {
+        await transporter.sendMail(mailOptions);
+        console.log('Email sent successfully!');
+        res.status(200).json({ success: true });
+    } catch (error) {
+        console.error('Error sending email:', error);
+        res.status(500).json({ success: false, error: 'Failed to send email.' });
+    }
+});
+
+router.post('/send-estimate-signed-email', async (req, res) => {
+    const {
+        to,
+        estimateId,
+        ownerId,
+        documentNumber,
+        customerName
+    } = req.body;
+
+    // const transporter = nodemailer.createTransport({
+    //     service: 'gmail',
+    //     auth: {
+    //         user: "jdwebservices1@gmail.com",
+    //         pass: "cwoxnbrrxvsjfbmr"
+    //     },
+    // });
+    
+    const transporter = nodemailer.createTransport({
+        service: 'gmail',
+        auth: {
+            user: "grithomesltd@gmail.com",
+            pass: "lpctmxmuoudgnopd"
+        },
+      });
+
+    const mailOptions = {
+        from: 'jdwebservices1@gmail.com',
+        to: to,
+        subject: 'Your document has been signed',
+        html: `<html>
+        <body style="background-color:#c5c1c187; margin-top: 40px; padding:20px 0px;">
+             <section style="font-family:sans-serif; width: 50%; margin: auto; background-color:#fff; padding: 15px 30px; margin-top: 40px;">
+                <div style="padding: 10px 0px;  text-align: center; font-weight: 500; color: #999999">
+                </div>
+                <div>
+                    <h1 style="margin-bottom:0px; font-size: 32px; color:#222">${customerName} has signed your document</h1>
+                </div>
+                <div>
+                    <p style="margin-bottom:10px; font-size: 18px; color:#222; padding-bottom:25px;">Document signed: <span style="font-weight:bold"> ${documentNumber} has been signed by ${customerName}.</span></p>
+                </div><hr/>
+                <div>
+                    <p style="margin-bottom:0px; padding-top:10px; padding-bottom:15px; font-size: 14px; color:#222"><span style="font-weight:bold">DO NOT </span>share this email</p>
+                </div>
+                <div style="padding: 1px 5px; margin: 0px 0px 10px;">
+                    <p style="color:#222">This email contains a unique link just for you. 
+                        Please do not share this email or link or others will have access to your document.
+                    </p>
+                </div>
+            </section>
+            <section style="font-family:sans-serif; width: 50%; margin: auto; background-color:#f5f4f4; padding: 35px 30px; margin-bottom: 40px;">
+                <div>
                     <h1 style="font-size: 35px; margin-bottom: 0; margin-top: 0; color:#222">ESTIMATE</h1>
                 </div>
                 <div>

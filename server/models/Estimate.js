@@ -6,9 +6,6 @@ const EstimateSchema = new Schema({
     estimate_id: { 
         type: Number
     },
-    noteimageUrl:{
-        type: String,
-    },
     EstimateNumber: { type: String },
     customername: {
         type: String,
@@ -28,6 +25,9 @@ const EstimateSchema = new Schema({
     emailsent: {
         type: String,
         default:'no'
+    },
+    discountTotal: {
+        type: String,
     },
     description: {
         type: String,
@@ -58,6 +58,9 @@ const EstimateSchema = new Schema({
     userid:{
         type: String,
     },
+    noteimageUrl:{
+        type: String,
+    },
     convertedToInvoice: {
         type: Boolean,
         default: false,
@@ -66,7 +69,14 @@ const EstimateSchema = new Schema({
         type: Date,
         default: Date.now,
     },
-
+    isAddSignature: { 
+        type: Boolean, 
+        default: false 
+    },
+    isCustomerSign: { 
+        type: Boolean, 
+        default: false 
+    } 
 });
 
 module.exports = mongoose.model('Estimate',EstimateSchema)
