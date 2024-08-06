@@ -7,9 +7,6 @@ import Usernavbar from './Usernavbar';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import Select from 'react-select';
-// import VirtualizedSelect from 'react-virtualized-select';
-// import 'react-virtualized-select/styles.css';
-// import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
@@ -69,8 +66,10 @@ export default function Createinvoice() {
     const [quantityMap, setQuantityMap] = useState({});
     const [discountMap, setDiscountMap] = useState({});
     const [itemExistsMessage, setItemExistsMessage] = useState('');
+    const [CloudImage, setCloudImage] = useState('');
     const [message, setmessage] = useState(false);
     const [alertShow, setAlertShow] = useState("");
+    const [SelectedCustomerId, setSelectedCustomerId] = useState("");
     const [selectedCustomerDetails, setSelectedCustomerDetails] = useState({
         name: '', email: '', phone: ''
     });
@@ -103,8 +102,9 @@ export default function Createinvoice() {
         post: '',
     });
 
+    
+
     useEffect(() => {
-      
         const fetchData = async () => {
             if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") === "true") {
                 navigate("/");
@@ -176,6 +176,8 @@ export default function Createinvoice() {
             console.error('Error fetching last invoice number:', error);
         }
     };
+
+    
     const fetchsignupdata = async () => {
         try {
           const userid = localStorage.getItem("userid");
@@ -297,7 +299,7 @@ export default function Createinvoice() {
 
     const onChangeQuantity = (event, itemId) => {
         let newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
-        newQuantity = Math.max(newQuantity, 0); // Ensure quantity is not negative
+        newQuantity = Math.max(newQuantity, 0); 
 
         setQuantityMap((prevMap) => ({
             ...prevMap,
@@ -313,6 +315,9 @@ export default function Createinvoice() {
 
     const onChangecustomer = (event) => {
         const selectedCustomerId = event.value;
+        console.log(selectedCustomerId, 'selectedCustomerId');
+        
+        setSelectedCustomerId(selectedCustomerId);
         const selectedCustomer = customers.find((customer) => customer._id === selectedCustomerId);
 
         if (selectedCustomer) {
@@ -326,7 +331,7 @@ export default function Createinvoice() {
             setSelectedCustomerDetails({
                 name: selectedCustomer.name,
                 email: selectedCustomer.email,
-                phone: selectedCustomer.number
+                number: selectedCustomer.number
             });
             setIsCustomerSelected(true);
         }
@@ -334,29 +339,70 @@ export default function Createinvoice() {
         setSearchcustomerResults([...searchcustomerResults, event]);
     };
 
-    const handleNameChange = (event) => {
-        const selectedName = event.target.value;
-        const selectedCustomer = customers.find(customer => customer.name === selectedName);
-        if (selectedCustomer) {
-            setEditedName(selectedName);
-            setEditedEmail(selectedCustomer.email);
+    const handleNameChange = (e) => {
+        const selectedName = e.target.value;
+        setEditedName(selectedName);
+    
+        const customer = customers.find(c => c.name === selectedName);
+        if (customer) {
+            setSelectedCustomerId(customer._id);
+            setEditedEmail(customer.email); 
+            setEditedPhone(customer.number);  
         }
     };
 
+    // const handleNameChange = (event) => {
+    //     const selectedName = event.target.value;
+    //     const selectedCustomer = customers.find(customer => customer.name === selectedName);
+    //     if (selectedCustomer) {
+    //         setEditedName(selectedName);
+    //         setEditedEmail(selectedCustomer.email);
+    //     }
+    // };
+    
     const handleEditCustomer = () => {
+        if (!SelectedCustomerId) {
+            console.error('Unable to determine SelectedCustomerId');
+            return;
+        }
+    
         const updatedCustomerDetails = {
             name: editedName,
             email: editedEmail,
-            phone: editedPhone
+            number: editedPhone
         };
 
         setSelectedCustomerDetails({
             name: editedName,
             email: editedEmail,
-            phone: editedPhone
+            number: editedPhone
         });
-        console.log("Updated customer details:", updatedCustomerDetails);
+    
+        console.log(SelectedCustomerId, 'edited SelectedCustomerId');
+        console.log('Updated customer details:', updatedCustomerDetails);
     };
+    
+    
+    // const handleEditCustomer = () => {
+    //     // console.log(event, "event structure");
+    //     // const SelectedCustomerId = event.value || event.target.value || event.id; 
+    //     // console.log(SelectedCustomerId, "edited SelectedCustomerId");
+    //     // setSelectedCustomerId(SelectedCustomerId);
+    //     const updatedCustomerDetails = {
+    //         name: editedName,
+    //         email: editedEmail,
+    //         phone: editedPhone
+    //     };
+
+    //     setSelectedCustomerDetails({
+    //         name: editedName,
+    //         email: editedEmail,
+    //         phone: editedPhone
+    //     });
+
+    //     setSelectedCustomerDetails(updatedCustomerDetails);
+    //     console.log("Updated customer details:", updatedCustomerDetails);
+    // };
 
     const calculateDiscountedAmount = (price, quantity, discount) => {
         const totalAmount = price * quantity;
@@ -435,6 +481,9 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem('userid'); // Assuming you have user ID stored in local storage
             const authToken = localStorage.getItem('authToken');
+
+            await new Promise(resolve => setTimeout(resolve, 100));
+            
             const invoiceItems = searchitemResults.map((item) => {
                 const selectedItem = items.find((i) => i._id === item.value);
                 const itemPrice = selectedItem?.price || 0;
@@ -456,6 +505,9 @@ export default function Createinvoice() {
                 };
             });
 
+            // setSelectedCustomerId(SelectedCustomerId);
+            const selectedCustomer = customers.find((customer) => customer._id === SelectedCustomerId);
+
             // Summing up subtotal, total, and amount due for the entire invoice
             const subtotal = invoiceItems.reduce((acc, curr) => acc + curr.amount, 0);
             const total = calculateTotal();
@@ -466,9 +518,9 @@ export default function Createinvoice() {
 
             const data = {
                 userid: userid,
-                customername: invoiceData.customername,
-                customeremail: invoiceData.customeremail,
-                customerphone: invoiceData.customerphone,
+                customername: selectedCustomer.name,
+                customeremail: selectedCustomer.email,
+                customerphone:  selectedCustomer.number,
                 invoice_id: invoiceData.invoice_id,
                 InvoiceNumber: invoiceData.InvoiceNumber,
                 purchaseorder: invoiceData.purchaseorder,
@@ -525,6 +577,30 @@ export default function Createinvoice() {
             console.error('Error creating invoice:', error);
         }
     };
+
+    // const handleImageUpload = async (file) => {
+    //     const formData = new FormData();
+    //     formData.append('file', file);
+    //     formData.append('upload_preset', 'restrocloudnary'); // Replace with your Cloudinary upload preset
+    //     formData.append('cloud_name', 'dlq5b1jed'); // Replace with your Cloudinary cloud name
+
+    //     // Upload image to Cloudinary
+    //     const response = await fetch('https://api.cloudinary.com/v1_1/dlq5b1jed/image/upload', {
+    //         method: 'POST',
+    //         body: formData,
+    //     });
+
+    //     if (!response.ok) {
+    //         throw new Error('Failed to upload image to Cloudinary');
+    //     }
+
+    //     const cloudinaryData = await response.json();
+
+    //     console.log(cloudinaryData.secure_url, "cloudinaryData.secure_url");
+    //     setCloudImage(cloudinaryData.secure_url)
+    //             return { default: cloudinaryData.secure_url }; // Return the URL of the uploaded image
+    // };
+    
 
     // Alert Component
     const Alert = ({ message }) => {
@@ -730,7 +806,7 @@ export default function Createinvoice() {
                                                                 </li>
                                                             </ul>
                                                             <p className='m-0'>{selectedCustomerDetails.email}</p>
-                                                            <p>{selectedCustomerDetails.phone}</p>
+                                                            <p>{selectedCustomerDetails.number}</p>
                                                         </div>
                                                     ) : (
                                                         <div className="search-container forms">
@@ -749,7 +825,6 @@ export default function Createinvoice() {
 
                                                                         )}
                                                                     /> */}
-
                                                                     <Select
                                                                         value={searchcustomerResults}
                                                                         onChange={onChangecustomer}
@@ -758,6 +833,7 @@ export default function Createinvoice() {
                                                                             label: customer.name,
                                                                         }))}
                                                                         placeholder=""
+                                                                        required
                                                                     />
 
                                                                 </div>
@@ -918,6 +994,12 @@ export default function Createinvoice() {
                                                                                             console.log('Focus.', editor);
                                                                                         }}
                                                                                     />
+                                                                                    
+                                                                                       {/* <CKEditor
+                                                                                            editor={ClassicEditor}
+                                                                                            data={editorData}
+                                                                                            onChange={handleEditorChange}
+                                                                                        /> */}
 
                                                                                 </div>
 
@@ -957,7 +1039,7 @@ export default function Createinvoice() {
                                                             })}
 
                                                             {itemExistsMessage && (
-                                                                <div className="alert alert-warning" role="alert">
+                                                                <div className="alert alert-warning mt-3" role="alert">
                                                                     {itemExistsMessage}
                                                                 </div>
                                                             )}
@@ -979,7 +1061,6 @@ export default function Createinvoice() {
                                                                     ({ label: item.itemname, value: item._id })
 
                                                                 )}
-
                                                             >
                                                             </VirtualizedSelect> */}
                                                             <Select
@@ -1118,6 +1199,10 @@ export default function Createinvoice() {
                                 <div className="mb-3">
                                     <label htmlFor="customerEmail" className="form-label">Email</label>
                                     <input type="email" className="form-control" id="customerEmail" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} />
+                                </div>
+                                <div className="mb-3">
+                                    <label htmlFor="customerPhone" className="form-label">Phone Number</label>
+                                    <input type="number" className="form-control" id="customerPhone" value={editedPhone} onChange={(e) => setEditedPhone(e.target.value)} />
                                 </div>
                             </div>
                             <div className="modal-footer">

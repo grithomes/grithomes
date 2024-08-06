@@ -65,6 +65,11 @@ export default function Usernavbar() {
                       </Link>
                     </li>
                     <li>
+                      <Link to="/userpanel/E-sign" className='nav-link scrollto icones w-100 text-black' >
+                        <img src={pin} width="24px" height='24px' /> <span className='ps-2'>E-Sign</span>
+                      </Link>
+                    </li>
+                    <li>
                       <p className='greyclr nav-link'>Management</p>
                     </li>
                     <li>
@@ -88,6 +93,11 @@ export default function Usernavbar() {
                           location.pathname == '/userpanel/Timeview' ||
                           location.pathname == '/Timeschemahistory' ? 'active' : ''}`} >
                         <img src={user} width="24px" height='24px' /> <span className='ps-2'>Team</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/userpanel/Signature" className='nav-link scrollto icones w-100 text-black' >
+                        <img src={pin} width="24px" height='24px' /> <span className='ps-2'>Signature</span>
                       </Link>
                     </li>
                     <li>

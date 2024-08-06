@@ -6,10 +6,10 @@ import Usernav from './Usernav';
 import Usernavbar from './Usernavbar';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
-import Select from 'react-select';
 // import VirtualizedSelect from 'react-virtualized-select';
 // import 'react-virtualized-select/styles.css';
 // import 'react-virtualized/styles.css'
+import Select from 'react-select';
 import CurrencySign from '../../components/CurrencySign ';
 import Alertauthtoken from '../../components/Alertauthtoken';
 
@@ -58,7 +58,6 @@ function MyCustomUploadAdapterPlugin(editor) {
 }
 
 export default function Editinvoice() {
-    
     const [ loading, setloading ] = useState(true);
     const [customers, setcustomers] = useState([]);
     const [selectedCustomerDetails, setSelectedCustomerDetails] = useState({
@@ -69,6 +68,7 @@ export default function Editinvoice() {
     const [searchitemResults, setSearchitemResults] = useState([]);
     const [quantityMap, setQuantityMap] = useState({});
     const [discountMap, setDiscountMap] = useState({});
+    const [itemExistsMessage, setItemExistsMessage] = useState('');
     const [discountTotal, setdiscountTotal] = useState(0);
     const [taxPercentage, setTaxPercentage] = useState(0);
     const [invoiceData, setInvoiceData] = useState({
@@ -79,6 +79,7 @@ export default function Editinvoice() {
     const location = useLocation();
     const invoiceid = location.state?.invoiceid;
     const [editorData, setEditorData] = useState("<p></p>");
+    const [noteimageUrl, setnoteImageUrl] = useState(''); 
     const [alertMessage, setAlertMessage] = useState('');
 
    
@@ -288,15 +289,37 @@ export default function Editinvoice() {
             console.log('Item already added to the invoice');
         }
     };
-    
 
-    // const onChangeitem=(event)=>{
-    //     setSearchitemResults([...searchitemResults,event]);
-    // }
+    // const onChangeitem = (event) => {
+    //     const newItemId = event.value;
+    //     const newItemLabel = event.label;
+
+    //     const isItemExists = searchitemResults.some((item) => item.value === newItemId);
+
+    //     if (!isItemExists) {
+    //         setSearchitemResults([...searchitemResults, { value: newItemId, label: newItemLabel }]);
+    //         setItemExistsMessage(''); // Clear any existing message
+    //     } else {
+    //         setItemExistsMessage('This item is already added!');
+    //     }
+    // };
+
     const onChangeitem = (selectedItem) => {
-        // Call the function to add the selected item to invoiceData.items
-        addSelectedItemToInvoice(selectedItem);
+        // Check if the selected item already exists in invoiceData.items
+        const itemExists = invoiceData.items && invoiceData.items.some(item => item.itemId === selectedItem.value);
+        if (itemExists) {
+            setItemExistsMessage('This item is already added!');
+        } else {
+            setItemExistsMessage('');
+            // Call the function to add the selected item to invoiceData.items
+            addSelectedItemToInvoice(selectedItem);
+        }
     };
+
+    // const onChangeitem = (selectedItem) => {
+    //     // Call the function to add the selected item to invoiceData.items
+    //     addSelectedItemToInvoice(selectedItem);
+    // };
 
     const handleEditorChange = (event, editor) => {
         const data = editor.getData();
@@ -369,6 +392,12 @@ export default function Editinvoice() {
                     const errorMessage = await response.text();
                     throw new Error(`Failed to delete item: ${errorMessage}`);
                 }
+
+                const updatedItems = invoiceData.items.filter(item => item.itemId !== itemId);
+                setInvoiceData(prevData => ({
+                    ...prevData,
+                    items: updatedItems,
+                }));
     
             // Update UI or perform other actions upon successful deletion
             // fetchdata();
@@ -639,8 +668,8 @@ export default function Editinvoice() {
                                 <p className='fs-35 fw-bold'>Invoice</p>
                                 <nav aria-label="breadcrumb">
                                     <ol class="breadcrumb mb-0">
-                                        <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
-                                        <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Invoice</a></li>
+                                        <li class="breadcrumb-item"><a href="/userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
+                                        <li class="breadcrumb-item"><a href="/userpanel/Invoice" className='txtclr text-decoration-none'>Invoice</a></li>
                                         <li class="breadcrumb-item active" aria-current="page">Edit Invoice</li>
                                     </ol>
                                 </nav>
@@ -654,17 +683,15 @@ export default function Editinvoice() {
                         </div>
                         <div className='box1 rounded adminborder p-4 m-2 mb-5'>
                             <div className='row me-2'>
-                                <div className="col-12 col-md-5">
-                                        <div className="customerdetail ">
+                                <div className="col-5">
+                                        <div className="customerdetail p-3">
                                             <ul>
                                                 <li className='fw-bold fs-4'>{invoiceData.customername}</li>
-                                                <li>{invoiceData.customeremail}</li>
                                             </ul>
-                                           
+                                            <p>{invoiceData.customeremail}</p>
                                         </div>
-                                        <hr />
                                 </div>    
-                                <div className="col-12 col-md-7">
+                                <div className="col-7">
                                     <div className="row">
                                         <div className="col-6">
                                             <div className="mb-3">
@@ -750,109 +777,173 @@ export default function Editinvoice() {
                                     </div>
                                 </div>    
                             </div>
-                            <div class="table-responsive">
-                                            <table class="table">
-                                                <thead>
-                                                    <tr>
-                                                        <th scope="col">ITEM</th>
-                                                        <th scope="col">QUANTITY</th>
-                                                        <th scope="col">PRICE</th>
-                                                        <th scope="col">AMOUNT</th>
-
-                                                    </tr>
-                                                </thead>
-                                                <tbody>
-
-                                                    {invoiceData.items && invoiceData.items.map((item) => (
-
-                                                        <tr key={item.itemId}>
-                                                            <td>
-                                                                <p>{item.itemname} 
-                                                                <span className='btn btn-danger btn-sm me-2' onClick={() => handleDeleteClick(item.itemId)}>
-                                                                <i className=" fas fa-trash"></i>
-                                                                </span>
-                                                                </p>
-                                                               
-                                                                <CKEditor
-                                                                    editor={ClassicEditor}
-                                                                    data={item.description}
-                                                                    // onReady={ editor => {
-                                                                    //     console.log( 'Editor is ready to use!', editor );
-                                                                    // } }
-
-                                                                    onChange={(event, editor) => {
-                                                                        handleDescriptionChange(editor, item.itemId);
-                                                                    }
-                                                                    }
-                                                                    onBlur={(event, editor) => {
-                                                                        console.log('Blur.', editor);
-                                                                    }}
-                                                                    onFocus={(event, editor) => {
-                                                                        console.log('Focus.', editor);
-                                                                    }}
-                                                                />
-                                                            </td>
-
-                                                            <td>
-                                                                <input
-                                                                    type="number"
-                                                                    name="quantity"
-                                                                    className="form-control"
-                                                                    value={item.itemquantity}
-                                                                    onChange={(event) => handleQuantityChange(event, item.itemId)}
-                                                                    id={`quantity-${item.itemId}`}
-                                                                    required
-                                                                />
-                                                            </td>
-
-                                                            <td>
-                                                            <input
-                                                                    type="number"
-                                                                    name="price"
-                                                                    className="form-control"
-                                                                    value={item.price}
-                                                                    onChange={(event) => handlePriceChange(event, item.itemId)} // Add onChange handler
-                                                                    id={`price-${item.itemId}`}
-                                                                    required
-                                                                />
-                                                            </td>
-
-                                                            <td>
-                                                            <p><CurrencySign />{item.amount}</p>
-                                                            </td>
-
-                                                        </tr>
-
-                                                    ))}
-
-                                                  
-                                                </tbody>
-                                            </table>
-                                        </div>
 
                             <div className='box1 rounded adminborder p-4 m-2'>
-                                
+                                <div className="row pt-3">
+                                    <div className="col-6">
+                                        <p>ITEM</p>
+                                    </div>
+                                    <div className="col-2">
+                                        <p>QUANTITY</p>
+                                    </div>
+                                    <div className="col-2">
+                                        <p>PRICE</p>
+                                    </div>
+                                    <div className="col-2">
+                                        <p>AMOUNT</p>
+                                    </div>
+                                </div>
 
-                                
+                                <div>
+                                    {console.log(invoiceData, "invoiceData")}
+                                {invoiceData.items && invoiceData.items.map((item) => (
+                                    <div className='row' key={item.itemId}>
+                                    <div className="col-6 ">
+                                        <div className="mb-3 d-flex align-items-baseline justify-content-between">
+                                            <p>{item.itemname}</p>
+                                            <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(item.itemId)}> 
+                                                <i className="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="col-2">
+                                        <div className="mb-3">
+                                        <input
+                                            type="number"
+                                            name="quantity"
+                                            className="form-control"
+                                            value={item.itemquantity}
+                                            onChange={(event) => handleQuantityChange (event, item.itemId)}
+                                            id={`quantity-${item.itemId}`}
+                                            required
+                                        />
+                                        </div>
+                                    </div>
+                                    <div className="col-2">
+                                        <div className="mb-3">
+                                          
+                                            <input
+                                                        type="text"
+                                                        name="price"
+                                                        className="form-control"
+                                                        value={item.price}
+                                                        id={`price-${item.itemId}`}
+                                                        required
+                                                        onChange={(event) => handlePriceChange(event, item.itemId)}
+                                                        onBlur={(event) => handlePriceBlur(event, item.itemId)}
+                                                    />
+                                        </div>
+                                    </div>
+                                  
+                                    <div className="col-2">
+                                        <p><CurrencySign />{item.amount}</p>
+                                    </div>
+                                    <div className="col-6">
+                                                <div class="mb-3">
+                                                    <label htmlFor="description" className="form-label">Description</label>
+                                                  
+                                                    <CKEditor
+                                                        editor={ClassicEditor}
+                                                        data={item.description} // Make sure item.description is a valid string
+                                                        onChange={(event, editor) => {
+                                                            handleDescriptionChange(editor, item.itemId);
+                                                        }}
+                                                        onBlur={(event, editor) => {
+                                                            console.log('Blur.', editor);
+                                                        }}
+                                                        onFocus={(event, editor) => {
+                                                            console.log('Focus.', editor);
+                                                        }}
+                                                    />
+                                                </div>
+                                            </div>
+                                    </div>
+                                        ))}
+                                        <div className='col-lg-6 col-12'>
+                                        {itemExistsMessage && (
+                                            <div className="alert alert-warning mt-3" role="alert">
+                                                {itemExistsMessage}
+                                            </div>
+                                        )}
+                                        </div>
+                                        
+                                        {/* {searchitemResults.map((item) => {
+                                            const selectedItem = items.find((i) => i._id === item.value);
+                                            const itemPrice = selectedItem?.price || 0;
+                                            const itemId = item.value;
+                                            const quantity = quantityMap[itemId] || 1;
+                                            const discount = discountMap[itemId] || 0;
+                                            const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+                                            const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
+                                            
+                                            });
+
+                                            return (
+                                                <div className='row'  key={item.itemId}>
+                                                    <div className="col-6 ">
+                                                        <div className="mb-3 d-flex align-items-baseline justify-content-between">
+                                                            <p>{item.label}</p>
+                                                            <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
+                                                                <i className="fas fa-trash"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-2">
+                                                        <div className="mb-3">
+                                                        <input
+                                                            type="number"
+                                                            name={`quantity-${itemId}`}
+                                                            className="form-control"
+                                                            value={quantity}
+                                                            onChange={(event) => onChangeQuantity(event, itemId)}
+                                                            id={`quantity-${itemId}`}
+                                                            required
+                                                        />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-2">
+                                                        <div className="mb-3">
+                                                            <input
+                                                                type="number"
+                                                                name="price"
+                                                                className="form-control"
+                                                                value={itemPrice}
+                                                                id="price"
+                                                                required
+                                                                readOnly
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="col-2 text-center">
+                                                        <p><CurrencySign />{formattedTotalAmount}</p>
+                                                    </div>
+                                                    <div className="col-6">
+                                                        <div class="mb-3">
+                                                            <label htmlFor="description" className="form-label">Description</label>
+                                                            <CKEditor
+                                                                editor={ ClassicEditor }
+                                                                data={invoiceData.description}
+                                                                onChange={handledescChange}
+                                                                onBlur={ ( event, editor ) => {
+                                                                    console.log( 'Blur.', editor );
+                                                                } }
+                                                                onFocus={ ( event, editor ) => {
+                                                                    console.log( 'Focus.', editor );
+                                                                } }
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                );
+                                        })} */}
+
+                                </div>
                                 <hr />
 
                                 <div className="row pt-3">
-                                    <div className="col-12 col-md-7">
+                                    <div className="col-7">
                                         <div className="search-container forms">
                                             <p className='fs-20 mb-0'>Select Item</p>
-                                            {/* <VirtualizedSelect
-                                                id="searchitems" 
-                                                name="itemname"
-                                                className="form-control zindex op pl-0"
-                                                placeholder=""
-                                                onChange={onChangeitem}
-                                                options={ items.map((item,index)=>
-                                                    ({label: item.itemname, value: item._id})
-                                                        
-                                                )}
-
-                                                >
-                                            </VirtualizedSelect>  */}
                                             <Select
                                                 className="form-control zindex op pl-0"
                                                 value={searchitemResults}
@@ -865,37 +956,20 @@ export default function Editinvoice() {
                                             />
                                         </div>
                                     </div>
-                                    <div className="col-12 col-md-5 pt-4">
+                                    <div className="col-5">
                                         <div className="row">
                                             <div className="col-6">
                                                 <p>Subtotal</p>
-                                                {/* <p>GST</p> */}
                                                 <p>GST {invoiceData.taxpercentage}%</p>
                                                 <p>Discount</p>
                                                 <p>Total</p>
                                             </div>
                                             <div className="col-6">
                                                 <p><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
-                                                    // style: 'currency',
-                                                    // currency: 'INR',
                                                 })}</p>
                                                 <div className="col-6">
-                                                {/* <div class="mb-3">
-                                                    <input
-                                                        type="number"
-                                                        name="tax"
-                                                        className="form-control"
-                                                        value={invoiceData.taxpercentage}
-                                                        onChange={handleTaxChange}
-                                                        placeholder="Enter Tax Percentage"
-                                                        id="taxInput"
-                                                        min="0"
-                                                    />
-                                                </div> */}
                                             </div>
                                                 <p><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN', {
-                                                    // style: 'currency',
-                                                    // currency: 'INR',
                                                 })}</p>
                                                 
                                                 <div className="mb-3">
@@ -904,15 +978,13 @@ export default function Editinvoice() {
                                                         name="totaldiscount"
                                                         className="form-control"
                                                         value={discountTotal}
-                                                        onChange={handleDiscountChange} // Ensure proper event binding
+                                                        onChange={handleDiscountChange} 
                                                         placeholder="Enter Discount Total"
                                                         id="discountInput"
                                                         min="0"
                                                     />
                                                 </div>
                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
-                                                    // style: 'currency',
-                                                    // currency: 'INR',
                                                     })}</p>
                                             </div>
                                         </div>
@@ -920,16 +992,15 @@ export default function Editinvoice() {
                                 </div>
                                 <hr />
                                 <div className="row pt-3">
-                                    <div className="col-12 col-md-7"></div>
-                                    <div className="col-12 col-md-5">
+                                    <div className="col-7"></div>
+                                    <div className="col-5">
                                         <div className="row">
                                             <div className="col-6">
                                                 <p>Amount due</p>
                                             </div>
                                             <div className="col-6">
                                                 <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
-                                                    // style: 'currency',
-                                                    // currency: 'INR',
+                                                
                                                     })}</p>
                                             </div>
                                         </div>
@@ -945,8 +1016,9 @@ export default function Editinvoice() {
                                     //     console.log( 'Editor is ready to use!', editor );
                                     // } }
                                     
-                                    onChange={handleEditorChange}
+                                    // data={editorData}
                                     config={{ extraPlugins: [MyCustomUploadAdapterPlugin] }}
+                                    onChange={handleEditorChange}
                                     onBlur={ ( event, editor ) => {
                                         console.log( 'Blur.', editor );
                                     } }

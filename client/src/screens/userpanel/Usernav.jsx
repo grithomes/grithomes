@@ -63,6 +63,11 @@ export default function Usernav() {
                       </Link>
                     </li>
                     <li>
+                      <Link to="/userpanel/E-sign" className='nav-link scrollto icones text-black' >
+                        <i class="fa-solid fa-house me-2 dashclr"></i> <span>E-Sign</span>
+                      </Link>
+                    </li>
+                    <li>
                       <p className='greyclr nav-link'>Management</p>
                     </li>
                     <li>
@@ -89,6 +94,11 @@ export default function Usernav() {
                                   location.pathname == '/userpanel/Timeview' ||
                                   location.pathname == '/Timeschemahistory' ? 'active' : ''}`} >
                         <i class="fa-solid fa-house me-2 dashclr"></i> <span>Team</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/userpanel/Signature" className='nav-link scrollto iconestext-black' >
+                      <i class="fa-solid fa-house me-2 dashclr"></i><span >Signature</span>
                       </Link>
                     </li>
                     <li>
