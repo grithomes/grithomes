@@ -4,7 +4,7 @@ const CurrencySign = ({}) => {
     const [currencyType, setCurrencyType] = useState("");
 
 useEffect(() => {
-    const storedCurrencyType = localStorage.getItem("currencyType") || "INR";
+    const storedCurrencyType = localStorage.getItem("currencyType") || "CAD";
     console.log("Stored Currency Type:", storedCurrencyType);
     setCurrencyType(storedCurrencyType);
 }, [])

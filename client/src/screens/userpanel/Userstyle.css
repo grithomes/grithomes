@@ -542,7 +542,7 @@ display: none;}
   height: auto;
 }
 .information-content {
-  width: 100%;
+  width: 50%;
   height: auto;
   overflow: hidden;
 }
