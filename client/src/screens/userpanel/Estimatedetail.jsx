@@ -1080,10 +1080,10 @@ thead{
                           }
                           
 
-                          <div className='invoice-body'>
+                          <div className='invoice-body invoice-body-text'>
                             <div className='mt-1'>
-                              <span>{estimateData.information == '' ? '' : 'Note:'}</span> <div dangerouslySetInnerHTML={{ __html: estimateData.information }} />
-
+                              <span>{estimateData.information == '' ? '' : 'Note:'}</span> 
+                              <div className='information-content' dangerouslySetInnerHTML={{ __html: estimateData.information }} />
                             </div>
                           </div>
                         </div>
