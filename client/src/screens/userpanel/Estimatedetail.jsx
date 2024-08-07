@@ -458,6 +458,22 @@ export default function Estimatedetail() {
           background: #fff;
           padding: 30px 50px;
         }
+          
+
+        .invoice-body-text{
+          width: 100%;
+          height: auto;
+        }
+        .information-content {
+          height: auto;
+          overflow: hidden;
+        }
+
+        .information-content img {
+          width: 50%;
+          max-width: 100%;
+          height: auto;
+        }
         .invoice-to {
           // padding-right: 20px;
         }
