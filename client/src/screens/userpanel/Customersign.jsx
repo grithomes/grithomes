@@ -750,7 +750,7 @@ console.log(offset);
       }
 
       // Send email request to backend
-      const response = await fetch('https://grithomes.onrender.com/api/send-estimate-signed-email', {
+      const emailResponse = await fetch('https://grithomes.onrender.com/api/send-estimate-signed-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -764,12 +764,38 @@ console.log(offset);
         }),
       });
 
-      if (response.ok) {
-        console.log('Email sent successfully');
-        navigate(`/completedocument?estimateId=${estimateId}`); 
-      } else {
+      if (!emailResponse.ok) {
         console.error('Failed to send email');
+        return;
       }
+      
+      console.log('Email sent successfully');// Update customer signature
+      const updateResponse = await fetch(`https://grithomes.onrender.com/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          // 'Authorization': authToken, // Uncomment if authToken is required
+        },
+        body: JSON.stringify({
+          customersign: signatureData,
+          estimateId: estimateId,
+          userid: estimateData?.userid || '',
+          customerName: estimateData?.customername || '',
+          customerEmail: estimateData?.customeremail || '',
+          documentNumber: estimateData?.EstimateNumber || '',
+          lastupdated: 'Completed' || '',
+          status: 'Signed',
+        }),
+      });
+  
+      if (!updateResponse.ok) {
+        console.error('Failed to update customer signature');
+        return;
+      }
+      
+      console.log('Customer signature updated successfully');
+      navigate(`/completedocument?estimateId=${estimateId}`);
+
     } catch (error) {
       console.error('Error in handleDocumentComplete:', error);
     }
