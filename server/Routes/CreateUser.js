@@ -3761,7 +3761,7 @@ router.post('/send-estimate-signed-email', async (req, res) => {
       });
 
     const mailOptions = {
-        from: 'jdwebservices1@gmail.com',
+        from: "grithomesltd@gmail.com",
         to: to,
         subject: 'Your document has been signed',
         html: `<html>
