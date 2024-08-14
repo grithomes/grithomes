@@ -49,6 +49,9 @@ export default function Invoicedetail() {
   const [depositpercentage, setdepositPercentage] = useState('');
   const [amount, setAmount] = useState('');
   const [pdfExportVisible, setPdfExportVisible] = useState(false);
+  const [ownerData, setOwnerData] = useState(null);
+  const [signatureData, setsignatureData] = useState(null);
+  // const [signatureData, setsignatureData] = useState(null);
   
 
 
@@ -451,12 +454,66 @@ export default function Invoicedetail() {
         if (Array.isArray(json.items)) {
           setitems(json.items);
         }
+
+        fetchOwnerData();
+
+        if (json.isAddSignature || json.isCustomerSign) {
+          // Wait for estimateData to be set before checking customer signature
+          setTimeout(() => {
+            checkCustomerSignature(json._id);
+          }, 0);
+        }
       }
 
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   }
+
+  const checkCustomerSignature = async (invoiceIdpass) => {
+    if (!invoiceIdpass) {
+      console.error('Customer email is not defined');
+      return;
+    }
+  
+    try {
+      const response = await fetch(`https://grithomes.onrender.com/api/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceIdpass)}`);
+      const json = await response.json();
+      console.log('Customer signature response:', json);
+      if (response.ok && json.hasSignature) {
+        setsignatureData(json.signatureData); 
+      } else {
+        setsignatureData(null); 
+      }
+    } catch (error) {
+      console.error('Error fetching customer signature:', error);
+    }
+  };
+
+  const fetchOwnerData = async () => {
+    try {
+      const ownerId = localStorage.getItem('userid');
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.com/api/getownerdata/${ownerId}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
+
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
+      } else {
+        const json = await response.json();
+        setOwnerData(json[0]); // Save all owner data
+      }
+    } catch (error) {
+      console.error('Error fetching owner data:', error);
+    }
+  };
 
   const fetchdepositdata = async () => {
     try {
@@ -928,22 +985,20 @@ export default function Invoicedetail() {
           background: #fff;
           padding: 30px 50px;
         }
-          
+        .invoice-body-text{
+          width: 100%;
+          height: auto;
+        }
+        .information-content {
+          height: auto;
+          overflow: hidden;
+        }
 
-.invoice-body-text{
-  width: 100%;
-  height: auto;
-}
-.information-content {
-  height: auto;
-  overflow: hidden;
-}
-
-.information-content img {
-  width: 50%;
-  max-width: 100%;
-  height: auto;
-}
+        .information-content img {
+          width: 50%;
+          max-width: 100%;
+          height: auto;
+        }
         .invoice-to {
           // padding-right: 20px;
         }
@@ -1067,35 +1122,90 @@ thead{
     }
 };
 
-  const handleRemove = async (invoiceid) => {
-    const authToken = localStorage.getItem('authToken');
-    try {
-      const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
-        method: 'GET',
+const handleRemove = async (invoiceid, invoiceIdpass) => {
+  try {
+    // Check if there's a customer signature
+    const signatureData = await checkCustomerSignature(invoiceIdpass);
+
+    // If a signature exists, delete it
+    if (signatureData) {
+      const authToken = localStorage.getItem('authToken');
+      const deleteSignatureResponse = await fetch(`https://grithomes.onrender.com/api/delcustomersignature/${encodeURIComponent(invoiceIdpass)}`, {
+        method: 'DELETE',
         headers: {
           'Authorization': authToken,
         }
       });
-      if (response.status === 401) {
-        const json = await response.json();
-        setAlertMessage(json.message);
-        setloading(false);
-        window.scrollTo(0, 0);
-        return; // Stop further execution
+
+      if (!deleteSignatureResponse.ok) {
+        const json = await deleteSignatureResponse.json();
+        console.error('Error deleting customer signature:', json.message);
+        return; // Stop further execution if deleting signature fails
+      } else {
+        console.log('Customer signature deleted successfully!');
       }
-      else {
-        const json = await response.json();
-        if (json.success) {
-          console.log('Data removed successfully!');
-          navigate('/userpanel/Invoice');
-        } else {
-          console.error('Error deleting Invoice:', json.message);
-        }
-      }
-    } catch (error) {
-      console.error('Error deleting Invoice:', error);
     }
-  };
+
+    // Proceed with deleting the estimate data
+    const authToken = localStorage.getItem('authToken');
+    const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': authToken,
+      }
+    });
+
+    if (response.status === 401) {
+      const json = await response.json();
+      setAlertMessage(json.message);
+      setloading(false);
+      window.scrollTo(0, 0);
+      return; // Stop further execution
+    } else {
+      const json = await response.json();
+
+      if (json.success) {
+        console.log('Data removed successfully!');
+        navigate('/userpanel/Invoice');
+      } else {
+        console.error('Error deleting Invoice:', json.message);
+      }
+    }
+
+  } catch (error) {
+    console.error('Error deleting Invoice:', error);
+  }
+};
+
+  // const handleRemove = async (invoiceid,invoiceIdpass) => {
+  //   const authToken = localStorage.getItem('authToken');
+  //   try {
+  //     const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Authorization': authToken,
+  //       }
+  //     });
+  //     if (response.status === 401) {
+  //       const json = await response.json();
+  //       setAlertMessage(json.message);
+  //       setloading(false);
+  //       window.scrollTo(0, 0);
+  //       return; // Stop further execution
+  //     }
+  //     else {
+  //       const json = await response.json();
+  //       if (json.success) {
+  //         console.log('Data removed successfully!');
+  //         navigate('/userpanel/Invoice');
+  //       } else {
+  //         console.error('Error deleting Invoice:', json.message);
+  //       }
+  //     }
+  //   } catch (error) {
+  //     console.error('Error deleting Invoice:', error);
+  //   }
+  // };
 
 
   const getStatus = () => {
@@ -1138,6 +1248,7 @@ thead{
     event.preventDefault();
     const authToken = localStorage.getItem('authToken');
     const contentAsPdf = await generatePdfFromHtml();
+    const userid = invoiceData.userid;
     try {
       const finalContent = content.trim() || ``; // If content is empty, use default value
       const response = await fetch('https://grithomes.onrender.com/api/send-invoice-email', {
@@ -1158,6 +1269,8 @@ thead{
           currencyType: signupdata.CurrencyType,
           amountdue1: invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0),
           pdfAttachment: contentAsPdf,
+          invoiceId: invoiceData._id,
+          ownerId: ownerData.ownerId,
         }),
       });
 
@@ -1178,7 +1291,7 @@ thead{
             body: JSON.stringify(updatedData),
           });
         }else {
-          const updatedData = { ...invoiceData,status:"Send", emailsent: 'yes' }
+          const updatedData = { ...invoiceData, emailsent: 'yes' }
           await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
@@ -1188,18 +1301,36 @@ thead{
             body: JSON.stringify(updatedData),
           });
         }
-        if (response.status === 401) {
-          const json = await response.json();
-          setAlertMessage(json.message);
-          setloading(false);
-          window.scrollTo(0, 0);
-          return; // Stop further execution
-        }
-        else {
-          fetchinvoicedata();
-        }
+        // Check if customer signature already exists
+      const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceData._id)}`);
+      const checkJson = await checkResponse.json();
+
+      if (checkResponse.ok && !checkJson.hasSignature) {
+        // Create new customer signature only if it doesn't exist
+        await fetch('https://grithomes.onrender.com/api/customersignature', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // 'Authorization': authToken,
+          },
+          body: JSON.stringify({
+            invoiceId: invoiceData._id,
+            userid,
+            // ownerEmail:ownerData.email,
+            // ownerId:ownerData.ownerId,
+            status:'Pending Signature',
+            customerName: invoiceData.customername,
+            customerEmail: invoiceData.customeremail,
+            customersign: "",
+            documentNumber: invoiceData.InvoiceNumber,
+            lastupdated: '',
+            completeButtonVisible: false,
+          }), 
+        });
+      }
 
         // Fetch updated invoice data
+        fetchinvoicedata();
 
       } else {
         console.error('Failed to send email.');
@@ -1650,15 +1781,56 @@ thead{
                             <div className='invoice-price-right'>
                               <small>Amount Due</small>
                               <span class="f-w-600 mt-3"><CurrencySign />{roundOff(invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
-
                             </div>
-
                           </div>
+
+                          {invoiceData.isAddSignature || invoiceData.isCustomerSign  ? 
+                            <div className="invoice-body">
+                              <p>By signing this document, the customer agrees to the services and conditions described in this document.</p>
+                              <div className="row">
+                                  
+                                    {ownerData && invoiceData.isAddSignature && (
+                                      <div className="col-6">
+                                      <div className="my-2">
+                                        <div>
+                                          <p className='text-center fw-bold fs-5'>{ownerData.companyname}</p>
+                                          <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr/>
+                                          <p className='text-center'>{formatCustomDate(ownerData.createdAt)}</p>
+                                        </div>
+                                      </div>
+                                      </div>
+                                    )}
+                                  <div className="col-6">
+                                    <div className="my-2">
+                                      <div>
+                                        <p className='text-center fw-bold fs-5'>{invoiceData.customername}</p>
+                                        {signatureData != null ? 
+                                          signatureData.customersign== '' ? (''):
+                                            (<div className="signature-section">
+                                              <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr/>
+                                              <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
+                                            </div>):''}
+                                        {/* {signatureData ? (
+                                            <div className="signature-section">
+                                              <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr/>
+                                              <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
+                                            </div>
+                                          ) : (
+                                            ''
+                                          )} */}
+                                      </div>
+                                    </div>
+                                  </div>
+                              </div>
+                              
+                            </div>: ''
+                          }
 
                           <div className='invoice-body invoice-body-text'>
                             <div className='mt-1'>
                               <span>{invoiceData.information == '' ? '' : 'Note:'}</span> 
                               <div className='information-content' dangerouslySetInnerHTML={{ __html: invoiceData.information }} />
+
                             </div>
                           </div>
 
@@ -2030,7 +2202,6 @@ thead{
                           invalidEmailInput: { backgroundColor: '#f9cfd0' },
                           container: { marginTop: '20px' },
                         }}
-
                       />
                     </div>
                   </div>

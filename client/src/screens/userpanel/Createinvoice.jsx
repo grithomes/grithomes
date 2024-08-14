@@ -89,6 +89,11 @@ export default function Createinvoice() {
     const [editorData, setEditorData] = useState(``);
     const [noteimageUrl, setnoteImageUrl] = useState(''); 
     const [alertMessage, setAlertMessage] = useState('');
+    const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
+    const [hasSignature, setHasSignature] = useState(false);
+    const [ownerId, setOwnerId] = useState('');
+    const [isAddSignatureSwitchOn, setIsAddSignatureSwitchOn] = useState(false);
+    const [isCustomerSignSwitchOn, setIsCustomerSignSwitchOn] = useState(false);
     const [credentials, setCredentials] = useState({
         name: '',
         email: '',
@@ -137,6 +142,62 @@ export default function Createinvoice() {
     const [city, setcity] = useState(false);
 
     const [message1, setMessage1] = useState(false);
+
+    const handleSignatureSwitch = async (event) => {
+        if (event.target.checked) {
+            try {
+                const ownerId = localStorage.getItem('userid');
+                const response = await fetch(`https://grithomes.onrender.com/api/check-signature/${ownerId}`);
+                const data = await response.json();
+                setHasSignature(data.hasSignature);
+
+                if (!data.hasSignature) {
+                    setIsSignatureModalOpen(true);
+                }
+                setIsAddSignatureSwitchOn(true); // Automatically activate "Add My Signature"
+                setIsCustomerSignSwitchOn(true); // Automatically activate "Customer to Sign"
+            } catch (error) {
+                console.error('Error checking signature:', error);
+            }
+        } else {
+            setIsAddSignatureSwitchOn(false);
+            setIsCustomerSignSwitchOn(false);
+            setHasSignature(false); // Ensure switches are hidden
+        }
+    };
+
+    const handleAddSignatureSwitch = (event) => {
+        setIsAddSignatureSwitchOn(event.target.checked);
+        if (!event.target.checked && !isCustomerSignSwitchOn) {
+            setHasSignature(false);
+        }
+    };
+
+    const handleCustomerSignSwitch = (event) => {
+        setIsCustomerSignSwitchOn(event.target.checked);
+        if (!event.target.checked && !isAddSignatureSwitchOn) {
+            setHasSignature(false);
+        }
+    };
+
+    const saveSignature = async (signatureData) => {
+        try {
+            const ownerId = localStorage.getItem('userid');
+            const email = localStorage.getItem('userEmail');
+            const companyname = localStorage.getItem('companyname');
+            await fetch('https://grithomes.onrender.com/api/ownersignature', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ signature: signatureData, ownerId, email, companyname }),
+            });
+            setHasSignature(true);
+            setIsSignatureModalOpen(false);
+        } catch (error) {
+            console.error('Error saving signature:', error);
+        }
+    };
 
     const roundOff = (value) => {
         return Math.round(value * 100) / 100;
@@ -536,6 +597,8 @@ export default function Createinvoice() {
                 taxpercentage: signUpData.percentage,
                 amountdue: amountdue,
                 noteimageUrl: noteimageUrl,
+                isAddSignature: isAddSignatureSwitchOn, 
+                isCustomerSign: isCustomerSignSwitchOn,
             };
             console.log(data, "Invoice Data ====");
 
@@ -794,377 +857,429 @@ export default function Createinvoice() {
                                                 {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                                             </div>
                                         </div>
-                                        <div className='box1 rounded adminborder p-4 m-2 mb-5'>
-                                            <div className='row me-2'>
-                                                <div className="col-md-6 col-lg-5 col-12">
-                                                    {isCustomerSelected ? (
-                                                        <div className="customerdetail p-3">
-                                                            <ul>
-                                                                <li className='fw-bold fs-4'>{selectedCustomerDetails.name}</li>
-                                                                <li>
-                                                                    <a href="" className='text-decoration-none' data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a>
-                                                                </li>
-                                                            </ul>
-                                                            <p className='m-0'>{selectedCustomerDetails.email}</p>
-                                                            <p>{selectedCustomerDetails.number}</p>
-                                                        </div>
-                                                    ) : (
-                                                        <div className="search-container forms">
-                                                            <p className='fs-20 mb-0'>Select Customers</p>
-                                                            <div className="row">
-                                                                <div className="col-6">
-                                                                    {/* <VirtualizedSelect
-                                                                        id="searchitems"
-                                                                        name="customername"
-                                                                        className="form-control zindex op pl-0"
-                                                                        placeholder=""
-                                                                        onChange={onChangecustomer}
-                                                                        required
-                                                                        options={customers.map((customer, index) =>
-                                                                            ({ label: customer.name, value: customer._id })
 
-                                                                        )}
-                                                                    /> */}
-                                                                    <Select
-                                                                        value={searchcustomerResults}
-                                                                        onChange={onChangecustomer}
-                                                                        options={customers.map(customer => ({
-                                                                            value: customer._id,
-                                                                            label: customer.name,
-                                                                        }))}
-                                                                        placeholder=""
-                                                                        required
-                                                                    />
-
+                                        <div className="row">
+                                            <div className="col-lg-9 col-12 order-2 order-lg-1">
+                                                <div className='box1 rounded adminborder p-4 m-2 mb-5'>
+                                                    <div className='row me-2'>
+                                                        <div className="col-md-6 col-lg-5 col-12">
+                                                            {isCustomerSelected ? (
+                                                                <div className="customerdetail p-3">
+                                                                    <ul>
+                                                                        <li className='fw-bold fs-4'>{selectedCustomerDetails.name}</li>
+                                                                        <li>
+                                                                            <a href="" className='text-decoration-none' data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a>
+                                                                        </li>
+                                                                    </ul>
+                                                                    <p className='m-0'>{selectedCustomerDetails.email}</p>
+                                                                    <p>{selectedCustomerDetails.number}</p>
                                                                 </div>
-                                                                <div className="col-3">
-                                                                    <a role='button' className="btn btn-success btn-sm me-2 text-white mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal1">
-                                                                        <i class="fa-solid fa-plus"></i>
-                                                                    </a>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    )}
+                                                            ) : (
+                                                                <div className="search-container forms">
+                                                                    <p className='fs-20 mb-0'>Select Customers</p>
+                                                                    <div className="row">
+                                                                        <div className="col-6">
+                                                                            {/* <VirtualizedSelect
+                                                                                id="searchitems"
+                                                                                name="customername"
+                                                                                className="form-control zindex op pl-0"
+                                                                                placeholder=""
+                                                                                onChange={onChangecustomer}
+                                                                                required
+                                                                                options={customers.map((customer, index) =>
+                                                                                    ({ label: customer.name, value: customer._id })
 
-                                                </div>
-                                                <div className="col-lg-7 col-md-6">
-                                                    <div className="row">
-                                                        {message == true ? (
-                                                            <div className="alert alert-warning alert-dismissible fade show" role="alert">
-                                                                <strong>{alertShow}</strong>
-                                                                <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                                            </div>
-                                                        ) : (
-                                                            ""
-                                                        )}
-                                                        <div className="col-lg-6">
-                                                            <div className="mb-3">
-                                                                <label htmlFor="invoicenumbr" className="form-label">
-                                                                    Invoice Number
-                                                                </label>
-                                                                <input
-                                                                    type="text"
-                                                                    name="InvoiceNumber"
-                                                                    className="form-control"
-                                                                    value={invoiceData.InvoiceNumber}
-                                                                    onChange={onchange}
-                                                                    // placeholder="Invoice Number"
-                                                                    id="invoicenumbr"
-                                                                    required
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-lg-6">
-                                                            <div className="mb-3">
-                                                                <label htmlFor="purchaseoder" className="form-label">
-                                                                    Purchase Order (PO) #
-                                                                </label>
-                                                                <input
-                                                                    type="text"
-                                                                    name="purchaseorder"
-                                                                    className="form-control"
-                                                                    onChange={onchange}
-                                                                    id="purchaseoder"
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-lg-6">
-                                                            <div className="mb-3">
-                                                                <label htmlFor="Date" className="form-label">
-                                                                    Date
-                                                                </label>
-                                                                <input
-                                                                    type="date"
-                                                                    name="date"
-                                                                    className="form-control"
-                                                                    value={invoiceData.date}
-                                                                    onChange={onchange}
-                                                                    // placeholder="Date"
-                                                                    id="Date"
-                                                                    required
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-lg-6">
-                                                            <div className="mb-3">
-                                                                <label htmlFor="Job" className="form-label">
-                                                                    Job
-                                                                </label>
-                                                                <input
-                                                                    type="text"
-                                                                    name="job"
-                                                                    className="form-control"
-                                                                    value={invoiceData.job}
-                                                                    onChange={onchange}
-                                                                    // placeholder="Date"
-                                                                    id="job"
-                                                                    required
-                                                                />
-                                                            </div>
-                                                        </div>
-                                                        <div className="col-lg-6">
-                                                            <div className="mb-3">
-                                                                <label htmlFor="duedate" className="form-label">
-                                                                    Due Date
-                                                                </label>
-                                                                <input
-                                                                    type="date"
-                                                                    name="duedate"
-                                                                    className="form-control"
-                                                                    value={invoiceData.duedate}
-                                                                    onChange={onchange}
-                                                                    // placeholder="Due Date"
-                                                                    id="duedate"
-                                                                />
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div className='box1 rounded adminborder p-4 m-2'>
-                                                <div className="table-responsive">
-                                                    <table className="table">
-                                                        <thead>
-                                                            <tr>
-                                                                <th scope="col">ITEM</th>
-                                                                <th scope="col">QUANTITY</th>
-                                                                <th scope="col">PRICE</th>
-                                                                {/* <th scope="col">DISCOUNT</th> */}
-                                                                <th scope="col">AMOUNT</th>
-                                                            </tr>
-                                                        </thead>
-                                                        <tbody>
-                                                            {searchitemResults.map((item) => {
-                                                                const selectedItem = items.find((i) => i._id === item.value);
-                                                                const itemPrice = selectedItem?.price || 0;
-                                                                const itemId = item.value;
-                                                                const quantity = quantityMap[itemId] || 1;
-                                                                const discount = discountMap[itemId] || 0;
-
-                                                                const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
-                                                                const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
-                                                                    // style: 'currency',
-                                                                    // currency: 'INR',
-                                                                });
-
-                                                                return (
-                                                                    <tr key={item.value}>
-                                                                        <td>
-                                                                            <div className="mb-3 d-flex align-items-baseline justify-content-between">
-                                                                                <p>{item.label}</p>
-                                                                                <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
-                                                                                    <i className="fas fa-trash"></i>
-                                                                                </button>
-                                                                            </div>
-                                                                            <div className="row">
-                                                                                <div className="col">
-                                                                                    <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
-
-                                                                                    <CKEditor
-                                                                                        editor={ClassicEditor}
-                                                                                        data={selectedItem?.description || ''}
-                                                                                        name={`description-${itemId}`}
-                                                                                        onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
-                                                                                        onBlur={(event, editor) => {
-                                                                                            console.log('Blur.', editor);
-                                                                                        }}
-                                                                                        onFocus={(event, editor) => {
-                                                                                            console.log('Focus.', editor);
-                                                                                        }}
-                                                                                    />
-                                                                                    
-                                                                                       {/* <CKEditor
-                                                                                            editor={ClassicEditor}
-                                                                                            data={editorData}
-                                                                                            onChange={handleEditorChange}
-                                                                                        /> */}
-
-                                                                                </div>
-
-                                                                            </div>
-                                                                        </td>
-                                                                        <td>
-                                                                            <input
-                                                                                type="number"
-                                                                                name={`quantity-${itemId}`}
-                                                                                className="form-control"
-                                                                                value={quantity}
-                                                                                onChange={(event) => onChangeQuantity(event, itemId)}
-                                                                                id={`quantity-${itemId}`}
+                                                                                )}
+                                                                            /> */}
+                                                                            <Select
+                                                                                value={searchcustomerResults}
+                                                                                onChange={onChangecustomer}
+                                                                                options={customers.map(customer => ({
+                                                                                    value: customer._id,
+                                                                                    label: customer.name,
+                                                                                }))}
+                                                                                placeholder=""
                                                                                 required
                                                                             />
-                                                                        </td>
 
-                                                                        <td>
-                                                                            <input
-                                                                                type="text"
-                                                                                name={`price-${itemId}`}
-                                                                                className="form-control"
-                                                                                value={itemPrice}
-                                                                                onChange={(event) => onChangePrice(event, itemId)}
-                                                                                id={`price-${itemId}`}
-                                                                                required
-                                                                            />
-                                                                        </td>
-
-                                                                        <td className="text-center">
-                                                                            <p><CurrencySign />{formattedTotalAmount}</p>
-                                                                        </td>
-                                                                    </tr>
-
-                                                                );
-
-                                                            })}
-
-                                                            {itemExistsMessage && (
-                                                                <div className="alert alert-warning mt-3" role="alert">
-                                                                    {itemExistsMessage}
+                                                                        </div>
+                                                                        <div className="col-3">
+                                                                            <a role='button' className="btn btn-success btn-sm me-2 text-white mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal1">
+                                                                                <i class="fa-solid fa-plus"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
                                                                 </div>
                                                             )}
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-
-                                                <div className="row pt-3">
-                                                    <div className="col-lg-6 col-md-12">
-                                                        <div className="search-container forms">
-                                                            <p className='fs-20 mb-0'>Select Item</p>
-                                                            {/* <VirtualizedSelect
-                                                                id="searchitems"
-                                                                name="itemname"
-                                                                className="form-control zindex op pl-0"
-                                                                placeholder=""
-                                                                onChange={onChangeitem}
-                                                                options={items.map((item, index) =>
-                                                                    ({ label: item.itemname, value: item._id })
-
-                                                                )}
-                                                            >
-                                                            </VirtualizedSelect> */}
-                                                            <Select
-                                                                value={searchitemResults}
-                                                                onChange={onChangeitem}
-                                                                options={items.map(item => ({
-                                                                    value: item._id,
-                                                                    label: item.itemname,
-                                                                }))}
-                                                                placeholder=""
-                                                            />
 
                                                         </div>
-                                                    </div>
-                                                    <div className="col-lg-6 col-md-12">
-                                                        <div className="row">
-                                                            <div className="col-6 col-md-3">
-                                                                <p>Subtotal</p>
-                                                                <p>Discount</p>
-                                                                {console.log(signUpData, "====signUpData")}
-                                                                {/* <p>GST</p> */}
-                                                                <p className='pt-3'>{signUpData.name} {signUpData.percentage}%</p>
+                                                        <div className="col-lg-7 col-md-6">
+                                                            <div className="row">
+                                                                {message == true ? (
+                                                                    <div className="alert alert-warning alert-dismissible fade show" role="alert">
+                                                                        <strong>{alertShow}</strong>
+                                                                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                                    </div>
+                                                                ) : (
+                                                                    ""
+                                                                )}
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="invoicenumbr" className="form-label">
+                                                                            Invoice Number
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            name="InvoiceNumber"
+                                                                            className="form-control"
+                                                                            value={invoiceData.InvoiceNumber}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Invoice Number"
+                                                                            id="invoicenumbr"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="purchaseoder" className="form-label">
+                                                                            Purchase Order (PO) #
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            name="purchaseorder"
+                                                                            className="form-control"
+                                                                            onChange={onchange}
+                                                                            id="purchaseoder"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="Date" className="form-label">
+                                                                            Date
+                                                                        </label>
+                                                                        <input
+                                                                            type="date"
+                                                                            name="date"
+                                                                            className="form-control"
+                                                                            value={invoiceData.date}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Date"
+                                                                            id="Date"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="Job" className="form-label">
+                                                                            Job
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            name="job"
+                                                                            className="form-control"
+                                                                            value={invoiceData.job}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Date"
+                                                                            id="job"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="duedate" className="form-label">
+                                                                            Due Date
+                                                                        </label>
+                                                                        <input
+                                                                            type="date"
+                                                                            name="duedate"
+                                                                            className="form-control"
+                                                                            value={invoiceData.duedate}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Due Date"
+                                                                            id="duedate"
+                                                                        />
+                                                                    </div>
+                                                                </div>
 
-                                                                <p>Total</p>
                                                             </div>
-                                                            <div className="col-6 col-md-9">
-                                                                <p><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
-                                                                   
-                                                                })}</p>
-                                                                <div className="mb-3">
+                                                        </div>
+                                                    </div>
+
+                                                    <div className='box1 rounded adminborder p-4 m-2'>
+                                                        <div className="table-responsive">
+                                                            <table className="table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">ITEM</th>
+                                                                        <th scope="col">QUANTITY</th>
+                                                                        <th scope="col">PRICE</th>
+                                                                        {/* <th scope="col">DISCOUNT</th> */}
+                                                                        <th scope="col">AMOUNT</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {searchitemResults.map((item) => {
+                                                                        const selectedItem = items.find((i) => i._id === item.value);
+                                                                        const itemPrice = selectedItem?.price || 0;
+                                                                        const itemId = item.value;
+                                                                        const quantity = quantityMap[itemId] || 1;
+                                                                        const discount = discountMap[itemId] || 0;
+
+                                                                        const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+                                                                        const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        });
+
+                                                                        return (
+                                                                            <tr key={item.value}>
+                                                                                <td>
+                                                                                    <div className="mb-3 d-flex align-items-baseline justify-content-between">
+                                                                                        <p>{item.label}</p>
+                                                                                        <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
+                                                                                            <i className="fas fa-trash"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                    <div className="row">
+                                                                                        <div className="col">
+                                                                                            <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
+
+                                                                                            <CKEditor
+                                                                                                editor={ClassicEditor}
+                                                                                                data={selectedItem?.description || ''}
+                                                                                                name={`description-${itemId}`}
+                                                                                                onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
+                                                                                                onBlur={(event, editor) => {
+                                                                                                    console.log('Blur.', editor);
+                                                                                                }}
+                                                                                                onFocus={(event, editor) => {
+                                                                                                    console.log('Focus.', editor);
+                                                                                                }}
+                                                                                            />
+                                                                                            
+                                                                                            {/* <CKEditor
+                                                                                                    editor={ClassicEditor}
+                                                                                                    data={editorData}
+                                                                                                    onChange={handleEditorChange}
+                                                                                                /> */}
+
+                                                                                        </div>
+
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        name={`quantity-${itemId}`}
+                                                                                        className="form-control"
+                                                                                        value={quantity}
+                                                                                        onChange={(event) => onChangeQuantity(event, itemId)}
+                                                                                        id={`quantity-${itemId}`}
+                                                                                        required
+                                                                                    />
+                                                                                </td>
+
+                                                                                <td>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        name={`price-${itemId}`}
+                                                                                        className="form-control"
+                                                                                        value={itemPrice}
+                                                                                        onChange={(event) => onChangePrice(event, itemId)}
+                                                                                        id={`price-${itemId}`}
+                                                                                        required
+                                                                                    />
+                                                                                </td>
+
+                                                                                <td className="text-center">
+                                                                                    <p><CurrencySign />{formattedTotalAmount}</p>
+                                                                                </td>
+                                                                            </tr>
+
+                                                                        );
+
+                                                                    })}
+
+                                                                    {itemExistsMessage && (
+                                                                        <div className="alert alert-warning mt-3" role="alert">
+                                                                            {itemExistsMessage}
+                                                                        </div>
+                                                                    )}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+                                                        <div className="row pt-3">
+                                                            <div className="col-lg-6 col-md-12">
+                                                                <div className="search-container forms">
+                                                                    <p className='fs-20 mb-0'>Select Item</p>
+                                                                    {/* <VirtualizedSelect
+                                                                        id="searchitems"
+                                                                        name="itemname"
+                                                                        className="form-control zindex op pl-0"
+                                                                        placeholder=""
+                                                                        onChange={onChangeitem}
+                                                                        options={items.map((item, index) =>
+                                                                            ({ label: item.itemname, value: item._id })
+
+                                                                        )}
+                                                                    >
+                                                                    </VirtualizedSelect> */}
+                                                                    <Select
+                                                                        value={searchitemResults}
+                                                                        onChange={onChangeitem}
+                                                                        options={items.map(item => ({
+                                                                            value: item._id,
+                                                                            label: item.itemname,
+                                                                        }))}
+                                                                        placeholder=""
+                                                                    />
+
+                                                                </div>
+                                                            </div>
+                                                            <div className="col-lg-6 col-md-12">
+                                                                <div className="row">
+                                                                    <div className="col-6 col-md-3">
+                                                                        <p>Subtotal</p>
+                                                                        <p>Discount</p>
+                                                                        {console.log(signUpData, "====signUpData")}
+                                                                        {/* <p>GST</p> */}
+                                                                        <p className='pt-3'>{signUpData.name} {signUpData.percentage}%</p>
+
+                                                                        <p>Total</p>
+                                                                    </div>
+                                                                    <div className="col-6 col-md-9">
+                                                                        <p><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
+                                                                        
+                                                                        })}</p>
+                                                                        <div className="mb-3">
+                                                                            <input
+                                                                                type="number"
+                                                                                name="totaldiscount"
+                                                                                className="form-control"
+                                                                                value={discountTotal}
+                                                                                onChange={handleDiscountChange} // Ensure proper event binding
+                                                                                placeholder="Enter Discount Total"
+                                                                                id="discountInput"
+                                                                                min="0"
+                                                                            />
+                                                                        </div>
+                                                                    
+
+                                                                        <p>{console.log("check Tax Amount", calculateTaxAmount())}<CurrencySign />{
+
+                                                                            calculateTaxAmount().toLocaleString('en-IN', {
+                                                                                // style: 'currency',
+                                                                                // currency: 'INR',
+                                                                            })}</p>
+
+                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        })}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <hr />
+                                                        <div className="row pt-3">
+                                                            <div className="col-lg-6 col-md-12"></div>
+                                                            <div className="col-lg-6 col-md-12">
+                                                                <div className="row">
+                                                                    <div className="col-6 col-md-3">
+                                                                        <p>Amount due</p>
+                                                                    </div>
+                                                                    <div className="col-6 col-md-9">
+                                                                        {/* <p><CurrencySign /> {calculateTotal().toLocaleString}</p> */}
+                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        })}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <label htmlFor="" className='fs-4 ms-2 mt-5'>Note</label>
+                                                    <div className='box1 rounded adminborder m-2'>
+                                                        <CKEditor
+                                                            editor={ClassicEditor}
+                                                            data={editorData}
+                                                            // onReady={ editor => {
+                                                            //     console.log( 'Editor is ready to use!', editor );
+                                                            // } }
+
+                                                            onChange={handleEditorChange}
+                                                            config={{
+                                                                extraPlugins: [MyCustomUploadAdapterPlugin],
+                                                            }}
+                                                            onBlur={(event, editor) => {
+                                                                console.log('Blur.', editor);
+                                                            }}
+                                                            onFocus={(event, editor) => {
+                                                                console.log('Focus.', editor);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            
+                                            <div className="col-lg-3 col-12 order-1 order-lg-2">
+                                                <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
+                                                    <div className="form-check form-switch">
+                                                        <div>
+                                                            <label className="form-check-label" htmlFor="signatureSwitch">Signature</label>
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                role="switch"
+                                                                id="signatureSwitch"
+                                                                onChange={handleSignatureSwitch}
+                                                                checked={hasSignature}
+                                                            />
+                                                        </div>
+                                                        {hasSignature && (
+                                                            <>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
                                                                     <input
-                                                                        type="number"
-                                                                        name="totaldiscount"
-                                                                        className="form-control"
-                                                                        value={discountTotal}
-                                                                        onChange={handleDiscountChange} // Ensure proper event binding
-                                                                        placeholder="Enter Discount Total"
-                                                                        id="discountInput"
-                                                                        min="0"
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="addSignatureSwitch"
+                                                                        checked={isAddSignatureSwitchOn}
+                                                                        onChange={handleAddSignatureSwitch}
                                                                     />
                                                                 </div>
-                                                              
-
-                                                                <p>{console.log("check Tax Amount", calculateTaxAmount())}<CurrencySign />{
-
-                                                                    calculateTaxAmount().toLocaleString('en-IN', {
-                                                                        // style: 'currency',
-                                                                        // currency: 'INR',
-                                                                    })}</p>
-
-                                                                <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
-                                                                    // style: 'currency',
-                                                                    // currency: 'INR',
-                                                                })}</p>
-                                                            </div>
-                                                        </div>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="customerSignSwitch"
+                                                                        checked={isCustomerSignSwitchOn}
+                                                                        onChange={handleCustomerSignSwitch}
+                                                                    />
+                                                                </div>
+                                                            </>
+                                                        )}
                                                     </div>
                                                 </div>
-                                                <hr />
-                                                <div className="row pt-3">
-                                                    <div className="col-lg-6 col-md-12"></div>
-                                                    <div className="col-lg-6 col-md-12">
-                                                        <div className="row">
-                                                            <div className="col-6 col-md-3">
-                                                                <p>Amount due</p>
-                                                            </div>
-                                                            <div className="col-6 col-md-9">
-                                                                {/* <p><CurrencySign /> {calculateTotal().toLocaleString}</p> */}
-                                                                <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
-                                                                    // style: 'currency',
-                                                                    // currency: 'INR',
-                                                                })}</p>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-
-
-
-
-                                            <label htmlFor="" className='fs-4 ms-2 mt-5'>Note</label>
-                                            <div className='box1 rounded adminborder m-2'>
-                                                <CKEditor
-                                                    editor={ClassicEditor}
-                                                    data={editorData}
-                                                    // onReady={ editor => {
-                                                    //     console.log( 'Editor is ready to use!', editor );
-                                                    // } }
-
-                                                    onChange={handleEditorChange}
-                                                    config={{
-                                                        extraPlugins: [MyCustomUploadAdapterPlugin],
-                                                    }}
-                                                    onBlur={(event, editor) => {
-                                                        console.log('Blur.', editor);
-                                                    }}
-                                                    onFocus={(event, editor) => {
-                                                        console.log('Focus.', editor);
-                                                    }}
-                                                />
+                                                {isSignatureModalOpen && (
+                                                    <SignatureModal
+                                                        onSave={saveSignature}
+                                                        onClose={() => setIsSignatureModalOpen(false)}
+                                                    />
+                                                )}
                                             </div>
                                         </div>
+                                        
 
                                     </form>
                                 </div>
