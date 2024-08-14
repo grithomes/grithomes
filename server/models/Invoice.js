@@ -71,6 +71,14 @@ const InvoiceSchema = new Schema({
     noteimageUrl:{
         type: String,
     },
+    isAddSignature: { 
+        type: Boolean, 
+        default: false 
+    },
+    isCustomerSign: { 
+        type: Boolean, 
+        default: false 
+    }, 
     createdAt: {
         type: Date,
         default: Date.now,

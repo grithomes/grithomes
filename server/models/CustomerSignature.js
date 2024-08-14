@@ -2,10 +2,16 @@ const mongoose = require('mongoose');
 const { Schema } = mongoose;
 
 const CustomerSignatureSchema = new Schema({
+    
     estimateId: {  
         type: Schema.Types.ObjectId, 
-        required: true, 
+        // required: true, 
         ref: 'Estimate' 
+    },
+    invoiceId: {  
+        type: Schema.Types.ObjectId, 
+        // required: true, 
+        ref: 'Invoice' 
     },
     userid: {  
         type: String, 
