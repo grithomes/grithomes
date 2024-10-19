@@ -13,6 +13,9 @@ const EstimateSchema = new Schema({
     customeremail: {
         type: String,
     },
+    customerphone: {
+        type: String,
+    },
     purchaseorder: {
         type: String,
     },

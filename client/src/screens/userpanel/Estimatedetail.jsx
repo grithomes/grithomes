@@ -72,7 +72,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/getestimatedata/${estimateid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -116,7 +116,7 @@ export default function Estimatedetail() {
     }
   
     try {
-      const response = await fetch(`http://localhost:3000/api/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
+      const response = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
       const json = await response.json();
       console.log('Customer signature response:', json);
       if (response.ok && json.hasSignature) {
@@ -133,7 +133,7 @@ export default function Estimatedetail() {
     try {
       const ownerId = localStorage.getItem('userid');
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3000/api/getownerdata/${ownerId}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getownerdata/${ownerId}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -158,7 +158,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/gettransactiondata/${estimateid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -195,7 +195,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -564,7 +564,7 @@ thead{
       // If a signature exists, delete it
       if (signatureData) {
         const authToken = localStorage.getItem('authToken');
-        const deleteSignatureResponse = await fetch(`http://localhost:3000/api/delcustomersignature/${encodeURIComponent(estimateIdpass)}`, {
+        const deleteSignatureResponse = await fetch(`https://grithomes.onrender.com/api/delcustomersignature/${encodeURIComponent(estimateIdpass)}`, {
           method: 'DELETE',
           headers: {
             'Authorization': authToken,
@@ -582,7 +582,7 @@ thead{
   
       // Proceed with deleting the estimate data
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/delestimatedata/${estimateid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
         method: 'GET',
         headers: {
           'Authorization': authToken,
@@ -614,7 +614,7 @@ thead{
   // const handleRemove = async (estimateid) => {
   //   try {
   //     const authToken = localStorage.getItem('authToken');
-  //     const response = await fetch(`http://localhost:3000/api/delestimatedata/${estimateid}`, {
+  //     const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
   //       method: 'GET',
   //       headers: {
   //         'Authorization': authToken,
@@ -668,7 +668,7 @@ thead{
     // console.log(userEmail, "userEmail ============");
     try {
       const finalContent = content.trim() || ``; // If content is empty, use default value
-      const response = await fetch('http://localhost:3001/api/send-estimate-email', {
+      const response = await fetch('https://grithomes.onrender.com/api/send-estimate-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -697,7 +697,7 @@ thead{
         setShowEmailAlert(true);
         // Update the database with emailsent status
         const updatedData = { ...estimateData, emailsent: 'yes' }; // Update emailsent status
-        await fetch(`http://localhost:3001/api/updateestimateData/${estimateid}`, {
+        await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -707,12 +707,12 @@ thead{
         });
 
         // Check if customer signature already exists
-      const checkResponse = await fetch(`http://localhost:3000/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
+      const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
       const checkJson = await checkResponse.json();
 
       if (checkResponse.ok && !checkJson.hasSignature) {
         // Create new customer signature only if it doesn't exist
-        await fetch('http://localhost:3000/api/customersignature', {
+        await fetch('https://grithomes.onrender.com/api/customersignature', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -1062,14 +1062,15 @@ thead{
                             <div className="invoice-body">
                               <p>By signing this document, the customer agrees to the services and conditions described in this document.</p>
                               <div className="row">
-                                  
+                                  {console.log(ownerData,"ownerData")
+                                  }
                                     {ownerData && estimateData.isAddSignature && (
                                       <div className="col-6">
                                       <div className="my-2">
                                         <div>
                                           <p className='text-center fw-bold fs-5'>{ownerData.companyname}</p>
                                           <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr/>
-                                          <p className='text-center'>{formatCustomDate(ownerData.createdAt)}</p>
+                                          <p className='text-center'>{formatCustomDate(estimateData.createdAt)}</p>
                                         </div>
                                       </div>
                                       </div>

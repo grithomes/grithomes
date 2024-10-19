@@ -451,7 +451,7 @@ thead{
     try {
       // const userid = localStorage.getItem("userid");
       // const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3000/api/getemailestimatedata/${estimateId}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getemailestimatedata/${estimateId}`, {
         // headers: {
         //   'Authorization': authToken,
         // }
@@ -496,7 +496,7 @@ thead{
       const userId =  estimateData.userid;  // localStorage.getItem("userid");
       // const userid =   localStorage.getItem("userid");
       // const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3000/api/getemailsignupdata/${userId}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getemailsignupdata/${userId}`, {
         // headers: {
         //   'Authorization': authToken,
         // }
@@ -525,7 +525,7 @@ thead{
     try {
       // const userid = localStorage.getItem("userid");
       // const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3000/api/getemailtransactiondata/${estimateId}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getemailtransactiondata/${estimateId}`, {
         // headers: {
         //   'Authorization': authToken,
         // }
@@ -562,7 +562,7 @@ thead{
       const ownerId = estimateData.userid;
       // const ownerId = localStorage.getItem('userid');
       // const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3000/api/getemailownerdata/${ownerId}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getemailownerdata/${ownerId}`, {
         // headers: {
         //   'Authorization': authToken,
         // }
@@ -591,7 +591,7 @@ thead{
     }
   
     try {
-      const response = await fetch(`http://localhost:3000/api/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
+      const response = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
       const json = await response.json();
       console.log('Customer signature response:', json);
       console.log('Customer signature response:', response.ok);
@@ -611,12 +611,12 @@ thead{
 
     try {
       // Check if customer signature already exists
-      const checkResponse = await fetch(`http://localhost:3000/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
+      const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
       const checkJson = await checkResponse.json();
   
       if (checkJson.hasSignature) {
         // Update the existing customer signature
-        const updateResponse = await fetch(`http://localhost:3000/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
+        const updateResponse = await fetch(`https://grithomes.onrender.com/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -652,12 +652,12 @@ thead{
   
     try {
       // Check if customer signature already exists
-      const checkResponse = await fetch(`http://localhost:3000/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
+      const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
       const checkJson = await checkResponse.json();
   
       // if (checkJson.ok) {
         // Update the existing customer signature
-        const updateResponse = await fetch(`http://localhost:3000/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
+        const updateResponse = await fetch(`https://grithomes.onrender.com/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -751,7 +751,7 @@ console.log(offset);
       }
 
       // Send email request to backend
-      const emailResponse = await fetch('http://localhost:3000/api/send-estimate-signed-email', {
+      const emailResponse = await fetch('https://grithomes.onrender.com/api/send-estimate-signed-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -771,7 +771,7 @@ console.log(offset);
       }
       
       console.log('Email sent successfully');// Update customer signature
-      const updateResponse = await fetch(`http://localhost:3000/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
+      const updateResponse = await fetch(`https://grithomes.onrender.com/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -838,9 +838,33 @@ console.log(offset);
                               </div>
                               <div className='col-sm-12 col-md-6 text-md-end'>
                                 <h2>Estimate</h2>
+                                {console.log(signupdata,"signupdata")
+                                }
                                 <div className='text-inverse mb-1'>
                                   <strong>{signupdata != null ? signupdata.companyname : ""}</strong>
                                 </div>
+                                <address className='m-t-5 m-b-5'>
+                                  <div className='mb-2'>
+                                    <div className=''>{signupdata.address} </div>
+                                      {signupdata.city ? JSON.parse(signupdata.city).name+',' : ' '}
+                                      {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
+                                  </div>
+                                  <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
+                                  <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
+                                  <div>{signupdata.email}</div>
+                                  <div>
+                                    { /* signupdata.gstNumber == '' || signupdata.gstNumber == null
+                                      ?
+                                      ''
+                                      :
+                                      <div>
+                                        {signupdata.TaxName}: {signupdata.gstNumber}
+                                      </div>
+                                   */ }
+                                  </div>
+                                  {/* <div>{signupdata.TaxName}: {signupdata.gstNumber}</div> */}
+
+                                </address>
                               </div>
 
                             </div>
@@ -969,7 +993,7 @@ console.log(offset);
                                         <div>
                                           <p className='text-center fw-bold fs-5 margin-top-sign txt-center center'>{ownerData.companyname}</p>
                                           <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr/>
-                                          <p className='text-center txt-center center'>{formatCustomDate(ownerData.createdAt)}</p>
+                                          <p className='text-center txt-center center'>{formatCustomDate(estimateData.createdAt)}</p>
                                         </div>
                                       </div>
                                     )}
