@@ -19,6 +19,7 @@ export default function Invoice() {
   const [alertMessage, setAlertMessage] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
   const entriesPerPage = 10;
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true") {
@@ -27,11 +28,25 @@ export default function Invoice() {
     fetchData();
   }, [])
 
+  // const getFilteredInvoices = () => {
+  //   if (filterStatus === 'All') {
+  //     return invoices;
+  //   }
+  //   return invoices.filter(invoice => invoice.status === filterStatus);
+  // };
+
   const getFilteredInvoices = () => {
-    if (filterStatus === 'All') {
-      return invoices;
+    let filtered = invoices;
+    if (filterStatus !== 'All') {
+      filtered = filtered.filter(invoice => invoice.status === filterStatus);
     }
-    return invoices.filter(invoice => invoice.status === filterStatus);
+    if (searchQuery) {
+      filtered = filtered.filter(invoice =>
+        (invoice.customername?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
+        (invoice.job?.toLowerCase() || '').includes(searchQuery.toLowerCase())
+      );
+    }
+    return filtered;
   };
 
   const roundOff = (value) => {
@@ -153,7 +168,7 @@ export default function Invoice() {
   };
 
   // Pagination functions
-  const getPageCount = () => Math.ceil(invoices.length / entriesPerPage);
+  const getPageCount = () => Math.ceil(getFilteredInvoices.length / entriesPerPage);
 
   const getCurrentPageInvoices = () => {
     const filteredInvoices = getFilteredInvoices();
@@ -229,6 +244,15 @@ export default function Invoice() {
                   <option value='Saved'>Saved</option>
                   <option value='Send'>Send</option>
                 </select>
+              </div>
+              <div className='col-3'>
+                <input
+                  type="text"
+                  className="form-control mb-2"
+                  placeholder="Search by name or job"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                />
               </div>
             </div>
 

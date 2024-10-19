@@ -17,6 +17,7 @@ export default function Estimate() {
   const [currentPage, setCurrentPage] = useState(0);
   const [alertMessage, setAlertMessage] = useState('');
   const entriesPerPage = 10;
+  const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true") {
@@ -26,11 +27,7 @@ export default function Estimate() {
   }, [])
 
   const roundOff = (value) => {
-    const roundedValue = Math.round(value * 100) / 100;
-    return roundedValue.toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-  });
+    return Math.round(value * 100) / 100;
 };
 
   const fetchData = async () => {
@@ -118,14 +115,31 @@ export default function Estimate() {
     }
   };
 
+  const getFilteredEstimates = () => {
+    if (!searchQuery) {
+      return estimates;
+    }
+    return estimates.filter(estimate =>
+      estimate.customername.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      estimate.job.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+  };
+
   // Pagination functions
-  const getPageCount = () => Math.ceil(estimates.length / entriesPerPage);
+  const getPageCount = () => Math.ceil(getFilteredEstimates.length / entriesPerPage);
 
   const getCurrentPageEstimates = () => {
+    const filteredEstimates = getFilteredEstimates();
     const startIndex = currentPage * entriesPerPage;
     const endIndex = startIndex + entriesPerPage;
-    return estimates.slice(startIndex, endIndex);
+    return filteredEstimates.slice(startIndex, endIndex);
   };
+
+  // const getCurrentPageEstimates = () => {
+  //   const startIndex = currentPage * entriesPerPage;
+  //   const endIndex = startIndex + entriesPerPage;
+  //   return estimates.slice(startIndex, endIndex);
+  // };
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
@@ -176,12 +190,23 @@ export default function Estimate() {
                       <p className='h5 fw-bold'>Estimate</p>
                     </div>
                     <div className='col-lg-3 col-md-4 col-sm-4 col-5 text-lg-end text-md-end text-sm-end text-end'>
-                      <button className='btn rounded-pill btnclr text-white fw-bold' onClick={handleAddClick}>
+                      <button className='btn rounded-pill btn-primary text-white fw-bold' onClick={handleAddClick}>
                         + Add New
                       </button>
                     </div>
                   </div>
                   <hr />
+                  <div className="row mb-3">
+                    <div className='col-3'>
+                      <input
+                        type="text"
+                        className="form-control mb-2"
+                        placeholder="Search by name or job"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                      />
+                    </div>
+                  </div>
 
                   <div className='row px-2 table-responsive'>
                     <table className='table table-bordered'>
@@ -190,7 +215,7 @@ export default function Estimate() {
                           <th scope='col'>Estimate </th>
                           <th scope='col'>STATUS </th>
                           <th scope='col'>DATE </th>
-                          <th scope='col'>EMAIL STATUS </th>
+                          {/* <th scope='col'>EMAIL STATUS </th> */}
                           <th scope='col'>VIEW </th>
                           <th scope='col'>CONVERT INTO INVOICE </th>
                           <th scope='col'>AMOUNT </th>
@@ -218,9 +243,9 @@ export default function Estimate() {
                                   </div>
                                 </div>
                               </td>
-                              <td className='text-center'>
+                              {/* <td className='text-center'>
                               <p className='datetext'>{estimate.emailsent}</p>
-                            </td>
+                            </td> */}
 
                               <td className='text-center'>
                                 <a role='button' className='text-black text-center' onClick={() => handleViewClick(estimate)}>

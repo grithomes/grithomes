@@ -41,18 +41,33 @@ export default function Teamhistory() {
             return; // Stop further execution
           }
           else{
+  
             const data = await response.json();
+            const sortedEntries = data.userEntries.sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+            setUserEntries(sortedEntries);
+        
+            // Extract unique months from the sorted entries
+            const months = [...new Set(sortedEntries.map((entry) => new Date(entry.startTime).getMonth()))];
+            setUniqueMonths(months);
+        
+            const initialPageByMonth = {};
+            months.forEach((monthIndex) => {
+              initialPageByMonth[monthIndex] = 0;
+            });
+            setCurrentPageByMonth(initialPageByMonth);
+
+          //   const data = await response.json();
     
-          setUserEntries(data.userEntries);
-          // Extract unique months from the entries
-          const months = [...new Set(data.userEntries.map((entry) => new Date(entry.startTime).getMonth()))];
-          setUniqueMonths(months);
+          // setUserEntries(data.userEntries);
+          // // Extract unique months from the entries
+          // const months = [...new Set(data.userEntries.map((entry) => new Date(entry.startTime).getMonth()))];
+          // setUniqueMonths(months);
     
-          const initialPageByMonth = {};
-          months.forEach((monthIndex) => {
-            initialPageByMonth[monthIndex] = 0;
-          });
-          setCurrentPageByMonth(initialPageByMonth);
+          // const initialPageByMonth = {};
+          // months.forEach((monthIndex) => {
+          //   initialPageByMonth[monthIndex] = 0;
+          // });
+          // setCurrentPageByMonth(initialPageByMonth);
     
           setTimeout(() => {
             setloading(false);
@@ -74,6 +89,14 @@ export default function Teamhistory() {
           ...currentPageByMonth,
           [monthIndex]: nextPage,
         });
+      };
+
+      const formatTimeFromSeconds = (totalSeconds) => {
+        const hours = Math.floor(totalSeconds / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+      
+        return `${hours} hours ${minutes} minutes ${seconds} seconds`;
       };
 
   return (
@@ -121,6 +144,16 @@ export default function Teamhistory() {
         {index > 0 && <hr />}
         <div className='table-responsive'>
           <h2>{monthName}</h2>
+          <p>
+            Total Time:{' '}
+            {formatTimeFromSeconds(
+              monthEntries.reduce((acc, curr) => {
+                const timeInSeconds = parseInt(curr.timeInSeconds);
+                return isNaN(timeInSeconds) ? acc : acc + timeInSeconds;
+              }, 0)
+            )}
+          </p>
+          <p></p>
           <table className="table">
             <thead>
               <tr>

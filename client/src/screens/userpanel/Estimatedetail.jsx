@@ -19,9 +19,9 @@ export default function Estimatedetail() {
   const location = useLocation();
   const [selectedinvoices, setselectedinvoices] = useState(null);
   const [estimateData, setestimateData] = useState({
-    customername: '', itemname: '', customeremail: '', EstimateNumber: '', purchaseorder: '',
+    customername: '', itemname: '', customeremail: '',customerphone:'', EstimateNumber: '', purchaseorder: '',
     date: '', description: '', itemquantity: '', price: '', discount: '',
-    amount: '', tax: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
+    amount: '', tax: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',isAddSignature:''
   });
 
   const estimateid = location.state?.estimateid;
@@ -39,15 +39,14 @@ export default function Estimatedetail() {
   const [showModal, setShowModal] = useState(false);
   const [showEmailAlert, setShowEmailAlert] = useState(false);
   const [alertMessage, setAlertMessage] = useState('');
+  const [ownerData, setOwnerData] = useState(null);
+  const [signatureData, setsignatureData] = useState(null);
 
   
   const roundOff = (value) => {
-    const roundedValue = Math.round(value * 100) / 100;
-    return roundedValue.toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-  });
+    return Math.round(value * 100) / 100;
 };
+  
   useEffect(() => {
 
     console.log("estimateid ===========", estimateid);
@@ -93,12 +92,67 @@ export default function Estimatedetail() {
         if (Array.isArray(json.items)) {
           setitems(json.items);
         }
+
+        fetchOwnerData(); 
+
+        if (json.isAddSignature || json.isCustomerSign) {
+          // Wait for estimateData to be set before checking customer signature
+          setTimeout(() => {
+            
+            checkCustomerSignature(json._id);
+          }, 0);
+        }
       }
 
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   }
+
+  const checkCustomerSignature = async (estimateIdpass) => {
+    if (!estimateIdpass) {
+      console.error('Customer email is not defined');
+      return;
+    }
+  
+    try {
+      const response = await fetch(`http://localhost:3000/api/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
+      const json = await response.json();
+      console.log('Customer signature response:', json);
+      if (response.ok && json.hasSignature) {
+        setsignatureData(json.signatureData); 
+      } else {
+        setsignatureData(null); 
+      }
+    } catch (error) {
+      console.error('Error fetching customer signature:', error);
+    }
+  };
+
+  const fetchOwnerData = async () => {
+    try {
+      const ownerId = localStorage.getItem('userid');
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:3000/api/getownerdata/${ownerId}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
+
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
+      } else {
+        const json = await response.json();
+        setOwnerData(json[0]); // Save all owner data
+      }
+    } catch (error) {
+      console.error('Error fetching owner data:', error);
+    }
+  };
 
   const fetchtransactiondata = async () => {
     try {
@@ -183,10 +237,6 @@ export default function Estimatedetail() {
       <head>
         <title>Print Invoice</title>
         <style>
-        body{
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji" !important;
-        }
-        
       
         .print-page{
           // width:80%;
@@ -377,7 +427,7 @@ export default function Estimatedetail() {
         }
         .invoice-header {
           background: #f0f3f4;
-          padding: 20px 38px 10px;
+          padding: 25px 50px;
         }
         @media print {
           body {
@@ -385,7 +435,7 @@ export default function Estimatedetail() {
           }
           .invoice-header {
             background: #f0f3f4;
-            padding: 20px 38px 10px;
+            padding: 25px 50px;
           }
           @page {
             /* Hide header and footer */
@@ -407,6 +457,22 @@ export default function Estimatedetail() {
         .invoice-body {
           background: #fff;
           padding: 30px 50px;
+        }
+          
+
+        .invoice-body-text{
+          width: 100%;
+          height: auto;
+        }
+        .information-content {
+          height: auto;
+          overflow: hidden;
+        }
+
+        .information-content img {
+          width: 50%;
+          max-width: 100%;
+          height: auto;
         }
         .invoice-to {
           // padding-right: 20px;
@@ -490,8 +556,31 @@ thead{
     navigate('/userpanel/Editestimate', { state: { estimateid } });
   };
 
-  const handleRemove = async (estimateid) => {
+  const handleRemove = async (estimateid, estimateIdpass) => {
     try {
+      // Check if there's a customer signature
+      const signatureData = await checkCustomerSignature(estimateIdpass);
+  
+      // If a signature exists, delete it
+      if (signatureData) {
+        const authToken = localStorage.getItem('authToken');
+        const deleteSignatureResponse = await fetch(`http://localhost:3000/api/delcustomersignature/${encodeURIComponent(estimateIdpass)}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': authToken,
+          }
+        });
+  
+        if (!deleteSignatureResponse.ok) {
+          const json = await deleteSignatureResponse.json();
+          console.error('Error deleting customer signature:', json.message);
+          return; // Stop further execution if deleting signature fails
+        } else {
+          console.log('Customer signature deleted successfully!');
+        }
+      }
+  
+      // Proceed with deleting the estimate data
       const authToken = localStorage.getItem('authToken');
       const response = await fetch(`http://localhost:3001/api/delestimatedata/${estimateid}`, {
         method: 'GET',
@@ -499,17 +588,16 @@ thead{
           'Authorization': authToken,
         }
       });
-
+  
       if (response.status === 401) {
         const json = await response.json();
         setAlertMessage(json.message);
         setloading(false);
         window.scrollTo(0, 0);
         return; // Stop further execution
-      }
-      else {
+      } else {
         const json = await response.json();
-
+  
         if (json.success) {
           console.log('Data removed successfully!');
           navigate('/userpanel/Userdashboard');
@@ -517,12 +605,45 @@ thead{
           console.error('Error deleting Invoice:', json.message);
         }
       }
-
-
+  
     } catch (error) {
       console.error('Error deleting Invoice:', error);
     }
   };
+
+  // const handleRemove = async (estimateid) => {
+  //   try {
+  //     const authToken = localStorage.getItem('authToken');
+  //     const response = await fetch(`http://localhost:3000/api/delestimatedata/${estimateid}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Authorization': authToken,
+  //       }
+  //     });
+
+  //     if (response.status === 401) {
+  //       const json = await response.json();
+  //       setAlertMessage(json.message);
+  //       setloading(false);
+  //       window.scrollTo(0, 0);
+  //       return; // Stop further execution
+  //     }
+  //     else {
+  //       const json = await response.json();
+
+  //       if (json.success) {
+  //         console.log('Data removed successfully!');
+  //         navigate('/userpanel/Userdashboard');
+  //       } else {
+  //         console.error('Error deleting Invoice:', json.message);
+  //       }
+  //     }
+
+
+  //   } catch (error) {
+  //     console.error('Error deleting Invoice:', error);
+  //   }
+  // };
 
   // Function to handle changes in email input
   const handleEmailChange = (newEmails) => {
@@ -542,6 +663,9 @@ thead{
     event.preventDefault();
     const contentAsPdf = await generatePdfFromHtml();
     const authToken = localStorage.getItem('authToken');
+    const userid = estimateData.userid;
+
+    // console.log(userEmail, "userEmail ============");
     try {
       const finalContent = content.trim() || ``; // If content is empty, use default value
       const response = await fetch('http://localhost:3001/api/send-estimate-email', {
@@ -562,6 +686,8 @@ thead{
           amountdue: estimateData.amountdue,
           amountdue1: estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0),
           pdfAttachment: contentAsPdf,
+          estimateId: estimateData._id,
+          ownerId: ownerData.ownerId,
         }),
       });
 
@@ -579,6 +705,33 @@ thead{
           },
           body: JSON.stringify(updatedData),
         });
+
+        // Check if customer signature already exists
+      const checkResponse = await fetch(`http://localhost:3000/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
+      const checkJson = await checkResponse.json();
+
+      if (checkResponse.ok && !checkJson.hasSignature) {
+        // Create new customer signature only if it doesn't exist
+        await fetch('http://localhost:3000/api/customersignature', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            // 'Authorization': authToken,
+          },
+          body: JSON.stringify({
+            estimateId: estimateData._id,
+            userid,
+            // ownerEmail:ownerData.email,
+            // ownerId:ownerData.ownerId,
+            customerName: estimateData.customername,
+            customerEmail: estimateData.customeremail,
+            customersign: "",
+            documentNumber: estimateData.EstimateNumber,
+            lastupdated: '',
+            completeButtonVisible: false,
+          }), 
+        });
+      }
 
         // Fetch updated invoice data
         fetchestimateData();
@@ -670,7 +823,7 @@ thead{
 
                             <li><a className="dropdown-item" onClick={handlePrintContent}>Print</a></li>
                             <li><a className="dropdown-item" onClick={() => handleEditContent(estimateData)}>Edit</a></li>
-                            <li><a className="dropdown-item" onClick={() => handleRemove(estimateData._id)}>Remove</a></li>
+                            <li><a className="dropdown-item" onClick={() => handleRemove(estimateData._id, estimateData.customeremail)}>Remove</a></li>
                           </ul>
                         </div>
 
@@ -708,11 +861,6 @@ thead{
 
                     )}
 
-
-                    <div className="row">
-                    
-                    </div>
-
                     <div className="row">
                     <div className="col-12 col-sm-12 col-md-12 col-lg-8" id="">
                         <div className='print' id='invoiceContent'>
@@ -731,8 +879,9 @@ thead{
                                 </div>
                                 <address className='m-t-5 m-b-5'>
                                   <div className='mb-2'>
-                                    <div className=''>{signupdata.address}</div>
-                                    {/* <div className=''>AU</div> */}
+                                    <div className=''>{signupdata.address} </div>
+                                      {signupdata.city ? JSON.parse(signupdata.city).name+',' : ' '}
+                                      {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
                                   </div>
                                   <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
                                   <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
@@ -765,152 +914,199 @@ thead{
       </div>
       <address className='m-t-5 m-b-5'>
         <div>{estimateData.customeremail}</div>
-        <div>{estimateData.customerphone || ''}</div>
+        <div>{estimateData.customerphone || 'No'}</div>
 
-      </address>
-    </div>
-    <div className='invoice-date col-sm-12 col-md-6'>
-      <div className='row text-md-end'>
-        <div className='col-6 col-md'>
-          <strong>Estimate #</strong>
-        </div>
-        <div className='col-6 col-md invoice-detail-right'>{estimateData.EstimateNumber}</div>
-      </div>
-      <div className='row text-md-end'>
-        <div className='col-6 col-md'>
-          <strong>Date</strong>
-        </div>
-        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.createdAt)}</div>
-      </div>
-      <div className='row text-md-end'>
-        <div className='col-6 col-md'>
-          <strong>Due date</strong>
-        </div>
-        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.date)}</div>
-      </div>
-      {/* <div className='row text-md-end'>
-        <div className='col-6 col-md'>
-          <strong>PO #</strong>
-        </div>
-        <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
-      </div> */}
-      <div className='row text-md-end'>
-        <div className='col-6 col-md'>
-          <strong>Job</strong>
-        </div>
-        <div className='col-6 col-md invoice-detail-right'>{estimateData.job}</div>
-      </div>
+                                </address>
+                              </div>
+                              <div className='invoice-date col-sm-12 col-md-6'>
+                                <div className='row text-md-end'>
+                                  <div className='col-6 col-md'>
+                                    <strong>Estimate #</strong>
+                                  </div>
+                                  <div className='col-6 col-md invoice-detail-right'>{estimateData.EstimateNumber}</div>
+                                </div>
+                                <div className='row text-md-end'>
+                                  <div className='col-6 col-md'>
+                                    <strong>Date</strong>
+                                  </div>
+                                  <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.date)}</div>
+                                </div>
+                                {/* <div className='row text-md-end'>
+                                  <div className='col-6 col-md'>
+                                    <strong>Due date</strong>
+                                  </div>
+                                  <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
+                                </div> */}
+                                {/* <div className='row text-md-end'>
+                                  <div className='col-6 col-md'>
+                                    <strong>PO #</strong>
+                                  </div>
+                                  <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
+                                </div> */}
+                                <div className='row text-md-end'>
+                                  <div className='col-6 col-md'>
+                                    <strong>Job</strong>
+                                  </div>
+                                  <div className='col-6 col-md invoice-detail-right'>{estimateData.job}</div>
+                                </div>
 
-    </div>
-  </div>
-  <div class="clr"></div>
-</div>
+                              </div>
+                            </div>
+                            <div class="clr"></div>
+                          </div>
 
-<div className='invoice-table'>
-  <div className='table-responsive'>
-    <table className='table table-invoice'>
-      <thead>
-        <tr className='table table-invoice'>
-          <th className='text-start'>Item</th>
-          <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
-          <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
-          <th className='text-end' width="15%"> Amount</th>
-        </tr>
-      </thead>
+                          <div className='invoice-table'>
+                            <div className='table-responsive'>
+                              <table className='table table-invoice'>
+                                <thead>
+                                  <tr className='table table-invoice'>
+                                    <th className='text-start'>Item</th>
+                                    <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
+                                    <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
+                                    <th className='text-end' width="15%"> Amount</th>
+                                  </tr>
+                                </thead>
 
-      <tbody>
-        {items.map((item) => (
-          <tr key={item._id}>
-            <td>
-              <div>
-                <span><strong>{item.itemname}</strong></span>
-                {/* <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div> */}
-                <div dangerouslySetInnerHTML={{ __html: item.description }} />
-                {/* <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div> */}
-              </div>
-            </td>
-            <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
-            <td className="text-end d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
-            <td className='text-end'><CurrencySign />{roundOff(item.amount)}</td>
-          </tr>
-        ))}
-      </tbody>
-
-    </table>
-  </div>
-  <hr />
-  <div className='row'>
-    <div className='col-12'>
-      <table className='table table-borderless table-small'>
-
-        <tbody>
-          <tr>
-            <td className='d-none d-md-table-cell' rowspan="5"></td>
-            <td className='text-md-end' width="22%">Subtotal</td>
-            <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.subtotal)}</td>
-          </tr>
-
-          {
-  estimateData.discountTotal > 0 
-  ?
-<tr>
-<td className='text-md-end' width="22%">Discount</td>
-                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.discountTotal)}</td>
+                                <tbody>
+                                  {items.map((item) => (
+                                    <tr key={item._id}>
+                                      <td>
+                                        <div>
+                                          <span><strong>{item.itemname}</strong></span>
+                                          <div dangerouslySetInnerHTML={{ __html: item.description }} />
+                                          {/* <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div> */}
+                                        </div>
+                                      </td>
+                                      <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
+                                      <td className="text-end d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
+                                      <td className='text-end'><CurrencySign />{roundOff(item.amount)}</td>
                                     </tr>
-                                    :
-                                    null
-}
-          {/* <tr>
+                                  ))}
+                                </tbody>
 
-            <td className='text-md-end' width="22%">Discount</td>
-            <td className='text-end' width="22%">${roundOff(estimateData.discountTotal)}</td>
-          </tr> */}
-          <tr>
+                              </table>
+                            </div>
+                            <hr />
+                            <div className='row'>
+                              <div className='col-12'>
+                                <table className='table table-borderless table-small'>
 
-            <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%) </td>
-            <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.tax)}</td>
-          </tr>
-          <tr>
+                                  <tbody>
+                                    <tr>
+                                      <td className='d-none d-md-table-cell' rowspan="5"></td>
+                                      <td className='text-md-end' width="22%">Subtotal</td>
+                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.subtotal)}</td>
+                                    </tr>
+                                    {
+                                      estimateData.tax > 0 
+                                      ?
+                                      <tr>
+                                        <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%) </td>
+                                        <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.tax)}</td>
+                                      </tr>
+                                      :
+                                        null
+                                    }
+                                    {
+                                      estimateData.discountTotal > 0 
+                                      ?
+                                        <tr>
+                                          <td className='text-md-end' width="22%">Discount</td>
+                                          <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.discountTotal)}</td>
+                                        </tr>
+                                      :
+                                        null
+                                    }
+                                    {/* <tr>
+                                      {console.log(estimateData, "estimateData")}
 
-            <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
-            <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{roundOff(estimateData.total)}</td>
-          </tr>
-          {transactions.map((transaction) => (
-            <tr key={transaction._id}>
-              <td className='text-md-end' width="22%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
-              <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>${transaction.paidamount}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
-  </div>
-  <div class="clr"></div>
-</div>
+                                      <td className='text-md-end' width="22%">Discount</td>
+                                      <td className='text-end' width="22%">${roundOff(estimateData.discountTotal)}</td>
+                                    </tr> */}
+                                    {/* <tr>
 
-<div className='invoice-price page-not-break'>
-  <div className='invoice-price-left text-end'>
-    <div className='d-none d-md-block'></div>
+                                      <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%)</td>
+                                      <td className='text-end' width="22%">${roundOff(estimateData.tax)}</td>
+                                    </tr> */}
+                                    <tr>
 
-  </div>
-  <div className='invoice-price-right'>
-    <small>Amount Due</small>
-    <span class="f-w-600 mt-3"><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
+                                      <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
+                                      <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{roundOff(estimateData.total)}</td>
+                                    </tr>
+                                    {transactions.map((transaction) => (
+                                      <tr key={transaction._id}>
+                                        <td className='text-md-end' width="22%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
+                                        <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount}</td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                            </div>
+                            <div class="clr"></div>
+                          </div>
 
-  </div>
+                          <div className='invoice-price page-not-break'>
+                            <div className='invoice-price-left text-end'>
+                              <div className='d-none d-md-block'></div>
 
-</div>
+                            </div>
+                            <div className='invoice-price-right'>
+                              <small>Amount Due</small>
+                              <span class="f-w-600 mt-3"><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
+                            </div>
 
-<div className='invoice-body'>
-  <div className='mt-1'>
-    <span>{estimateData.information == '' ? '' : 'Note:'}</span> <div dangerouslySetInnerHTML={{ __html: estimateData.information }} />
+                          </div>
 
-  </div>
-</div>
-                      
+                          {estimateData.isAddSignature || estimateData.isCustomerSign  ? 
+                            <div className="invoice-body">
+                              <p>By signing this document, the customer agrees to the services and conditions described in this document.</p>
+                              <div className="row">
+                                  
+                                    {ownerData && estimateData.isAddSignature && (
+                                      <div className="col-6">
+                                      <div className="my-2">
+                                        <div>
+                                          <p className='text-center fw-bold fs-5'>{ownerData.companyname}</p>
+                                          <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr/>
+                                          <p className='text-center'>{formatCustomDate(ownerData.createdAt)}</p>
+                                        </div>
+                                      </div>
+                                      </div>
+                                    )}
+                                  <div className="col-6">
+                                    <div className="my-2">
+                                      <div>
+                                        <p className='text-center fw-bold fs-5'>{estimateData.customername}</p>
+                                        {signatureData != null ? 
+                                          signatureData.customersign== '' ? (''):
+                                            (<div className="signature-section">
+                                              <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr/>
+                                              <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
+                                            </div>):''}
+                                        {/* {signatureData ? (
+                                            <div className="signature-section">
+                                              <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr/>
+                                              <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
+                                            </div>
+                                          ) : (
+                                            ''
+                                          )} */}
+                                      </div>
+                                    </div>
+                                  </div>
+                              </div>
+                              
+                            </div>: ''
+                          }
+                          
 
-                         
-
+                          <div className='invoice-body invoice-body-text'>
+                            <div className='mt-1'>
+                              <span>{estimateData.information == '' ? '' : 'Note:'}</span> 
+                              <div className='information-content' dangerouslySetInnerHTML={{ __html: estimateData.information }} />
+                            </div>
+                          </div>
                         </div>
                       </div>
 
@@ -931,7 +1127,7 @@ thead{
                               <p>Total</p>
                             </div>
                             <div className="col-6 text-end">
-                              <p><CurrencySign />{roundOff(estimateData.total)}</p>
+                              <p><CurrencySign />{estimateData.total}</p>
                             </div>
 
                           </div><hr />
