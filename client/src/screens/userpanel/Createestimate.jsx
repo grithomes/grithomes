@@ -71,16 +71,17 @@ export default function Createestimate() {
     const [message, setmessage] = useState(false);
     const [alertShow, setAlertShow] = useState("");
     const [selectedCustomerDetails, setSelectedCustomerDetails] = useState({
-        name: '', email: ''
+        name: '', email: '', number:''
     });
     const [isCustomerSelected, setIsCustomerSelected] = useState(false);
     const [editedName, setEditedName] = useState('');
     const [editedEmail, setEditedEmail] = useState('');
+    const [editedNumber, setEditedNumber] = useState('');
     const [taxPercentage, setTaxPercentage] = useState(0);
     const [signUpData, setsignUpData] = useState(0);
     const [discountTotal, setdiscountTotal] = useState(0);
     const [estimateData, setestimateData] = useState({
-        customername: '', itemname: '', customeremail: '', estimate_id: '', EstimateNumber: '', purchaseorder: '',
+        customername: '', itemname: '', customeremail: '',customerphone:'', estimate_id: '', EstimateNumber: '', purchaseorder: '',
         job: '', date: format(new Date(), 'yyyy-MM-dd'), description: '', itemquantity: '', price: '', discount: '',
         amount: '', tax: '', discountTotal: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
     });
@@ -138,7 +139,7 @@ export default function Createestimate() {
         try {
             const userid = localStorage.getItem('userid');
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/lastEstimateNumber/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -175,7 +176,7 @@ export default function Createestimate() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/customers/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -212,7 +213,7 @@ export default function Createestimate() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/itemdata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -284,17 +285,21 @@ export default function Createestimate() {
     const onChangecustomer = (event) => {
         const selectedCustomerId = event.value;
         const selectedCustomer = customers.find((customer) => customer._id === selectedCustomerId);
-
+        
+        console.log(selectedCustomer,"Selected Customer");
+        
         if (selectedCustomer) {
             setestimateData({
                 ...estimateData,
                 customername: selectedCustomer.name,
                 customeremail: selectedCustomer.email,
+                customerphone: selectedCustomer.number,
             });
 
             setSelectedCustomerDetails({
                 name: selectedCustomer.name,
-                email: selectedCustomer.email
+                email: selectedCustomer.email,
+                number: selectedCustomer.number,
             });
             setIsCustomerSelected(true);
         }
@@ -308,6 +313,7 @@ export default function Createestimate() {
         if (selectedCustomer) {
             setEditedName(selectedName);
             setEditedEmail(selectedCustomer.email);
+            setEditedNumber(selectedCustomer.number);
         }
     };
 
@@ -315,11 +321,13 @@ export default function Createestimate() {
         const updatedCustomerDetails = {
             name: editedName,
             email: editedEmail,
+            number: editedNumber,
         };
 
         setSelectedCustomerDetails({
             name: editedName,
-            email: editedEmail
+            email: editedEmail,
+            number: editedNumber
         });
         console.log("Updated customer details:", updatedCustomerDetails);
     };
@@ -453,11 +461,12 @@ export default function Createestimate() {
                 userid: userid,
                 customername: estimateData.customername,
                 customeremail: estimateData.customeremail,
+                customerphone: estimateData.customerphone,
                 estimate_id: estimateData.estimate_id,
                 EstimateNumber: estimateData.EstimateNumber,
                 purchaseorder: estimateData.purchaseorder,
                 job: estimateData.job || 'No Job',
-                discountTotal: discountTotal || 'No Discount',
+                discountTotal: discountTotal || 0,
                 information: editorData,
                 date: estimateData.date,
                 items: estimateItems,
@@ -468,10 +477,10 @@ export default function Createestimate() {
                 amountdue: amountdue,
                 noteimageUrl: noteimageUrl,
             };
-
+            console.log(data,"Data sdsdfsdsfsdf");
 
             // Sending estimate data to the backend API
-            const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
+            const response = await fetch('http://localhost:3001/api/savecreateestimate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -489,6 +498,8 @@ export default function Createestimate() {
             else {
                 if (response.ok) {
                     const responseData = await response.json();
+                    console.log(responseData,"responseData");
+                    
                     if (responseData.success) {
                         const estimateid = responseData.estimate._id;
                         navigate('/userpanel/Estimatedetail', { state: { estimateid } });
@@ -578,7 +589,7 @@ export default function Createestimate() {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
         const authToken = localStorage.getItem('authToken');
-        const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
+        const response = await fetch('http://localhost:3001/api/addcustomer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -699,6 +710,7 @@ export default function Createestimate() {
                                         <div className='box1 rounded adminborder p-4 m-2 mb-5'>
                                             <div className='row me-2'>
                                                 <div className="col-md-6 col-lg-5 col-12">
+                                                    {console.log(selectedCustomerDetails, "selectedCustomerDetails")                                                    }
                                                     {isCustomerSelected ? (
                                                         <div className="customerdetail p-3">
                                                             <ul>
@@ -708,6 +720,7 @@ export default function Createestimate() {
                                                                 </li>
                                                             </ul>
                                                             <p>{selectedCustomerDetails.email}</p>
+                                                            <p>{selectedCustomerDetails.number || 'No'}</p>
                                                         </div>
                                                     ) : (
                                                         <div className="search-container forms">
@@ -725,6 +738,7 @@ export default function Createestimate() {
                                                                             ({ label: customer.name, value: customer._id })
                                                                         )}
                                                                     /> */}
+                                                                    {console.log(customers, "")}
                                                                     <Select
                                                                         value={searchcustomerResults}
                                                                         onChange={onChangecustomer}

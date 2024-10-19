@@ -73,7 +73,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`, {
+      const response = await fetch(`http://localhost:3001/api/getestimatedata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -104,7 +104,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`, {
+      const response = await fetch(`http://localhost:3001/api/gettransactiondata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -141,7 +141,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -493,7 +493,7 @@ thead{
   const handleRemove = async (estimateid) => {
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
+      const response = await fetch(`http://localhost:3001/api/delestimatedata/${estimateid}`, {
         method: 'GET',
         headers: {
           'Authorization': authToken,
@@ -544,7 +544,7 @@ thead{
     const authToken = localStorage.getItem('authToken');
     try {
       const finalContent = content.trim() || ``; // If content is empty, use default value
-      const response = await fetch('https://grithomes.onrender.com/api/send-estimate-email', {
+      const response = await fetch('http://localhost:3001/api/send-estimate-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -571,7 +571,7 @@ thead{
         setShowEmailAlert(true);
         // Update the database with emailsent status
         const updatedData = { ...estimateData, emailsent: 'yes' }; // Update emailsent status
-        await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
+        await fetch(`http://localhost:3001/api/updateestimateData/${estimateid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -738,14 +738,14 @@ thead{
                                   <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
                                   <div>{signupdata.email}</div>
                                   <div>
-                                    {signupdata.gstNumber == '' || signupdata.gstNumber == null
+                                    { /* signupdata.gstNumber == '' || signupdata.gstNumber == null
                                       ?
                                       ''
                                       :
                                       <div>
                                         {signupdata.TaxName}: {signupdata.gstNumber}
                                       </div>
-                                    }
+                                   */ }
                                   </div>
                                   {/* <div>{signupdata.TaxName}: {signupdata.gstNumber}</div> */}
 
@@ -758,7 +758,8 @@ thead{
                           <div className='invoice-header'>
   <div className='row'>
     <div className='invoice-to col-sm-12 col-md-6'>
-      <strong>Bill To</strong>
+      <strong>Bill To</strong> 
+      {console.log(estimateData, "estimateData -======-==--==---===--")}
       <div className='text-inverse mb-1'>
         {estimateData.customername}
       </div>
