@@ -835,6 +835,7 @@ console.log(offset);
                                   <p className='h4 fw-bold'>{signupdata.companyname}</p>
                                   :""
                                 }
+                                
                               </div>
                               <div className='col-sm-12 col-md-6 text-md-end'>
                                 <h2>Estimate</h2>
