@@ -645,7 +645,7 @@ export default function Createestimate() {
                     
                     if (responseData.success) {
                         const estimateid = responseData.estimate._id;
-                        // navigate('/userpanel/Estimatedetail', { state: { estimateid } });
+                        navigate('/userpanel/Estimatedetail', { state: { estimateid } });
                         console.log('estimate saved successfully!');
                     } else {
                         console.error('Failed to save the estimate.');
