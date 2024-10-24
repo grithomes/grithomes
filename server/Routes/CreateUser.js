@@ -758,7 +758,7 @@ router.post('/send-estimate-email', async (req, res) => {
     // const transporter = nodemailer.createTransport({
     //     service: 'gmail',
     //     auth: {
-    //         user: "jdwebservices1@gmail.com",
+    //         user: "grithomesltd@gmail.com",
     //         pass: "cwoxnbrrxvsjfbmr"
     //     },
     // });
@@ -860,7 +860,7 @@ router.post('/send-estimate-signed-email', async (req, res) => {
     // const transporter = nodemailer.createTransport({
     //     service: 'gmail',
     //     auth: {
-    //         user: "jdwebservices1@gmail.com",
+    //         user: "grithomesltd@gmail.com",
     //         pass: "cwoxnbrrxvsjfbmr"
     //     },
     // });
@@ -942,13 +942,13 @@ router.post('/send-Invoice-signed-email', async (req, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: "jdwebservices1@gmail.com",
-            pass: "cwoxnbrrxvsjfbmr"
+            user: "grithomesltd@gmail.com",
+            pass: "lpctmxmuoudgnopd"
         },
-    });
+      });
 
     const mailOptions = {
-        from: 'jdwebservices1@gmail.com',
+        from: 'grithomesltd@gmail.com',
         to: to,
         subject: 'Your document has been signed',
         html: `<html>

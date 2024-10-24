@@ -906,6 +906,29 @@ console.log(offset);
                                 <h2>Invoice</h2>
                                 <div className='text-inverse mb-1'>
                                   <strong>{signupdata != null ? signupdata.companyname : ""}</strong>
+                                  <address className='m-t-5 m-b-5'>
+                                  <div className='mb-2'>
+                                    <div className=''>{signupdata.address} </div>
+                                      {signupdata.city ? JSON.parse(signupdata.city).name+',' : ' '}
+                                      {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
+                                     {/* <div className=''>{JSON.parse(signupdata.city).name}, {JSON.parse(signupdata.state).name}</div>
+                                    <div className=''>{JSON.parse(signupdata.country).emoji}</div> */}
+                                  </div>
+                                  <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
+                                  <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
+                                  <div>{signupdata.email}</div>
+                                  <div>
+                                    {signupdata.gstNumber == ''
+                                    ?
+                                  ""
+                                  :
+                                  signupdata.gstNumber
+                                  }
+                                    
+                                    
+                                    </div>
+
+                                </address>
                                 </div>
                               </div>
 
@@ -1032,7 +1055,7 @@ console.log(offset);
                                         <div>
                                           <p className='text-center fw-bold fs-5 margin-top-sign txt-center center'>{ownerData.companyname}</p>
                                           <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr/>
-                                          <p className='text-center txt-center center'>{formatCustomDate(ownerData.createdAt)}</p>
+                                          <p className='text-center txt-center center'>{formatCustomDate(invoiceData.createdAt)}</p>
                                         </div>
                                       </div>
                                     )}
