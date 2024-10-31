@@ -1803,7 +1803,7 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                         <div>
                                           <p className='text-center fw-bold fs-5'>{ownerData.companyname}</p>
                                           <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr/>
-                                          <p className='text-center'>{formatCustomDate(ownerData.createdAt)}</p>
+                                          <p className='text-center'>{formatCustomDate(invoiceData.createdAt)}</p>
                                         </div>
                                       </div>
                                       </div>
