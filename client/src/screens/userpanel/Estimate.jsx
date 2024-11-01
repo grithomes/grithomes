@@ -231,10 +231,33 @@ export default function Estimate() {
                                 <p className='my-0'>Job: {estimate.job}</p>
                               </td>
                               <td>
-                                <span className='clrtrxtstatus'>
-                                  <i class="fa-solid fa-circle fs-12 mx-2 saved"></i> Saved
+                              {estimate.status === 'Saved' ? (
+                                <span className='saved p-2 rounded-pill'>
+                                  <i className="fa-solid fa-circle fs-12 me-2 grey-3"></i>
+                                  <span className='clrtrxtstatus fw-bold'>Saved</span>
                                 </span>
-                              </td>
+                              ) : estimate.status === 'Send' ? (
+                                <span className='sent p-2 rounded-pill'>
+                                  <i className="fa-solid fa-circle fs-12 me-2 text-primary"></i>
+                                  <span className='clrtrxtstatus fw-bold'>Send</span>
+                                </span>
+                              ) : estimate.status === 'Paid' ? (
+                                <span className='paid p-2 rounded-pill'>
+                                  <i class="fa-solid fa-circle fs-12 me-2 "></i>
+                                  <span className='clrtrxtstatus fw-bold'>Paid</span>
+                                </span>
+                              ) : estimate.status === 'Partially Paid' ? (
+                                <span className='paid p-2 rounded-pill'>
+                                  <i class="fa-solid fa-circle fs-12 me-2"></i>
+                                  <span className='clrtrxtstatus fw-bold'>Partially Paid</span>
+                                </span>
+                              ) : (
+                                <>
+                                  <i className="fa-solid fa-circle fs-12 me-2 unknown"></i>
+                                  <span className='clrtrxtstatus fw-bold'>Unknown Status</span>
+                                </>
+                              )}
+                            </td>
                               <td>
                                 <div className=''>
                                   <div className='d-flex'>

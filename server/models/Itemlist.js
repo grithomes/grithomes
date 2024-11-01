@@ -9,6 +9,9 @@ const ItemsSchema = new Schema({
     description: {
         type: String,
     },
+    unit: {
+        type: String,
+    },
     price: {
         type: Number,
     },

@@ -231,7 +231,7 @@ return (
                     </div>
                     </div>
 
-                    <div className="col-12 col-sm-6 col-lg-6">
+                    <div className="col-12 col-sm-6 col-lg-12">
                     <div className="mb-3">
                         <label htmlFor="City" className="form-label">
                         City {console.log(credentials.city)}
@@ -249,6 +249,7 @@ return (
                         />
                     </div>
                     </div>
+
                     <div className="col-12 col-sm-12 col-md-4 col-lg-4">
                     <div className="form-group pt-3">
                         <label className="label py-2" htmlFor="First_Name">First Name</label>
@@ -278,6 +279,14 @@ return (
                         <label className="label py-2" htmlFor="Last_Name">Last Name</label>
                         <input type="text" className="form-control" name="LastName" value={signupdata.User2LastName} onChange={handleInputChange} placeholder="Last Name" />
                     </div>
+                   
+                    </div>
+                    <div className="col-12 col-sm-12 col-md-4 col-lg-4">
+                    <div className="form-group pt-3 ">
+                        <label className="label py-2" htmlFor="Website">Website</label>
+                        <input type="text" className="form-control" name="website" value={signupdata.website} onChange={handleInputChange} placeholder="Website" />
+                    </div>
+                   
                     </div>
                     <div className="col-12 col-sm-12 col-md-4 col-lg-4">
                     <div className="form-group pt-3">

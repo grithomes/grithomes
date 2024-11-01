@@ -72,6 +72,10 @@ const EstimateSchema = new Schema({
         type: Date,
         default: Date.now,
     },
+    status: {
+        type: String,
+        default: 'Saved',
+    },
     isAddSignature: { 
         type: Boolean, 
         default: false 

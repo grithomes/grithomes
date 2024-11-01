@@ -1293,7 +1293,7 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
             body: JSON.stringify(updatedData),
           });
         }else {
-          const updatedData = { ...invoiceData, emailsent: 'yes' }
+          const updatedData = { ...invoiceData, status:'Send', emailsent: 'yes' }
           await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
@@ -1608,15 +1608,15 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                      {/* <div className=''>{JSON.parse(signupdata.city).name}, {JSON.parse(signupdata.state).name}</div>
                                     <div className=''>{JSON.parse(signupdata.country).emoji}</div> */}
                                   </div>
-                                  <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
-                                  <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
+                                 
                                   <div>{signupdata.email}</div>
+                                  <div>{signupdata.website} </div>
                                   <div>
                                     {signupdata.gstNumber == ''
                                     ?
                                   ""
                                   :
-                                  signupdata.gstNumber
+                                  `${signupdata.TaxName } ${signupdata.gstNumber}`
                                   }
                                     
                                     
@@ -1698,6 +1698,7 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                     <th className='text-start'>Item</th>
                                     <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
                                     <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
+                                    <th className='text-end d-none d-md-table-cell' width="15%"> Unit</th>
                                     <th className='text-end' width="15%"> Amount</th>
                                   </tr>
                                 </thead>
@@ -1714,6 +1715,7 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                       </td>
                                       <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
                                       <td className="text-end d-none d-md-table-cell">{roundOff(item.price)}</td>
+                                      <td className="text-end d-none d-md-table-cell">{item.unit}</td>
                                       <td className='text-end'>{roundOff(item.amount)}</td>
                                     </tr>
                                   ))}

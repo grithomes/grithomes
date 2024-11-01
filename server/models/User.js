@@ -57,13 +57,14 @@ const UserSchema = new Schema({
   },
   country: {
     type: String,
-
   },
   state: {
     type: String,
-
   },
   city: {
+    type: String,
+  },
+  website: {
     type: String,
   },
   resetPasswordToken: String,

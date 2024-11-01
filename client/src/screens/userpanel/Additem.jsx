@@ -16,6 +16,7 @@ export default function Additem() {
     itemname: '',
     description: '',
     price: '',
+    unit: '',
   });
 
   const [message, setMessage] = useState(false);
@@ -31,7 +32,7 @@ export default function Additem() {
 }, [])
 
   const handleSubmit = async (e) => {
-    // e.preventDefault();
+    e.preventDefault();
     let userid = localStorage.getItem('userid');
     const authToken = localStorage.getItem('authToken');
     const response = await fetch('https://grithomes.onrender.com/api/additem', {
@@ -45,6 +46,7 @@ export default function Additem() {
         itemname: credentials.itemname,
         description: editorData,
         price: credentials.price,
+        unit: credentials.unit,
       }),
     });
     if (response.status === 401) {
@@ -56,13 +58,14 @@ export default function Additem() {
     }
     else{
         const json = await response.json();
-        console.log(json);
+        console.log(json,"Items Added");
 
         if (json.Success) {
           setCredentials({
             itemname: '',
             description: '',
             price: '',
+            unit: '',
           });
 
           setMessage(true);
@@ -176,6 +179,22 @@ export default function Additem() {
                             />
                           </div>
                         </div>
+                        <div className="col-12 col-sm-6 col-lg-6">
+                          <div className="mb-3">
+                            <label htmlFor="Number" className="form-label">
+                            Unit
+                            </label>
+                            <input
+                              type="text"
+                              name="unit"
+                              className="form-control"
+                              onChange={onchange}
+                              placeholder="unit"
+                              id="unit"
+                              
+                            />
+                          </div>
+                        </div>
 
                         <div className="col-12 col-sm-12 col-lg-6">
                           <div className="mb-3">
@@ -237,7 +256,7 @@ export default function Additem() {
                 <div className="row pt-4 pe-2">
                   <div className="col-3 me-auto"></div>
                   <div className="col-4 col-sm-2">
-                    <button onClick={(e)=> handleSubmit(e)} className="btn btnclr text-white">Next</button>
+                    <button onClick={(e)=> handleSubmit(e)} className="btn btnclr text-white">Add Item</button>
                   </div>
                 </div>
               </div>

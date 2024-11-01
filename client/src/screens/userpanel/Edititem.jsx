@@ -19,6 +19,7 @@ export default function Edititem() {
         itemname: '',
         description: '',
         price: '',
+        unit: '',
     });
 
     useEffect(() => {
@@ -186,6 +187,23 @@ export default function Edititem() {
                                             placeholder="Price"
                                             id="price"
                                             required
+                                            />
+                                        </div>
+                                    </div>
+                                    <div className="col-12 col-sm-6 col-lg-6">
+                                        <div className="mb-3">
+                                            <label htmlFor="Number" className="form-label">
+                                            Unit
+                                            </label>
+                                            <input
+                                            type="text"
+                                            name="unit"
+                                            value={item.unit}
+                                            className="form-control"
+                                            onChange={handleInputChange}
+                                            placeholder="unit"
+                                            id="unit"
+                                            
                                             />
                                         </div>
                                     </div>

@@ -22,11 +22,11 @@ const CustomerSchema = new Schema({
     },
     country:{
         type: String,
-        required: true
+        required: false
     },
     state:{
         type: String,
-        required: true
+        required: false
     },
     city:{
         type: String,
@@ -34,7 +34,7 @@ const CustomerSchema = new Schema({
     },
     countryid:{
         type: Number,
-        required: true
+        required: false
     },
     stateid:{
         type: Number,

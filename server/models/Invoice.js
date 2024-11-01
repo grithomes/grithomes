@@ -16,6 +16,9 @@ const InvoiceSchema = new Schema({
     customeremail: {
         type: String,
     },
+    customerphone: {
+        type: String,
+    },
     emailsent: {
         type: String,
         default:'no'

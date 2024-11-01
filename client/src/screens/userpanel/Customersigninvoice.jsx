@@ -914,18 +914,16 @@ console.log(offset);
                                      {/* <div className=''>{JSON.parse(signupdata.city).name}, {JSON.parse(signupdata.state).name}</div>
                                     <div className=''>{JSON.parse(signupdata.country).emoji}</div> */}
                                   </div>
-                                  <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
-                                  <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
                                   <div>{signupdata.email}</div>
+                                  <div>{signupdata.website} </div>
                                   <div>
                                     {signupdata.gstNumber == ''
                                     ?
                                   ""
                                   :
-                                  signupdata.gstNumber
+                                  `${signupdata.TaxName } ${signupdata.gstNumber}`
                                   }
-                                    
-                                    
+
                                     </div>
 
                                 </address>

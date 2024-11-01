@@ -850,21 +850,18 @@ console.log(offset);
                                       {signupdata.city ? JSON.parse(signupdata.city).name+',' : ' '}
                                       {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
                                   </div>
-                                  <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
-                                  <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
                                   <div>{signupdata.email}</div>
+                                  <div>{signupdata.website} </div>
                                   <div>
-                                    { /* signupdata.gstNumber == '' || signupdata.gstNumber == null
-                                      ?
-                                      ''
-                                      :
-                                      <div>
-                                        {signupdata.TaxName}: {signupdata.gstNumber}
-                                      </div>
-                                   */ }
-                                  </div>
-                                  {/* <div>{signupdata.TaxName}: {signupdata.gstNumber}</div> */}
+                                    {signupdata.gstNumber == ''
+                                    ?
+                                  ""
+                                  :
+                                  `${signupdata.TaxName } ${signupdata.gstNumber}`
+                                  }
 
+                                    </div>
+                               
                                 </address>
                               </div>
 

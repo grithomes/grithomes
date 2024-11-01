@@ -47,20 +47,20 @@ const getCurrencySign = (currencyType) => {
 
 router.get('/check-signature/:ownerId', (req, res) => {
     const ownerId = req.params.ownerId;
-  
-    Ownwesignature.findOne({ ownerId })
-      .then(signature => {
-        if (signature) {
-          res.json({ hasSignature: true, signatureData: signature.data });
-        } else {
-          res.json({ hasSignature: false });
-        }
-      })
-      .catch(err => res.json({ hasSignature: false }));
-  });
-  
 
-  router.get('/getallesigncustomerdata', async (req, res) => {
+    Ownwesignature.findOne({ ownerId })
+        .then(signature => {
+            if (signature) {
+                res.json({ hasSignature: true, signatureData: signature.data });
+            } else {
+                res.json({ hasSignature: false });
+            }
+        })
+        .catch(err => res.json({ hasSignature: false }));
+});
+
+
+router.get('/getallesigncustomerdata', async (req, res) => {
     try {
         // Fetch all customer data
         let userid = req.params.userid;
@@ -87,7 +87,7 @@ router.get('/check-signature/:ownerId', (req, res) => {
 });
 
 
-  router.get('/getesigncustomerdata/:userid', async (req, res) => {
+router.get('/getesigncustomerdata/:userid', async (req, res) => {
     try {
         const { userid } = req.params;
         let authtoken = req.headers.authorization;
@@ -95,7 +95,7 @@ router.get('/check-signature/:ownerId', (req, res) => {
         // Verify JWT token
         const decodedToken = jwt.verify(authtoken, jwrsecret);
         console.log(decodedToken);
-        const customeremailData = await CustomerSignatureSchema.find({"userid":userid}); // Assuming you have an `Owner` model
+        const customeremailData = await CustomerSignatureSchema.find({ "userid": userid }); // Assuming you have an `Owner` model
 
         if (!customeremailData) {
             return res.status(404).json({ message: 'Customer not found' });
@@ -112,74 +112,74 @@ router.get('/check-signature/:ownerId', (req, res) => {
 
 router.get('/checkcustomersignature/:estimateIds', (req, res) => {
     const { estimateIds } = req.params;
-      CustomerSignatureSchema.findOne({estimateId: estimateIds })
-      .then(signature => {
-        if (signature) {
-          res.status(200).json({ hasSignature: true, signatureData: signature });
-        } else {
-          res.status(200).json({ hasSignature: false });
-        }
-      })
-      .catch(err => res.status(200).json({ hasSignature: false }));
-  });
+    CustomerSignatureSchema.findOne({ estimateId: estimateIds })
+        .then(signature => {
+            if (signature) {
+                res.status(200).json({ hasSignature: true, signatureData: signature });
+            } else {
+                res.status(200).json({ hasSignature: false });
+            }
+        })
+        .catch(err => res.status(200).json({ hasSignature: false }));
+});
 
-  router.get('/checkcustomersignatureusinginvoice/:invoiceIds', (req, res) => {
+router.get('/checkcustomersignatureusinginvoice/:invoiceIds', (req, res) => {
     const { invoiceIds } = req.params;
-      CustomerSignatureSchema.findOne({invoiceId: invoiceIds })
-      .then(signature => {
-        if (signature) {
-          res.status(200).json({ hasSignature: true, signatureData: signature });
-        } else {
-          res.status(200).json({ hasSignature: false });
-        }
-      })
-      .catch(err => res.status(200).json({ hasSignature: false }));
-  });
+    CustomerSignatureSchema.findOne({ invoiceId: invoiceIds })
+        .then(signature => {
+            if (signature) {
+                res.status(200).json({ hasSignature: true, signatureData: signature });
+            } else {
+                res.status(200).json({ hasSignature: false });
+            }
+        })
+        .catch(err => res.status(200).json({ hasSignature: false }));
+});
 
-  
+
 router.put('/updatecustomersigninv/:invoiceId', async (req, res) => {
     const { invoiceId } = req.params;
-    const { customersign, customerName, documentNumber, status,lastupdated,completeButtonVisible } = req.body;
-  
+    const { customersign, customerName, documentNumber, status, lastupdated, completeButtonVisible } = req.body;
+
     try {
-      const customerSignature = await CustomerSignatureSchema.findOneAndUpdate(
-        { invoiceId: invoiceId },
-        {
-          customersign,
-          invoiceId,
-          customerName,
-          documentNumber,
-          status,
-          lastupdated,
-          completeButtonVisible
-        },
-        { new: true }
-      );
-  
-      if (customerSignature) {
-        res.status(200).json({ message: 'Customer signature updated successfully', customerSignature });
-      } else {
-        res.status(404).json({ message: 'Customer signature not found' });
-      }
+        const customerSignature = await CustomerSignatureSchema.findOneAndUpdate(
+            { invoiceId: invoiceId },
+            {
+                customersign,
+                invoiceId,
+                customerName,
+                documentNumber,
+                status,
+                lastupdated,
+                completeButtonVisible
+            },
+            { new: true }
+        );
+
+        if (customerSignature) {
+            res.status(200).json({ message: 'Customer signature updated successfully', customerSignature });
+        } else {
+            res.status(404).json({ message: 'Customer signature not found' });
+        }
     } catch (error) {
-      console.error('Error updating customer signature:', error);
-      res.status(500).json({ message: 'Server error' });
+        console.error('Error updating customer signature:', error);
+        res.status(500).json({ message: 'Server error' });
     }
-  });
+});
 
 router.post('/ownersignature', (req, res) => {
-    const { signature, ownerId, email,companyname } = req.body;
-  
+    const { signature, ownerId, email, companyname } = req.body;
+
     const newSignature = new Ownwesignature({
-      ownerId,
-      email,
-      companyname,
-      data: signature,
+        ownerId,
+        email,
+        companyname,
+        data: signature,
     });
-  
+
     newSignature.save()
-      .then(signature => res.json({ message: 'Signature saved successfully', id: signature._id }))
-      .catch(err => res.status(500).send('Error saving signature'));
+        .then(signature => res.json({ message: 'Signature saved successfully', id: signature._id }))
+        .catch(err => res.status(500).send('Error saving signature'));
 });
 
 // Route for updating an existing signature
@@ -190,8 +190,8 @@ router.put('/update-ownersignature', async (req, res) => {
 
     try {
         const updatedSignature = await Ownwesignature.findOneAndUpdate(
-            { ownerId }, 
-            { data: signature, email, companyname }, 
+            { ownerId },
+            { data: signature, email, companyname },
             { new: true }
         );
 
@@ -209,7 +209,7 @@ router.put('/update-ownersignature', async (req, res) => {
 });
 
 router.post('/customersignature', (req, res) => {
-    const { customersign, invoiceId, estimateId,userid, customerName, customerEmail,documentNumber,lastupdated,completeButtonVisible } = req.body;
+    const { customersign, invoiceId, estimateId, userid, customerName, customerEmail, documentNumber, lastupdated, completeButtonVisible } = req.body;
 
     if (!estimateId && !invoiceId) {
         return res.status(400).json({ message: 'Either Estimate ID or Invoice ID must be provided' });
@@ -235,35 +235,35 @@ router.post('/customersignature', (req, res) => {
 // Add this route to update customer signature
 router.put('/updatecustomersignature/:estimateId', async (req, res) => {
     const { estimateId } = req.params;
-    const { customersign, customerName, documentNumber, status,lastupdated,completeButtonVisible } = req.body;
-  
-    try {
-      const customerSignature = await CustomerSignatureSchema.findOneAndUpdate(
-        { estimateId: estimateId },
-        {
-          customersign,
-          estimateId,
-          customerName,
-          documentNumber,
-          status,
-          lastupdated,
-          completeButtonVisible
-        },
-        { new: true }
-      );
-  
-      if (customerSignature) {
-        res.status(200).json({ message: 'Customer signature updated successfully', customerSignature });
-      } else {
-        res.status(404).json({ message: 'Customer signature not found' });
-      }
-    } catch (error) {
-      console.error('Error updating customer signature:', error);
-      res.status(500).json({ message: 'Server error' });
-    }
-  });
+    const { customersign, customerName, documentNumber, status, lastupdated, completeButtonVisible } = req.body;
 
-  router.delete('/customersignature/:email', async (req, res) => {
+    try {
+        const customerSignature = await CustomerSignatureSchema.findOneAndUpdate(
+            { estimateId: estimateId },
+            {
+                customersign,
+                estimateId,
+                customerName,
+                documentNumber,
+                status,
+                lastupdated,
+                completeButtonVisible
+            },
+            { new: true }
+        );
+
+        if (customerSignature) {
+            res.status(200).json({ message: 'Customer signature updated successfully', customerSignature });
+        } else {
+            res.status(404).json({ message: 'Customer signature not found' });
+        }
+    } catch (error) {
+        console.error('Error updating customer signature:', error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.delete('/customersignature/:email', async (req, res) => {
     const { email } = req.params;
 
     try {
@@ -279,7 +279,7 @@ router.put('/updatecustomersignature/:estimateId', async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
-  
+
 
 // Backend route to fetch owner data by ownerId
 router.get('/getownerdata/:ownerId', async (req, res) => {
@@ -292,7 +292,7 @@ router.get('/getownerdata/:ownerId', async (req, res) => {
         console.log(decodedToken);
 
         // Fetch owner data from the database
-        const ownerData = await Ownwesignature.find({"ownerId":ownerId}); // Assuming you have an `Owner` model
+        const ownerData = await Ownwesignature.find({ "ownerId": ownerId }); // Assuming you have an `Owner` model
 
         if (!ownerData) {
             return res.status(404).json({ message: 'Owner not found' });
@@ -320,7 +320,7 @@ router.get('/getemailownerdata/:ownerId', async (req, res) => {
         // console.log(decodedToken);
 
         // Fetch owner data from the database
-        const ownerData = await Ownwesignature.find({"ownerId":ownerId}); // Assuming you have an `Owner` model
+        const ownerData = await Ownwesignature.find({ "ownerId": ownerId }); // Assuming you have an `Owner` model
 
         if (!ownerData) {
             return res.status(404).json({ message: 'Owner not found' });
@@ -337,18 +337,18 @@ router.get('/getemailownerdata/:ownerId', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-  
-  // Get signature route
+
+// Get signature route
 router.get('/ownersignature/:id', (req, res) => {
     Ownwesignature.findById(req.params.id)
-      .then(signature => {
-        if (signature) {
-          res.json({ data: signature.data });
-        } else {
-          res.status(404).send('Signature not found');
-        }
-      })
-      .catch(err => res.status(500).send('Error retrieving signature'));
+        .then(signature => {
+            if (signature) {
+                res.json({ data: signature.data });
+            } else {
+                res.status(404).send('Signature not found');
+            }
+        })
+        .catch(err => res.status(500).send('Error retrieving signature'));
 });
 
 router.get('/getemailestimatedata/:estimateid', async (req, res) => {
@@ -525,7 +525,7 @@ router.get('/currentMonthReceivedAmount2/:userid', async (req, res) => {
                 }
             },
             {
-                $sort: { _id: 1 } 
+                $sort: { _id: 1 }
             }
         ]);
 
@@ -567,7 +567,7 @@ router.post('/send-invoice-email', async (req, res) => {
             user: "grithomesltd@gmail.com",
             pass: "lpctmxmuoudgnopd"
         },
-      });
+    });
 
     const currencySign = getCurrencySign(currencyType);
 
@@ -652,7 +652,7 @@ router.post('/send-deposit-email', async (req, res) => {
         InvoiceNumber,
         currencyType,
     } = req.body;
-    console.log(duedate , "");
+    console.log(duedate, "");
 
     const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -660,7 +660,7 @@ router.post('/send-deposit-email', async (req, res) => {
             user: "grithomesltd@gmail.com",
             pass: "lpctmxmuoudgnopd"
         },
-      });
+    });
 
     // const transporter = nodemailer.createTransport({
     //     host: 'smtp.hostinger.com', // Replace with your hosting provider's SMTP server
@@ -769,7 +769,7 @@ router.post('/send-estimate-email', async (req, res) => {
             user: "grithomesltd@gmail.com",
             pass: "lpctmxmuoudgnopd"
         },
-      });
+    });
 
     // const transporter = nodemailer.createTransport({
     //     host: 'smtp.hostinger.com', // Replace with your hosting provider's SMTP server
@@ -864,14 +864,14 @@ router.post('/send-estimate-signed-email', async (req, res) => {
     //         pass: "cwoxnbrrxvsjfbmr"
     //     },
     // });
-    
+
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
             user: "grithomesltd@gmail.com",
             pass: "lpctmxmuoudgnopd"
         },
-      });
+    });
 
     const mailOptions = {
         from: "grithomesltd@gmail.com",
@@ -945,7 +945,7 @@ router.post('/send-Invoice-signed-email', async (req, res) => {
             user: "grithomesltd@gmail.com",
             pass: "lpctmxmuoudgnopd"
         },
-      });
+    });
 
     const mailOptions = {
         from: 'grithomesltd@gmail.com',
@@ -1339,67 +1339,67 @@ router.post("/createuser", [
 router.post('/login', [
     body('email').isEmail(),
     body('password').isLength({ min: 4 }),
-  ], async (req, res) => {
+], async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+        return res.status(400).json({ errors: errors.array() });
     }
-  
+
     const email = req.body.email;
     const password = req.body.password;
-  
+
     try {
-      // Check if it's a user
-      const user = await User.findOne({ email });
-      
-      if (user) {
-        const pwdCompare = await bcrypt.compare(password, user.password);
-        if (pwdCompare) {
-          const data = {
-            user: {
-              id: user._id,
-            },
-          };
-          const mostRecentClockEntry = await Timeschema.findOne({ endTime: null, userid:user._id }).sort({ startTime: -1 });
-          const mostRecentClockEntrystartTime = mostRecentClockEntry != null ? mostRecentClockEntry.startTime : "";
-          const authToken = jwt.sign(data, jwrsecret);
-          return res.json(
-            { 
-                Success: true, 
-                authToken, userid: user._id, 
-                username: user.FirstName, 
-                CurrencyType: user.CurrencyType, 
-                startTime:mostRecentClockEntrystartTime, 
-                isTeamMember: false, 
-                taxPercentage: user.taxPercentage,
-                TaxName: user.TaxName,
-            });
+        // Check if it's a user
+        const user = await User.findOne({ email });
+
+        if (user) {
+            const pwdCompare = await bcrypt.compare(password, user.password);
+            if (pwdCompare) {
+                const data = {
+                    user: {
+                        id: user._id,
+                    },
+                };
+                const mostRecentClockEntry = await Timeschema.findOne({ endTime: null, userid: user._id }).sort({ startTime: -1 });
+                const mostRecentClockEntrystartTime = mostRecentClockEntry != null ? mostRecentClockEntry.startTime : "";
+                const authToken = jwt.sign(data, jwrsecret);
+                return res.json(
+                    {
+                        Success: true,
+                        authToken, userid: user._id,
+                        username: user.FirstName,
+                        CurrencyType: user.CurrencyType,
+                        startTime: mostRecentClockEntrystartTime,
+                        isTeamMember: false,
+                        taxPercentage: user.taxPercentage,
+                        TaxName: user.TaxName,
+                    });
+            }
         }
-      }
-  
-      // Check if it's a team member
-      const teamMember = await Team.findOne({ email });
-      
-      if (teamMember) {
-        const pwdCompare1 = await bcrypt.compare(password, teamMember.password);
-        if (pwdCompare1) {
-          const data1 = {
-            users: {
-              id: teamMember._id,
-            },
-          };
-          const mostRecentClockEntry = await Timeschema.findOne({ endTime: null, userid:teamMember._id }).sort({ startTime: -1 });
-          const mostRecentClockEntrystartTime = mostRecentClockEntry != null ? mostRecentClockEntry.startTime : "";
-          const authToken = jwt.sign(data1, jwrsecret);
-          return res.json({ Success: true, authToken, userid: teamMember._id, username: teamMember.name, startTime:mostRecentClockEntrystartTime, isTeamMember: true });
+
+        // Check if it's a team member
+        const teamMember = await Team.findOne({ email });
+
+        if (teamMember) {
+            const pwdCompare1 = await bcrypt.compare(password, teamMember.password);
+            if (pwdCompare1) {
+                const data1 = {
+                    users: {
+                        id: teamMember._id,
+                    },
+                };
+                const mostRecentClockEntry = await Timeschema.findOne({ endTime: null, userid: teamMember._id }).sort({ startTime: -1 });
+                const mostRecentClockEntrystartTime = mostRecentClockEntry != null ? mostRecentClockEntry.startTime : "";
+                const authToken = jwt.sign(data1, jwrsecret);
+                return res.json({ Success: true, authToken, userid: teamMember._id, username: teamMember.name, startTime: mostRecentClockEntrystartTime, isTeamMember: true });
+            }
         }
-      }
-  
-      console.log('Login failed for email:', email);
-      return res.status(400).json({ errors: 'Login with correct details' });
+
+        console.log('Login failed for email:', email);
+        return res.status(400).json({ errors: 'Login with correct details' });
     } catch (error) {
-      console.log(error);
-      res.json({ Success: false });
+        console.log(error);
+        res.json({ Success: false });
     }
 });
 
@@ -1466,7 +1466,7 @@ function sendWelcomeEmail(userEmail, name, isFirstTimeLogin) {
             user: "grithomesltd@gmail.com",
             pass: "lpctmxmuoudgnopd"
         },
-      });
+    });
     // const transporter = nodemailer.createTransport({
     //     host: 'smtp.hostinger.com', // Replace with your hosting provider's SMTP server
     //     port: 465, // Replace with the appropriate port
@@ -1517,7 +1517,7 @@ router.post('/forgot-password', async (req, res) => {
                 user: "grithomesltd@gmail.com",
                 pass: "lpctmxmuoudgnopd"
             },
-          });
+        });
         // const transporter = nodemailer.createTransport({
         //     host: 'smtp.hostinger.com', // Replace with your hosting provider's SMTP server
         //     port: 465, // Replace with the appropriate port
@@ -1750,82 +1750,82 @@ router.get('/allEntries', async (req, res) => {
 //   }
 // });
 
-router.post("/addcustomer",
-    [
-        body('email').isEmail(),
-        body('name').isLength({ min: 3 }),
-        body('information').isLength(),
-        body('number').isNumeric(),
-        body('city').isLength(),
-        body('state').isLength(),
-        body('country').isLength(),
-        body('post').isLength(),
+// router.post("/addcustomer",
+//     [
+//         body('email').isEmail(),
+//         body('name').isLength({ min: 3 }),
+//         body('information').isLength(),
+//         body('number').isNumeric(),
+//         body('city').isLength(),
+//         body('state').isLength(),
+//         body('country').isLength(),
+//         body('post').isLength(),
 
-        // body('address').isLength(),
-    ]
-    , async (req, res) => {
-        const errors = validationResult(req);
-        let authtoken = req.headers.authorization;
-        try {
-            // Verify JWT token
-            const decodedToken = jwt.verify(authtoken, jwrsecret);
-            console.log(decodedToken);
+//         // body('address').isLength(),
+//     ]
+//     , async (req, res) => {
+//         const errors = validationResult(req);
+//         let authtoken = req.headers.authorization;
+//         try {
+//             // Verify JWT token
+//             const decodedToken = jwt.verify(authtoken, jwrsecret);
+//             console.log(decodedToken);
 
-            if (!errors.isEmpty()) {
-                return res.status(400).json({ errors: errors.array() });
-            }
-            const email = req.body.email;
-            const existingcustomer = await Customerlist.findOne({ email });
+//             if (!errors.isEmpty()) {
+//                 return res.status(400).json({ errors: errors.array() });
+//             }
+//             const email = req.body.email;
+//             const existingcustomer = await Customerlist.findOne({ email });
 
-            if (existingcustomer) {
-                console.log('Email already registered:', email);
-                return res.status(400).json({
-                    success: false,
-                    message: "This Customer Email already exist!"
-                });
-            } else {
-                Customerlist.create({
-                    userid: req.body.userid,
-                    name: req.body.name,
-                    information: req.body.information,
-                    email: req.body.email,
-                    number: req.body.number,
-                    country: req.body.country,
-                    countryid: req.body.countryid,
-                    city: req.body.city,
-                    cityid: req.body.cityid,
-                    state: req.body.state,
-                    stateid: req.body.stateid,
-                    countrydata: req.body.countrydata,
-                    statedata: req.body.statedata,
-                    citydata: req.body.citydata,
-                    zip: req.body.zip,
-                    address1: req.body.address1,
-                    address2: req.body.address2,
-                    post: req.body.post,
-                })
-                res.json({
-                    Success: true,
-                    message: "Congratulations! Your Customer has been successfully added! "
-                })
-            }
-        }
-        catch (error) {
-            console.error(error);
-            // Handle token verification errors
-            if (error.name === 'JsonWebTokenError') {
-                return res.status(401).json({ message: 'Unauthorized: Invalid token' });
-            }
-            // Handle other errors
-            res.status(500).json({ message: 'Internal server error' });
-        }
-    });
+//             if (existingcustomer) {
+//                 console.log('Email already registered:', email);
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: "This Customer Email already exist!"
+//                 });
+//             } else {
+//                 Customerlist.create({
+//                     userid: req.body.userid,
+//                     name: req.body.name,
+//                     information: req.body.information,
+//                     email: req.body.email,
+//                     number: req.body.number,
+//                     country: req.body.country,
+//                     countryid: req.body.countryid,
+//                     city: req.body.city,
+//                     cityid: req.body.cityid,
+//                     state: req.body.state,
+//                     stateid: req.body.stateid,
+//                     countrydata: req.body.countrydata,
+//                     statedata: req.body.statedata,
+//                     citydata: req.body.citydata,
+//                     zip: req.body.zip,
+//                     address1: req.body.address1,
+//                     address2: req.body.address2,
+//                     post: req.body.post,
+//                 })
+//                 res.json({
+//                     Success: true,
+//                     message: "Congratulations! Your Customer has been successfully added! "
+//                 })
+//             }
+//         }
+//         catch (error) {
+//             console.error(error);
+//             // Handle token verification errors
+//             if (error.name === 'JsonWebTokenError') {
+//                 return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+//             }
+//             // Handle other errors
+//             res.status(500).json({ message: 'Internal server error' });
+//         }
+//     });
 
-    router.post("/addcustomer", [
+router.post("/addcustomer", [
     body('email').isEmail(),
     body('name').isLength({ min: 3 }),
     body('information').isLength(),
-    body('number').isNumeric(),
+    body('number').isLength(), 
     body('city').isLength(),
     body('state').isLength(),
     body('country').isLength(),
@@ -2131,23 +2131,23 @@ router.get('/customerwisedata/:customeremail', async (req, res) => {
     try {
         let customeremail = req.params.customeremail;
         let authtoken = req.headers.authorization;
-        
+
         // Verify JWT token
         const decodedToken = jwt.verify(authtoken, jwrsecret);
         console.log(decodedToken);
-        
+
         // Find invoice data for the specified customer email sorted by creation date in descending order
         const invoicedata = await Invoice.find({ customeremail: customeremail }).sort({ createdAt: -1 });
-        
+
         res.json(invoicedata);
     } catch (error) {
         console.error('Error fetching customer-wise data:', error);
-        
+
         // Handle token verification errors
         if (error.name === 'JsonWebTokenError') {
             return res.status(401).json({ message: 'Unauthorized: Invalid token' });
         }
-        
+
         // Handle other errors
         res.status(500).json({ message: 'Internal server error' });
     }
@@ -2190,7 +2190,7 @@ router.post('/converttoinvoice/:estimateid', async (req, res) => {
                 duedate: estimate.date,
                 description: estimate.description,
                 items: estimate.items,
-                discountTotal:estimate.discountTotal,
+                discountTotal: estimate.discountTotal,
                 subtotal: estimate.subtotal,
                 total: estimate.total,
                 userid: estimate.userid,
@@ -2765,7 +2765,7 @@ router.get('/estimatedata/:userid', async (req, res) => {
         // Verify JWT token
         const decodedToken = jwt.verify(authtoken, jwrsecret);
         console.log(decodedToken);
-        
+
         const estimates = await Estimate.find({ userid: userid }).sort({ createdAt: -1 });;
         res.json(estimates);
     } catch (error) {
@@ -3172,6 +3172,7 @@ router.post("/additem",
     [
         body('itemname').isLength({ min: 3 }),
         body('description').isLength(),
+        body('unit').isLength(),
         body('price').isNumeric(),
 
         // body('address').isLength(),
@@ -3191,9 +3192,11 @@ router.post("/additem",
                 itemname: req.body.itemname,
                 description: req.body.description,
                 price: req.body.price,
+                unit: req.body.unit,
             })
             res.json({
                 Success: true,
+                Itemdata1: Itemlist,
                 message: "Congratulations! Your Item has been successfully added! "
             })
         }
@@ -3501,7 +3504,7 @@ function sendTeamWelcomeEmail(userEmail, name, isFirstTimeLogin, companyName) {
             user: "grithomesltd@gmail.com",
             pass: "lpctmxmuoudgnopd"
         },
-      });
+    });
     // const transporter = nodemailer.createTransport({
     //     host: 'smtp.hostinger.com', // Replace with your hosting provider's SMTP server
     //     port: 465, // Replace with the appropriate port

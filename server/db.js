@@ -9,7 +9,7 @@ const mongoDB = async() => {
     if(err) console.log('Some Error -- ', err)
         else { 
              const fetch_data = await mongoose.connection.db.collection("users");
-    console.log(fetch_data,"connect");
+    console.log("connect");
         }
     })
    

@@ -235,7 +235,7 @@ export default function Addcustomer() {
                               onChange={onchange}
                               placeholder="Phone Number"
                               id="phonenumber"
-                              required
+                              
                             />
                           </div>
                         </div>

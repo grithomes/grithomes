@@ -71,7 +71,7 @@ export default function Createinvoice() {
     const [alertShow, setAlertShow] = useState("");
     const [SelectedCustomerId, setSelectedCustomerId] = useState("");
     const [selectedCustomerDetails, setSelectedCustomerDetails] = useState({
-        name: '', email: '', phone: ''
+        name: '', email: '', number: ''
     });
     const [isCustomerSelected, setIsCustomerSelected] = useState(false);
     const [editedName, setEditedName] = useState('');
@@ -548,6 +548,7 @@ export default function Createinvoice() {
             const invoiceItems = searchitemResults.map((item) => {
                 const selectedItem = items.find((i) => i._id === item.value);
                 const itemPrice = selectedItem?.price || 0;
+                const unit = selectedItem?.unit || 0;
                 const itemId = item.value;
                 const quantity = quantityMap[itemId] || 1;
                 const discount = discountMap[itemId] || 0;
@@ -559,6 +560,7 @@ export default function Createinvoice() {
                     itemquantity: quantity,
                     price: itemPrice,
                     discount,
+                    unit,
                     description: selectedItem.description,
                     amount: discountedAmount, // Add subtotal to each item
                     //   total: calculateTotal(), // Calculate total for each item
@@ -1017,13 +1019,15 @@ export default function Createinvoice() {
                                                                         <th scope="col">ITEM</th>
                                                                         <th scope="col">QUANTITY</th>
                                                                         <th scope="col">PRICE</th>
-                                                                        {/* <th scope="col">DISCOUNT</th> */}
+                                                                        <th scope="col">UNIT</th>
                                                                         <th scope="col">AMOUNT</th>
                                                                     </tr>
                                                                 </thead>
                                                                 <tbody>
                                                                     {searchitemResults.map((item) => {
                                                                         const selectedItem = items.find((i) => i._id === item.value);
+                                                                        console.log(selectedItem,"sle");
+                                                                        
                                                                         const itemPrice = selectedItem?.price || 0;
                                                                         const itemId = item.value;
                                                                         const quantity = quantityMap[itemId] || 1;
@@ -1060,13 +1064,6 @@ export default function Createinvoice() {
                                                                                                     console.log('Focus.', editor);
                                                                                                 }}
                                                                                             />
-                                                                                            
-                                                                                            {/* <CKEditor
-                                                                                                    editor={ClassicEditor}
-                                                                                                    data={editorData}
-                                                                                                    onChange={handleEditorChange}
-                                                                                                /> */}
-
                                                                                         </div>
 
                                                                                     </div>
@@ -1093,6 +1090,18 @@ export default function Createinvoice() {
                                                                                         id={`price-${itemId}`}
                                                                                         required
                                                                                     />
+                                                                                </td>
+                                                                                <td>
+                                                                                {selectedItem?.unit}
+                                                                                    {/* <input
+                                                                                        type="text"
+                                                                                        name={`unit-${itemId}`}
+                                                                                        className="form-control"
+                                                                                        value={selectedItem?.unit || ''}
+                                                                                        onChange={(event) => onChangePrice(event, itemId)}
+                                                                                        id={`unit-${itemId}`}
+                                                                                        required
+                                                                                    /> */}
                                                                                 </td>
 
                                                                                 <td className="text-center">

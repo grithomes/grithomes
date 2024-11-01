@@ -19,7 +19,7 @@ export default function Estimatedetail() {
   const location = useLocation();
   const [selectedinvoices, setselectedinvoices] = useState(null);
   const [estimateData, setestimateData] = useState({
-    customername: '', itemname: '', customeremail: '',customerphone:'', EstimateNumber: '', purchaseorder: '',
+    customername: '', itemname: '', customeremail: '', customerphone:'', EstimateNumber: '', purchaseorder: '',
     date: '', description: '', itemquantity: '', price: '', discount: '',
     amount: '', tax: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',isAddSignature:''
   });
@@ -696,7 +696,7 @@ thead{
         // setShowModal(false);
         setShowEmailAlert(true);
         // Update the database with emailsent status
-        const updatedData = { ...estimateData, emailsent: 'yes' }; // Update emailsent status
+        const updatedData = { ...estimateData,status:'Send', emailsent: 'yes' }; // Update emailsent status
         await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
           method: 'POST',
           headers: {
@@ -883,19 +883,18 @@ thead{
                                       {signupdata.city ? JSON.parse(signupdata.city).name+',' : ' '}
                                       {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
                                   </div>
-                                  <div>{signupdata.FirstName} {signupdata.User1_Mobile_Number}</div>
-                                  <div>{signupdata.User2FirstName} {signupdata.User2_Mobile_Number}</div>
+                                  
                                   <div>{signupdata.email}</div>
+                                  <div>{signupdata.website} </div>
                                   <div>
-                                    { /* signupdata.gstNumber == '' || signupdata.gstNumber == null
-                                      ?
-                                      ''
-                                      :
-                                      <div>
-                                        {signupdata.TaxName}: {signupdata.gstNumber}
-                                      </div>
-                                   */ }
-                                  </div>
+                                    {signupdata.gstNumber == ''
+                                    ?
+                                  ""
+                                  :
+                                  `${signupdata.TaxName } ${signupdata.gstNumber}`
+                                  }
+
+                                    </div>
                                   {/* <div>{signupdata.TaxName}: {signupdata.gstNumber}</div> */}
 
                                 </address>
@@ -963,6 +962,7 @@ thead{
                                     <th className='text-start'>Item</th>
                                     <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
                                     <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
+                                    <th className='text-end d-none d-md-table-cell' width="15%"> Unit</th>
                                     <th className='text-end' width="15%"> Amount</th>
                                   </tr>
                                 </thead>
@@ -979,6 +979,7 @@ thead{
                                       </td>
                                       <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
                                       <td className="text-end d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
+                                      <td className="text-end d-none d-md-table-cell">{item.unit}</td>
                                       <td className='text-end'><CurrencySign />{roundOff(item.amount)}</td>
                                     </tr>
                                   ))}
