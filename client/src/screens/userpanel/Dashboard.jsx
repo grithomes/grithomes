@@ -19,6 +19,7 @@ export default function Dashboard() {
   const [totalPaymentsReceived, setTotalPaymentsReceived] = useState(0);
   const [totalInvoiceAmount, setTotalInvoiceAmount] = useState(0);
   const [totalUnpaidAmount, setTotalUnpaidAmount] = useState(0);
+  const [totalExpense, setTotalExpense] = useState(0);
   const entriesPerPage = 10;
   useEffect(() => {
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true") {
@@ -29,6 +30,7 @@ export default function Dashboard() {
     fetchCurMonReceivedAmount();
     fetchTotalPaymentsReceived();
     fetchOverdueInvoices();
+    fetchTotalExpense();
     // setloading(true)
 
   }, [])
@@ -66,7 +68,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -94,7 +96,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/invoicedata/${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/invoicedata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -126,7 +128,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/currentMonthReceivedAmount/${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/currentMonthReceivedAmount/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -153,7 +155,7 @@ export default function Dashboard() {
     try {
         const authToken = localStorage.getItem('authToken');
         const userId = localStorage.getItem('userid');
-        const response = await fetch(`https://grithomes.onrender.com/api/totalPaymentReceived/${userId}`, {
+        const response = await fetch(`http://localhost:3001/api/totalPaymentReceived/${userId}`, {
             headers: {
                 Authorization: authToken,
             },
@@ -173,11 +175,46 @@ export default function Dashboard() {
     }
 };
 
+
+const fetchTotalExpense = async () => {
+  try {
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`http://localhost:3001/api/expense`, {
+          headers: {
+              Authorization: authToken,
+          },
+      });
+
+      if (response.status === 401) {
+          const json = await response.json();
+          console.error(json.message);
+          return;
+      }
+
+      const json = await response.json();
+      console.log(json, "json----");
+
+      // Filter only "Expense" transactions and calculate total amount
+      const total = json
+          .filter(entry => entry.transactionType === "Expense")
+          .reduce((sum, entry) => sum + entry.amount, 0);
+
+      // Update the totalExpense state
+      setTotalExpense(total);
+      console.log(`Total Expense: ${total}`);
+
+      setloading(false); // Set loading to false if applicable
+  } catch (error) {
+      console.error('Error fetching data:', error);
+  }
+};
+
+
 const fetchOverdueInvoices = async () => {
   try {
     const authToken = localStorage.getItem('authToken');
     const userid = localStorage.getItem('userid');
-    const response = await fetch(`https://grithomes.onrender.com/api/overdueInvoices/${userid}`, {
+    const response = await fetch(`http://localhost:3001/api/overdueInvoices/${userid}`, {
       headers: { 'Authorization': authToken },
     });
     if (response.status === 401) {
@@ -327,6 +364,8 @@ const handleOverdue = () => {
                   <div className='box1 rounded adminborder py-4 px-4 m-2 '>
                     <p className='fs-6 fw-bold'>PAYMENTS RECEIVED</p>
                     <p className='fs-3 fw-bold'><CurrencySign />{roundOff(totalInvoiceAmount)}</p>
+                    <p className='fs-6 fw-bold'>TOTAL EXPENSE</p>
+                    <p className='fs-3 fw-bold'><CurrencySign />{roundOff(totalExpense)}</p>
                     {/* <p className='fs-3 fw-bold'><CurrencySign /></p> */}
                     <div className='d-flex'>
                       <p className='pe-3'><span className='text-primary'>Paid</span> <CurrencySign />{roundOff(totalPaymentsReceived)}</p>

@@ -25,9 +25,9 @@ export default function ExpenseEntries() {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertMessageShow, setAlertMessageShow] = useState(false);
 
-    const apiURL = 'https://grithomes.onrender.com/api/expense';
-    const expenseTypeURL = 'https://grithomes.onrender.com/api/expensetype';
-    const vendorURL = 'https://grithomes.onrender.com/api/vendor';
+    const apiURL = 'http://localhost:3001/api/expense';
+    const expenseTypeURL = 'http://localhost:3001/api/expensetype';
+    const vendorURL = 'http://localhost:3001/api/vendor';
     const [showModal, setShowModal] = useState(false); // State to manage modal visibility
     const [fileName, setFileName] = useState('');
     const [isUploading, setIsUploading] = useState(false);
@@ -80,7 +80,7 @@ export default function ExpenseEntries() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/invoicedata/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/invoicedata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -463,8 +463,6 @@ export default function ExpenseEntries() {
                                                                         id="transactionType" name="transactionType" className="form-control" value={formData.transactionType} onChange={handleInputChange}
                                                                     >
                                                                         <option value="">Select Transaction Type</option>
-
-                                                                        <option value=""> Select Option </option>
                                                                         <option value="Credit">Credit </option>
                                                                         <option value="Expense">Expense </option>
                                                                     </select>
@@ -611,23 +609,23 @@ export default function ExpenseEntries() {
 
 
                                                         <div className='row'>
-                                                        <div className="mb-3 col-6">
+                                                            <div className="mb-3 col-6">
                                                                 <label htmlFor="expenseDate" className="form-label">Select Invoice</label>
 
-                                                            {/* Invoice Filter */}
-                                                            <select
-                                                                value={filters.invoiceId}
-                                                                onChange={(e) => setFilters({ ...filters, invoiceId: e.target.value })}
-                                                                className="form-control"
-                                                            >
-                                                                <option value="">Select Invoice</option>
-                                                                {invoices.map((invoice) => (
-                                                                    <option key={invoice._id} value={invoice._id}>
-                                                                        {invoice.InvoiceNumber} - {invoice.job}
-                                                                    </option>
-                                                                ))}
-                                                            </select>
-                                                        </div>
+                                                                {/* Invoice Filter */}
+                                                                <select
+                                                                    value={filters.invoiceId}
+                                                                    onChange={(e) => setFilters({ ...filters, invoiceId: e.target.value })}
+                                                                    className="form-control"
+                                                                >
+                                                                    <option value="">Select Invoice</option>
+                                                                    {invoices.map((invoice) => (
+                                                                        <option key={invoice._id} value={invoice._id}>
+                                                                            {invoice.InvoiceNumber} - {invoice.job}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <table className="table">
@@ -645,6 +643,8 @@ export default function ExpenseEntries() {
                                                             </tr>
                                                         </thead>
                                                         <tbody>
+                                                            {console.log(filteredExpenseEntries, "filteredExpenseEntries")}
+
                                                             {filteredExpenseEntries.map((entry, index) => (
                                                                 <tr key={entry._id}>
                                                                     <td>{index + 1}</td>
@@ -693,6 +693,18 @@ export default function ExpenseEntries() {
                                                                 </tr>
                                                             ))}
                                                         </tbody>
+                                                        <tfoot>
+                                                            <tr>
+                                                                <td colSpan="3" style={{ fontWeight: "bold", textAlign: "right" }}>Expense Total :</td>
+                                                                <td style={{ fontWeight: "bold", color: "red" }}>
+                                                                    <CurrencySign />
+                                                                    {filteredExpenseEntries
+                                                                        .filter(entry => entry.transactionType === "Expense")
+                                                                        .reduce((total, entry) => total + entry.amount, 0)}
+                                                                </td>
+                                                                <td colSpan="5"></td>
+                                                            </tr>
+                                                        </tfoot>
                                                     </table>
 
                                                     {/* <table className="table table-bordered table-striped">
