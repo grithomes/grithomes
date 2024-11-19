@@ -861,7 +861,56 @@ export default function Createinvoice() {
                                         </div>
 
                                         <div className="row">
-                                            <div className="col-lg-9 col-12 order-2 order-lg-1">
+                                        <div className="col-lg-3 col-12">
+                                                <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
+                                                    <div className="form-check form-switch">
+                                                        <div>
+                                                            <label className="form-check-label" htmlFor="signatureSwitch">Signature</label>
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                role="switch"
+                                                                id="signatureSwitch"
+                                                                onChange={handleSignatureSwitch}
+                                                                checked={hasSignature}
+                                                            />
+                                                        </div>
+                                                        {hasSignature && (
+                                                            <>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="addSignatureSwitch"
+                                                                        checked={isAddSignatureSwitchOn}
+                                                                        onChange={handleAddSignatureSwitch}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="customerSignSwitch"
+                                                                        checked={isCustomerSignSwitchOn}
+                                                                        onChange={handleCustomerSignSwitch}
+                                                                    />
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {isSignatureModalOpen && (
+                                                    <SignatureModal
+                                                        onSave={saveSignature}
+                                                        onClose={() => setIsSignatureModalOpen(false)}
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="col-lg-12 col-12 order-2 order-lg-1">
                                                 <div className='box1 rounded adminborder p-4 m-2 mb-5'>
                                                     <div className='row me-2'>
                                                         <div className="col-md-6 col-lg-5 col-12">
@@ -1018,8 +1067,8 @@ export default function Createinvoice() {
                                                                     <tr>
                                                                         <th scope="col">ITEM</th>
                                                                         <th scope="col">QUANTITY</th>
-                                                                        <th scope="col">PRICE</th>
                                                                         <th scope="col">UNIT</th>
+                                                                        <th scope="col">PRICE</th>
                                                                         <th scope="col">AMOUNT</th>
                                                                     </tr>
                                                                 </thead>
@@ -1041,7 +1090,7 @@ export default function Createinvoice() {
 
                                                                         return (
                                                                             <tr key={item.value}>
-                                                                                <td>
+                                                                                <td >
                                                                                     <div className="mb-3 d-flex align-items-baseline justify-content-between">
                                                                                         <p>{item.label}</p>
                                                                                         <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
@@ -1049,7 +1098,7 @@ export default function Createinvoice() {
                                                                                         </button>
                                                                                     </div>
                                                                                     <div className="row">
-                                                                                        <div className="col">
+                                                                                        <div className="col" >
                                                                                             <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
 
                                                                                             <CKEditor
@@ -1079,18 +1128,6 @@ export default function Createinvoice() {
                                                                                         required
                                                                                     />
                                                                                 </td>
-
-                                                                                <td>
-                                                                                    <input
-                                                                                        type="text"
-                                                                                        name={`price-${itemId}`}
-                                                                                        className="form-control"
-                                                                                        value={itemPrice}
-                                                                                        onChange={(event) => onChangePrice(event, itemId)}
-                                                                                        id={`price-${itemId}`}
-                                                                                        required
-                                                                                    />
-                                                                                </td>
                                                                                 <td>
                                                                                 {selectedItem?.unit}
                                                                                     {/* <input
@@ -1103,6 +1140,19 @@ export default function Createinvoice() {
                                                                                         required
                                                                                     /> */}
                                                                                 </td>
+
+                                                                                <td>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        name={`price-${itemId}`}
+                                                                                        className="form-control"
+                                                                                        value={itemPrice}
+                                                                                        onChange={(event) => onChangePrice(event, itemId)}
+                                                                                        id={`price-${itemId}`}
+                                                                                        required
+                                                                                    />
+                                                                                </td>
+                                                                                
 
                                                                                 <td className="text-center">
                                                                                     <p><CurrencySign />{formattedTotalAmount}</p>
@@ -1238,55 +1288,7 @@ export default function Createinvoice() {
                                                 </div>
                                             </div>
                                             
-                                            <div className="col-lg-3 col-12 order-1 order-lg-2">
-                                                <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
-                                                    <div className="form-check form-switch">
-                                                        <div>
-                                                            <label className="form-check-label" htmlFor="signatureSwitch">Signature</label>
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                role="switch"
-                                                                id="signatureSwitch"
-                                                                onChange={handleSignatureSwitch}
-                                                                checked={hasSignature}
-                                                            />
-                                                        </div>
-                                                        {hasSignature && (
-                                                            <>
-                                                                <div>
-                                                                    <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        role="switch"
-                                                                        id="addSignatureSwitch"
-                                                                        checked={isAddSignatureSwitchOn}
-                                                                        onChange={handleAddSignatureSwitch}
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        role="switch"
-                                                                        id="customerSignSwitch"
-                                                                        checked={isCustomerSignSwitchOn}
-                                                                        onChange={handleCustomerSignSwitch}
-                                                                    />
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                {isSignatureModalOpen && (
-                                                    <SignatureModal
-                                                        onSave={saveSignature}
-                                                        onClose={() => setIsSignatureModalOpen(false)}
-                                                    />
-                                                )}
-                                            </div>
+                                            
                                         </div>
                                         
 

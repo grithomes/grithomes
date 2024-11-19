@@ -25,6 +25,9 @@ const Deposit = require('../models/Deposit');
 const Signature = require('../models/Signature')
 const Ownwesignature = require('../models/Ownwesignature')
 const CustomerSignatureSchema = require('../models/CustomerSignature')
+const Vendor = require('../models/Vendor')
+const ExpenseType = require('../models/ExpenseType')
+const Expense = require('../models/Expense')
 const crypto = require('crypto');
 const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
@@ -4123,6 +4126,283 @@ router.get('/getUserPreferences/:userid', async (req, res) => {
         res.status(500).json({ error: 'Failed to retrieve user preferences' });
     }
 });
+
+
+
+// Create a new expense
+router.post('/expense', async (req, res) => {
+    try {
+        const { invoiceId, vendor, expenseType,transactionType,paymentStatus, amount, description, receiptUrl } = req.body;
+
+        // Check if the invoice exists
+        const invoice = await Invoice.findById(invoiceId);
+        if (!invoice) {
+            return res.status(404).json({ error: 'Invoice not found' });
+        }
+
+        // Create and save the expense
+        const expense = new Expense({
+            invoiceId,
+            vendor,
+            expenseType,
+            amount,
+            transactionType,
+            description,
+            paymentStatus,
+            receiptUrl
+        });
+        await expense.save();
+
+        res.status(201).json(expense);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get all expenses for a specific invoice
+router.get('/expense/:invoiceId', async (req, res) => {
+    try {
+        const { invoiceId } = req.params;
+
+        const expenses = await Expense.find({ invoiceId });
+        res.status(200).json(expenses);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+router.get('/expense/', async (req, res) => {
+    try {
+        const { invoiceId } = req.params;
+
+        const expenses = await Expense.find();
+        res.status(200).json(expenses);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get a specific expense by ID
+router.get('/expense/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const expense = await Expense.findById(id);
+        if (!expense) {
+            return res.status(404).json({ error: 'Expense not found' });
+        }
+
+        res.status(200).json(expense);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update an expense
+router.put('/expense/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { vendorName, expenseType, amount, description, receiptUrl, paymentStatus } = req.body;
+
+        const expense = await Expense.findByIdAndUpdate(
+            id,
+            { vendorName, expenseType, amount, description, receiptUrl, paymentStatus },
+            { new: true, runValidators: true }
+        );
+
+        if (!expense) {
+            return res.status(404).json({ error: 'Expense not found' });
+        }
+
+        res.status(200).json(expense);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete an expense
+router.delete('/expense/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const expense = await Expense.findByIdAndDelete(id);
+        if (!expense) {
+            return res.status(404).json({ error: 'Expense not found' });
+        }
+
+        res.status(200).json({ message: 'Expense deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+
+
+// Create a new expense type
+router.post('/expensetype', async (req, res) => {
+    try {
+        const { name, description } = req.body;
+
+        // Check if an expense type with the same name already exists
+        const existingExpenseType = await ExpenseType.findOne({ name });
+        if (existingExpenseType) {
+            return res.status(400).json({ error: 'Expense type already exists' });
+        }
+
+        // Create and save the new expense type
+        const expenseType = new ExpenseType({ name, description });
+        await expenseType.save();
+
+        res.status(201).json(expenseType);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get all expense types
+router.get('/expensetype', async (req, res) => {
+    try {
+        const expenseTypes = await ExpenseType.find();
+        res.status(200).json(expenseTypes);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get a specific expense type by ID
+router.get('/expensetype/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const expenseType = await ExpenseType.findById(id);
+        if (!expenseType) {
+            return res.status(404).json({ error: 'Expense type not found' });
+        }
+        res.status(200).json(expenseType);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update an expense type
+router.put('/expensetype/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, description } = req.body;
+
+        const expenseType = await ExpenseType.findByIdAndUpdate(
+            id,
+            { name, description },
+            { new: true, runValidators: true }
+        );
+
+        if (!expenseType) {
+            return res.status(404).json({ error: 'Expense type not found' });
+        }
+
+        res.status(200).json(expenseType);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete an expense type
+router.delete('/expensetype/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const expenseType = await ExpenseType.findByIdAndDelete(id);
+        if (!expenseType) {
+            return res.status(404).json({ error: 'Expense type not found' });
+        }
+
+        res.status(200).json({ message: 'Expense type deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Create a new vendor
+router.post('/vendor', async (req, res) => {
+    try {
+        const { name, contactPerson, email, phone, address, notes } = req.body;
+
+        // Check if a vendor with the same name or email already exists
+        const existingVendor = await Vendor.findOne({ $or: [{ name }, { email }] });
+        if (existingVendor) {
+            return res.status(400).json({ error: 'Vendor with the same name or email already exists' });
+        }
+
+        // Create and save the new vendor
+        const vendor = new Vendor({ name, contactPerson, email, phone, address, notes });
+        await vendor.save();
+
+        res.status(201).json(vendor);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get all vendors
+router.get('/vendor', async (req, res) => {
+    try {
+        const vendors = await Vendor.find();
+        res.status(200).json(vendors);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Get a specific vendor by ID
+router.get('/vendor/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const vendor = await Vendor.findById(id);
+        if (!vendor) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+        res.status(200).json(vendor);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Update a vendor
+router.put('/vendor/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { name, contactPerson, email, phone, address, notes } = req.body;
+
+        const vendor = await Vendor.findByIdAndUpdate(
+            id,
+            { name, contactPerson, email, phone, address, notes },
+            { new: true, runValidators: true }
+        );
+
+        if (!vendor) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+
+        res.status(200).json(vendor);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Delete a vendor
+router.delete('/vendor/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        const vendor = await Vendor.findByIdAndDelete(id);
+        if (!vendor) {
+            return res.status(404).json({ error: 'Vendor not found' });
+        }
+
+        res.status(200).json({ message: 'Vendor deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 
 module.exports = router;

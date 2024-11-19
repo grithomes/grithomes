@@ -35,6 +35,7 @@ import Customersign from './screens/userpanel/Customersign';
 import Customersigninvoice from './screens/userpanel/Customersigninvoice';
 import Signature from './screens/userpanel/Signature';
 import Completedocument from './screens/userpanel/Completedocument';
+import Category from './screens/userpanel/Expense/Category';
 // import { InvoiceProvider } from './components/InvoiceContext';
 import {
   BrowserRouter as Router,
@@ -42,6 +43,8 @@ import {
   Route,
   Link
 } from "react-router-dom";
+import Vendor from './screens/userpanel/Expense/Vendor';
+import ExpenseEntries from './screens/userpanel/Expense/ExpenseEntries';
 
 function App() {
   return (
@@ -82,6 +85,9 @@ function App() {
             <Route exact path='/completedocument' element={<Completedocument/>} />
             <Route exact path='/userpanel/E-sign' element={<Esign/>} />
             <Route exact path='/userpanel/Signature' element={<Signature/>} />
+            <Route exact path='/userpanel/Category' element={<Category/>} />
+            <Route exact path='/userpanel/Vendor' element={<Vendor/>} />
+            <Route exact path='/userpanel/Expense' element={<ExpenseEntries/>} />
             <Route exact path='/Timeschemahistory' element={<Timeschemahistory/>} />
             <Route exact path='/Teammemberpanel/Teammenberdashboard' element={<Teammenberdashboard/>} />
             <Route exact path='/Teammemberpanel/History' element={<Teamhistory/>} />

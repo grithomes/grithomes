@@ -728,8 +728,41 @@ export default function Invoicedetail() {
           },
           body: JSON.stringify(updatedData),
         });
-
+ // Add new expense
+ await fetch('https://grithomes.onrender.com/api/expense', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json',
+    'Authorization': authToken,
+  },
+  body: JSON.stringify({
+    expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
+    expenseType: null, // Specify the type of expense
+    vendor: null, // Specify the vendor
+    amount: transactionData.paidamount,
+    description: '', // Add a description if needed
+    paymentStatus: 'Paid',
+    transactionType: 'Credit',
+    receiptUrl: '', // If there's a receipt URL, provide it here
+    invoiceId: invoiceData._id,
+  }),
+});
         
+
+console.log(
+  JSON.stringify({
+    expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
+    expenseType: null, // Specify the type of expense
+    vendor: null, // Specify the vendor
+    amount: transactionData.paidamount,
+    description: '', // Add a description if needed
+    paymentStatus: 'Paid',
+    transactionType: 'Credit',
+    receiptUrl: '', // If there's a receipt URL, provide it here
+    invoiceId: invoiceData._id,
+  }),
+);
+
             await fetchtransactiondata();
 
             // Calculate total paid amount from transactions
@@ -1697,8 +1730,8 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                   <tr className='table table-invoice'>
                                     <th className='text-start'>Item</th>
                                     <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
-                                    <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
                                     <th className='text-end d-none d-md-table-cell' width="15%"> Unit</th>
+                                    <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
                                     <th className='text-end' width="15%"> Amount</th>
                                   </tr>
                                 </thead>
@@ -1714,8 +1747,8 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                         </div>
                                       </td>
                                       <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
-                                      <td className="text-end d-none d-md-table-cell">{roundOff(item.price)}</td>
                                       <td className="text-end d-none d-md-table-cell">{item.unit}</td>
+                                      <td className="text-end d-none d-md-table-cell">{roundOff(item.price)}</td>
                                       <td className='text-end'>{roundOff(item.amount)}</td>
                                     </tr>
                                   ))}
@@ -1920,7 +1953,7 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
           <div class="modal-dialog modal-lg">
             <div class="modal-content">
               <div class="modal-header">
-                <h1 class="modal-title fs-5" id="exampleModalLabel">Mark paid</h1>
+                <h1 class="modal-title fs-5" id="exampleModalLabel">Mark Paid</h1>
                 <button type="button" class="btn-close" id="closebutton" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body">

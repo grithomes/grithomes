@@ -15,6 +15,19 @@ export default function Usernavbar() {
   const [teammember, setTeammember] = useState("true");
   const location = useLocation();
 
+  const [dropdownOpen, setDropdownOpen] = useState({
+    documents: false,
+    management: false,
+  });
+
+  const toggleDropdown = (menu) => {
+    setDropdownOpen((prevState) => ({
+      ...prevState,
+      [menu]: !prevState[menu]
+    }));
+  };
+
+
   const handleLogout = () => {
     localStorage.removeItem('authToken');
     localStorage.removeItem('userid');
@@ -69,6 +82,33 @@ export default function Usernavbar() {
                         <img src={pin} width="24px" height='24px' /> <span className='ps-2'>E-Sign</span>
                       </Link>
                     </li>
+                    <li className="nav-item">
+                      <div className="nav-link pointer text-black" onClick={() => toggleDropdown('documents')}>
+                        {/* <span>Expenses</span> */}
+                        <img src={dollar} width="24px" height='24px' /> <span className='ps-2'>Expenses</span>
+                      </div>
+                      {dropdownOpen.documents && (
+                        <ul className="dropdown-list">
+                          <li>
+                            <Link to="/userpanel/Expense" className='nav-link text-black'>
+                              <img src={dollar} width="24px" height='24px' /> <span className='ps-2'>Expense Entry</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/userpanel/Category" className='nav-link text-black'>
+                              <img src={dollar} width="24px" height='24px' /> <span className='ps-2'>Category</span>
+                            </Link>
+                          </li>
+                          <li>
+                            <Link to="/userpanel/Vendor" className='nav-link text-black'>
+                              <img src={pin} width="24px" height='24px' /> <span className='ps-2'>Vendor</span>
+                            </Link>
+                          </li>
+                          
+                        </ul>
+                      )}
+                    </li>
+
                     <li>
                       <p className='greyclr nav-link'>Management</p>
                     </li>

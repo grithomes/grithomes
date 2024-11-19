@@ -351,11 +351,13 @@ export default function Editestimate() {
     
         if (!itemExists) {
             const selectedPrice = items.find((i) => i._id === value)?.price || 0;
+            const selectedUnit = items.find((i) => i._id === value)?.unit || 0;
             const selectedDescription = items.find((i) => i._id === value)?.description || "";
             const newItem = {
                 itemId: value,
                 itemname: label,
                 price: selectedPrice,
+                unit: selectedUnit,
                 itemquantity: 1, // Set default quantity or whatever value you prefer
                 discount: 0, // Set default discount or whatever value you prefer
                 amount: selectedPrice, // Initially set amount same as price
@@ -834,6 +836,9 @@ export default function Editestimate() {
                                                 <p>QUANTITY</p>
                                             </div>
                                             <div className="col-2">
+                                                <p>UNIT</p>
+                                            </div>
+                                            <div className="col-2">
                                                 <p>PRICE</p>
                                             </div>
                                             {/* <div className="col-2">
@@ -869,6 +874,9 @@ export default function Editestimate() {
                                                     required
                                                 />
                                                 </div>
+                                            </div>
+                                            <div className="col-2">
+                                                <p>{item.unit || '-'}</p>
                                             </div>
                                             <div className="col-2">
                                                 <div className="mb-3">

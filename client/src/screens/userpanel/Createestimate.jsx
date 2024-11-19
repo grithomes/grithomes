@@ -853,7 +853,57 @@ export default function Createestimate() {
                                             </div>
                                         </div>
                                         <div className="row">
-                                            <div className="col-lg-9 col-12 order-2 order-lg-1"> 
+                                            
+                                        <div className="col-lg-3 col-12">
+                                                <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
+                                                    <div className="form-check form-switch">
+                                                        <div>
+                                                            <label className="form-check-label" htmlFor="signatureSwitch">Signature</label>
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                role="switch"
+                                                                id="signatureSwitch"
+                                                                onChange={handleSignatureSwitch}
+                                                                checked={hasSignature}
+                                                            />
+                                                        </div>
+                                                        {hasSignature && (
+                                                            <>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="addSignatureSwitch"
+                                                                        checked={isAddSignatureSwitchOn}
+                                                                        onChange={handleAddSignatureSwitch}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="customerSignSwitch"
+                                                                        checked={isCustomerSignSwitchOn}
+                                                                        onChange={handleCustomerSignSwitch}
+                                                                    />
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {isSignatureModalOpen && (
+                                                    <SignatureModal
+                                                        onSave={saveSignature}
+                                                        onClose={() => setIsSignatureModalOpen(false)}
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="col-lg-12 col-12 order-2 order-lg-1"> 
                                                 <div className='box1 rounded adminborder p-4 m-2 mb-5'>
                                                     <div className='row me-2'>
                                                         <div className="col-md-6 col-lg-7 col-12">
@@ -990,8 +1040,8 @@ export default function Createestimate() {
                                                                     <tr>
                                                                         <th scope="col">ITEM</th>
                                                                         <th scope="col">QUANTITY</th>
-                                                                        <th scope="col">PRICE</th>
                                                                         <th scope="col">UNIT</th>
+                                                                        <th scope="col">PRICE</th>
                                                                         <th scope="col">AMOUNT</th>
                                                                     </tr>
                                                                 </thead>
@@ -1051,6 +1101,9 @@ export default function Createestimate() {
                                                                                     />
                                                                                 </td>
                                                                                 <td>
+                                                                                {selectedItem?.unit}
+                                                                                </td>
+                                                                                <td>
                                                                 
                                                                                     <input
                                                                                         type="text"
@@ -1063,7 +1116,7 @@ export default function Createestimate() {
                                                                                     />
 
                                                                                 </td>
-                                                                                {selectedItem?.unit}
+                                                                               
                                                                                 {/* <td className="text-center">
                                                                                     <p><CurrencySign />{discountTotal.toFixed(2)}</p>
                                                                                 </td> */}
@@ -1200,55 +1253,7 @@ export default function Createestimate() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="col-lg-3 col-12 order-1 order-lg-2">
-                                                <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
-                                                    <div className="form-check form-switch">
-                                                        <div>
-                                                            <label className="form-check-label" htmlFor="signatureSwitch">Signature</label>
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                role="switch"
-                                                                id="signatureSwitch"
-                                                                onChange={handleSignatureSwitch}
-                                                                checked={hasSignature}
-                                                            />
-                                                        </div>
-                                                        {hasSignature && (
-                                                            <>
-                                                                <div>
-                                                                    <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        role="switch"
-                                                                        id="addSignatureSwitch"
-                                                                        checked={isAddSignatureSwitchOn}
-                                                                        onChange={handleAddSignatureSwitch}
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        role="switch"
-                                                                        id="customerSignSwitch"
-                                                                        checked={isCustomerSignSwitchOn}
-                                                                        onChange={handleCustomerSignSwitch}
-                                                                    />
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                {isSignatureModalOpen && (
-                                                    <SignatureModal
-                                                        onSave={saveSignature}
-                                                        onClose={() => setIsSignatureModalOpen(false)}
-                                                    />
-                                                )}
-                                            </div>
+                                         
                                         </div>
 
                                     </form>

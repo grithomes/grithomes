@@ -282,6 +282,8 @@ export default function Editinvoice() {
               }
               else{
                 const json = await response.json();
+                console.log(json,"json - ");
+                
             
                 if (Array.isArray(json)) {
                     setitems(json);
@@ -349,11 +351,13 @@ export default function Editinvoice() {
     
         if (!itemExists) {
             const selectedPrice = items.find((i) => i._id === value)?.price || 0;
+            const selectedUnit = items.find((i) => i._id === value)?.unit || 0;
             const selectedDescription = items.find((i) => i._id === value)?.description || "";
             const newItem = {
                 itemId: value,
                 itemname: label,
                 price: selectedPrice,
+                unit:selectedUnit,
                 itemquantity: 1, // Set default quantity or whatever value you prefer
                 discount: 0, // Set default discount or whatever value you prefer
                 amount: selectedPrice, // Initially set amount same as price
@@ -870,6 +874,9 @@ export default function Editinvoice() {
                                                 <p>QUANTITY</p>
                                             </div>
                                             <div className="col-2">
+                                                <p>UNIT</p>
+                                            </div>
+                                            <div className="col-2">
                                                 <p>PRICE</p>
                                             </div>
                                             <div className="col-2">
@@ -878,7 +885,7 @@ export default function Editinvoice() {
                                         </div>
 
                                         <div>
-                                            {console.log(invoiceData, "invoiceData")}
+                                            {console.log(invoiceData.items, "invoiceData.items")}
                                         {invoiceData.items && invoiceData.items.map((item) => (
                                             <div className='row' key={item.itemId}>
                                             <div className="col-6 ">
@@ -900,6 +907,11 @@ export default function Editinvoice() {
                                                     id={`quantity-${item.itemId}`}
                                                     required
                                                 />
+                                                </div>
+                                            </div>
+                                            <div className="col-2">
+                                                <div className="mb-3">
+                                                    {item.unit || '-'}
                                                 </div>
                                             </div>
                                             <div className="col-2">

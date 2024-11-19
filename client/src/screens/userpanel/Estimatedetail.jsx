@@ -886,7 +886,7 @@ thead{
                                   
                                   <div>{signupdata.email}</div>
                                   <div>{signupdata.website} </div>
-                                  <div>
+                                  {/* <div>
                                     {signupdata.gstNumber == ''
                                     ?
                                   ""
@@ -894,7 +894,7 @@ thead{
                                   `${signupdata.TaxName } ${signupdata.gstNumber}`
                                   }
 
-                                    </div>
+                                    </div> */}
                                   {/* <div>{signupdata.TaxName}: {signupdata.gstNumber}</div> */}
 
                                 </address>
@@ -913,7 +913,7 @@ thead{
       </div>
       <address className='m-t-5 m-b-5'>
         <div>{estimateData.customeremail}</div>
-        <div>{estimateData.customerphone || 'No'}</div>
+        <div>{estimateData.customerphone || ''}</div>
 
                                 </address>
                               </div>
@@ -961,8 +961,8 @@ thead{
                                   <tr className='table table-invoice'>
                                     <th className='text-start'>Item</th>
                                     <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
-                                    <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
                                     <th className='text-end d-none d-md-table-cell' width="15%"> Unit</th>
+                                    <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
                                     <th className='text-end' width="15%"> Amount</th>
                                   </tr>
                                 </thead>
@@ -978,8 +978,8 @@ thead{
                                         </div>
                                       </td>
                                       <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
-                                      <td className="text-end d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
                                       <td className="text-end d-none d-md-table-cell">{item.unit}</td>
+                                      <td className="text-end d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
                                       <td className='text-end'><CurrencySign />{roundOff(item.amount)}</td>
                                     </tr>
                                   ))}
