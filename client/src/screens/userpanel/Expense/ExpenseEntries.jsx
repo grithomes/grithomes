@@ -204,20 +204,7 @@ export default function ExpenseEntries() {
 
     // Handle form data change
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-
-        // If the input is for "expenseDate", convert it to a Date object
-        if (name === "expenseDate") {
-            setFormData({
-                ...formData,
-                [name]: new Date(value), // Convert string to Date object
-            });
-        } else {
-            setFormData({
-                ...formData,
-                [name]: value,
-            });
-        }
+        setFormData({ ...formData, [e.target.name]: e.target.value });
     };
 
 
