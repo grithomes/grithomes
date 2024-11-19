@@ -39,7 +39,10 @@ export default function Invoicedetail() {
     method: '',
     note: ''
   });
+  const [expenseTypes, setExpenseTypes] = useState([]);
+  const [vendors, setVendors] = useState([]);
   const [transactions, setTransactions] = useState([]);
+  const [expenseTransactions, setExpenseTransactions] = useState([]);
   const [showAlert, setShowAlert] = useState(false);
   const [emails, setEmails] = useState([]);
   const [bccEmails, setBccEmails] = useState([]);
@@ -52,7 +55,9 @@ export default function Invoicedetail() {
   const [ownerData, setOwnerData] = useState(null);
   const [signatureData, setsignatureData] = useState(null);
   // const [signatureData, setsignatureData] = useState(null);
-  
+  const apiURL = 'https://grithomes.onrender.comapi/expense';
+  const expenseTypeURL = 'https://grithomes.onrender.comapi/expensetype';
+  const vendorURL = 'https://grithomes.onrender.comapi/vendor';
 
 
   useEffect(() => {
@@ -64,6 +69,7 @@ export default function Invoicedetail() {
       fetchinvoicedata();
       fetchdepositdata();
       fetchtransactiondata();
+      fetchExpensetransactiondata();
     }
   }, [invoiceid])
 
@@ -72,13 +78,53 @@ export default function Invoicedetail() {
     if (invoiceData.customeremail) {
       setEmails([invoiceData.customeremail]);
     }
+    fetchExpenseTypes()
+    fetchVendors()
   }, [invoiceData.customeremail]);
 
   let navigate = useNavigate();
 
   const roundOff = (value) => {
     return Math.round(value * 100) / 100;
-};
+  };
+
+
+  const fetchExpenseTypes = async () => {
+    setloading(true);
+    try {
+      const response = await fetch(expenseTypeURL);
+      const data = await response.json();
+      setExpenseTypes(data);
+    } catch (error) {
+      console.error('Error fetching expense types:', error);
+    } finally {
+      setloading(false);
+    }
+  };
+
+  // Fetch all vendors
+  const fetchVendors = async () => {
+    setloading(true);
+    try {
+      const response = await fetch(vendorURL);
+      const data = await response.json();
+      setVendors(data);
+    } catch (error) {
+      console.error('Error fetching vendors:', error);
+    } finally {
+      setloading(false);
+    }
+  };
+  const getExpenseTypeName = (id) => {
+    const expenseType = expenseTypes.find((type) => type._id === id);
+    return expenseType ? expenseType.name : '-';
+  };
+
+  // Function to get Vendor name by ID
+  const getVendorName = (id) => {
+    const vendor = vendors.find((vendor) => vendor._id === id);
+    return vendor ? vendor.name : '-';
+  };
 
   const handlePercentageChange = (event) => {
     setdepositPercentage(event.target.value);
@@ -93,8 +139,8 @@ export default function Invoicedetail() {
 
 
   const handleDateChange = (event) => {
-    console.log(event.target.value,"event");
-    
+    console.log(event.target.value, "event");
+
     setDueDepositDate(event.target.value);
   };
 
@@ -116,7 +162,7 @@ export default function Invoicedetail() {
       };
 
       try {
-        const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
+        const response = await fetch('https://grithomes.onrender.comapi/addpayment', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -147,23 +193,22 @@ export default function Invoicedetail() {
               setsavedDepositData('');
               const setamountDue = roundOff(invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0) - responseData.transaction.paidamount)
               console.log("setamountDue Mark Depoist: ==============", setamountDue);
-  
-  
-              const updatedData = { 
-  
-                ...invoiceData,  
-                amountdue: setamountDue, 
-                status: `${
-                  setamountDue == 0
+
+
+              const updatedData = {
+
+                ...invoiceData,
+                amountdue: setamountDue,
+                status: `${setamountDue == 0
                   ?
                   "Paid"
                   :
                   "Partially Paid"
-                }`
-              
-              
+                  }`
+
+
               }; // Update emailsent status
-              await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+              await fetch(`https://grithomes.onrender.comapi/updateinvoicedata/${invoiceid}`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -183,7 +228,7 @@ export default function Invoicedetail() {
               // Update amount due by subtracting totalPaidAmount from total invoice amount
               const updatedAmountDue = invoiceData.total - totalPaidAmount;
               setInvoiceData({ ...invoiceData, amountdue: updatedAmountDue });
-              
+
               // Close the modal after adding payment
               document.getElementById('closebutton').click();
               if (modalRef.current) {
@@ -215,7 +260,7 @@ export default function Invoicedetail() {
     try {
       if ((savedDepositData != null || savedDepositData != "") && savedDepositData._id != undefined) {
         // If savedDepositData exists and has an ID, update the existing record
-        const response = await fetch(`https://grithomes.onrender.com/api/updatedeposit/${savedDepositData._id}`, {
+        const response = await fetch(`https://grithomes.onrender.comapi/updatedeposit/${savedDepositData._id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -243,7 +288,7 @@ export default function Invoicedetail() {
 
           if (data.Success) {
             console.log('Deposit updated successfully:', data.deposit);
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
+            const savedDepositResponse = await fetch(`https://grithomes.onrender.comapi/deposit/${data.deposit._id}`);
             const savedDepositDatad = await savedDepositResponse.json();
             setsavedDepositData(savedDepositDatad.deposit);
             // You may update the state here if required
@@ -255,7 +300,7 @@ export default function Invoicedetail() {
 
       } else {
         // If savedDepositData is empty or does not have an ID, add a new record
-        const response = await fetch('https://grithomes.onrender.com/api/deposit', {
+        const response = await fetch('https://grithomes.onrender.comapi/deposit', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -281,7 +326,7 @@ export default function Invoicedetail() {
         else {
           const data = await response.json();
           if (data.success) {
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`, {
+            const savedDepositResponse = await fetch(`https://grithomes.onrender.comapi/deposit/${data.deposit._id}`, {
               headers: {
                 'Authorization': authToken,
               }
@@ -315,7 +360,7 @@ export default function Invoicedetail() {
     try {
       if ((savedDepositData != null || savedDepositData != "") && savedDepositData._id != undefined) {
         // If savedDepositData exists and has an ID, update the existing record
-        const response = await fetch(`https://grithomes.onrender.com/api/updatedeposit/${savedDepositData._id}`, {
+        const response = await fetch(`https://grithomes.onrender.comapi/updatedeposit/${savedDepositData._id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -343,7 +388,7 @@ export default function Invoicedetail() {
 
           if (data.Success) {
             console.log('Deposit updated successfully:', data.deposit);
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`, {
+            const savedDepositResponse = await fetch(`https://grithomes.onrender.comapi/deposit/${data.deposit._id}`, {
               headers: {
                 'Authorization': authToken,
               }
@@ -366,7 +411,7 @@ export default function Invoicedetail() {
         }
       } else {
         // If savedDepositData is empty or does not have an ID, add a new record
-        const response = await fetch('https://grithomes.onrender.com/api/deposit', {
+        const response = await fetch('https://grithomes.onrender.comapi/deposit', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -391,7 +436,7 @@ export default function Invoicedetail() {
         else {
           const data = await response.json();
           if (data.success) {
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`, {
+            const savedDepositResponse = await fetch(`https://grithomes.onrender.comapi/deposit/${data.deposit._id}`, {
               headers: {
                 'Authorization': authToken,
               }
@@ -436,7 +481,7 @@ export default function Invoicedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getinvoicedata/${invoiceid}`, {
+      const response = await fetch(`https://grithomes.onrender.comapi/getinvoicedata/${invoiceid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -477,15 +522,15 @@ export default function Invoicedetail() {
       console.error('Customer email is not defined');
       return;
     }
-  
+
     try {
-      const response = await fetch(`https://grithomes.onrender.com/api/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceIdpass)}`);
+      const response = await fetch(`https://grithomes.onrender.comapi/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceIdpass)}`);
       const json = await response.json();
       console.log('Customer signature response:', json);
       if (response.ok && json.hasSignature) {
-        setsignatureData(json.signatureData); 
+        setsignatureData(json.signatureData);
       } else {
-        setsignatureData(null); 
+        setsignatureData(null);
       }
     } catch (error) {
       console.error('Error fetching customer signature:', error);
@@ -496,7 +541,7 @@ export default function Invoicedetail() {
     try {
       const ownerId = localStorage.getItem('userid');
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getownerdata/${ownerId}`, {
+      const response = await fetch(`https://grithomes.onrender.comapi/getownerdata/${ownerId}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -521,7 +566,7 @@ export default function Invoicedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getdepositdata/${userid}/${invoiceid}`, {
+      const response = await fetch(`https://grithomes.onrender.comapi/getdepositdata/${userid}/${invoiceid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -548,7 +593,7 @@ export default function Invoicedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoiceid}`, {
+      const response = await fetch(`https://grithomes.onrender.comapi/gettransactiondata/${invoiceid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -581,11 +626,49 @@ export default function Invoicedetail() {
     }
   }
 
+  const fetchExpensetransactiondata = async () => {
+    try {
+      const userid = localStorage.getItem("userid");
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.comapi/expense/${invoiceid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
+      });
+
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
+      }
+      else {
+        const json = await response.json();
+
+        // Check if the response contains paidamount
+        if (Array.isArray(json)) {
+          setExpenseTransactions(json);
+          //   const totalPaidAmount = payments.reduce((total, payment) => total + payment.paidamount, 0);
+
+          console.log(json, "Invoice 173");
+
+        } else {
+          console.error('Invalid data structure for transactions:', json);
+        }
+        setloading(false);
+      }
+    }
+    catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  }
+
   const fetchsignupdata = async () => {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+      const response = await fetch(`https://grithomes.onrender.comapi/getsignupdata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -653,6 +736,7 @@ export default function Invoicedetail() {
     // Fetch updated transaction data after payment addition
     await fetchtransactiondata();
 
+
     // Calculate total paid amount from transactions
     // const totalPaidAmount = transactions.reduce((total, payment) => total + payment.paidamount, 0);
     const totalPaidAmount = transactions.reduce(
@@ -671,7 +755,7 @@ export default function Invoicedetail() {
       setexceedpaymenterror("");
     }
     try {
-      const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
+      const response = await fetch('https://grithomes.onrender.comapi/addpayment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -689,6 +773,7 @@ export default function Invoicedetail() {
 
       if (response.status === 401) {
         const responseData = await response.json();
+        fetchExpensetransactiondata();
         setAlertMessage(responseData.message);
         setloading(false);
         window.scrollTo(0, 0);
@@ -706,62 +791,61 @@ export default function Invoicedetail() {
             console.log("setamountDue: ==============", setamountDue);
 
 
-            const updatedData = { 
+            const updatedData = {
 
-              ...invoiceData,  
-              amountdue: setamountDue, 
-              status: `${
-                setamountDue == 0
+              ...invoiceData,
+              amountdue: setamountDue,
+              status: `${setamountDue == 0
                 ?
                 "Paid"
                 :
                 "Partially Paid"
-              }`
-            
-            
-            }; // Update emailsent status
-        await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': authToken,
-          },
-          body: JSON.stringify(updatedData),
-        });
- // Add new expense
- await fetch('https://grithomes.onrender.com/api/expense', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json',
-    'Authorization': authToken,
-  },
-  body: JSON.stringify({
-    expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
-    expenseType: null, // Specify the type of expense
-    vendor: null, // Specify the vendor
-    amount: transactionData.paidamount,
-    description: '', // Add a description if needed
-    paymentStatus: 'Paid',
-    transactionType: 'Credit',
-    receiptUrl: '', // If there's a receipt URL, provide it here
-    invoiceId: invoiceData._id,
-  }),
-});
-        
+                }`
 
-console.log(
-  JSON.stringify({
-    expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
-    expenseType: null, // Specify the type of expense
-    vendor: null, // Specify the vendor
-    amount: transactionData.paidamount,
-    description: '', // Add a description if needed
-    paymentStatus: 'Paid',
-    transactionType: 'Credit',
-    receiptUrl: '', // If there's a receipt URL, provide it here
-    invoiceId: invoiceData._id,
-  }),
-);
+
+            }; // Update emailsent status
+            await fetch(`https://grithomes.onrender.comapi/updateinvoicedata/${invoiceid}`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken,
+              },
+              body: JSON.stringify(updatedData),
+            });
+            // Add new expense
+            await fetch('https://grithomes.onrender.comapi/expense', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken,
+              },
+              body: JSON.stringify({
+                expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
+                expenseType: null, // Specify the type of expense
+                vendor: null, // Specify the vendor
+                amount: transactionData.paidamount,
+                description: '', // Add a description if needed
+                paymentStatus: 'Paid',
+                transactionType: 'Credit',
+                receiptUrl: '', // If there's a receipt URL, provide it here
+                invoiceId: invoiceData._id,
+              }),
+            });
+
+
+            console.log(
+              JSON.stringify({
+                expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
+                expenseType: null, // Specify the type of expense
+                vendor: null, // Specify the vendor
+                amount: transactionData.paidamount,
+                description: '', // Add a description if needed
+                paymentStatus: 'Paid',
+                transactionType: 'Credit',
+                receiptUrl: '', // If there's a receipt URL, provide it here
+                invoiceId: invoiceData._id,
+              }),
+            );
 
             await fetchtransactiondata();
 
@@ -1128,94 +1212,94 @@ thead{
 
   const handleDeleteTransClick = async (transactionid) => {
     try {
-        const authToken = localStorage.getItem('authToken');
-        const response = await fetch(`https://grithomes.onrender.com/api/deltransaction/${transactionid}`, {
-            method: 'GET',
-            headers: {
-                'Authorization': authToken,
-              }
-        });
-
-        if (response.status === 401) {
-          const json = await response.json();
-          setAlertMessage(json.message);
-          setloading(false);
-          window.scrollTo(0,0);
-          return; // Stop further execution
-        }
-        else{
-            const json = await response.json();
-            if (json.Success) {
-              console.log('Transaction removed successfully!');
-              fetchtransactiondata();
-            } else {
-                console.error('Error deleting teammember:', json.message);
-            }
-        }
-    } catch (error) {
-        console.error('Error deleting teammember:', error);
-    }
-};
-
-const handleRemove = async (invoiceid, invoiceIdpass) => {
-  try {
-    // Check if there's a customer signature
-    const signatureData = await checkCustomerSignature(invoiceIdpass);
-
-    // If a signature exists, delete it
-    if (signatureData) {
       const authToken = localStorage.getItem('authToken');
-      const deleteSignatureResponse = await fetch(`https://grithomes.onrender.com/api/delcustomersignature/${encodeURIComponent(invoiceIdpass)}`, {
-        method: 'DELETE',
+      const response = await fetch(`https://grithomes.onrender.comapi/deltransaction/${transactionid}`, {
+        method: 'GET',
         headers: {
           'Authorization': authToken,
         }
       });
 
-      if (!deleteSignatureResponse.ok) {
-        const json = await deleteSignatureResponse.json();
-        console.error('Error deleting customer signature:', json.message);
-        return; // Stop further execution if deleting signature fails
-      } else {
-        console.log('Customer signature deleted successfully!');
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
       }
+      else {
+        const json = await response.json();
+        if (json.Success) {
+          console.log('Transaction removed successfully!');
+          fetchtransactiondata();
+        } else {
+          console.error('Error deleting teammember:', json.message);
+        }
+      }
+    } catch (error) {
+      console.error('Error deleting teammember:', error);
     }
+  };
 
-    // Proceed with deleting the estimate data
-    const authToken = localStorage.getItem('authToken');
-    const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
-      method: 'GET',
-      headers: {
-        'Authorization': authToken,
+  const handleRemove = async (invoiceid, invoiceIdpass) => {
+    try {
+      // Check if there's a customer signature
+      const signatureData = await checkCustomerSignature(invoiceIdpass);
+
+      // If a signature exists, delete it
+      if (signatureData) {
+        const authToken = localStorage.getItem('authToken');
+        const deleteSignatureResponse = await fetch(`https://grithomes.onrender.comapi/delcustomersignature/${encodeURIComponent(invoiceIdpass)}`, {
+          method: 'DELETE',
+          headers: {
+            'Authorization': authToken,
+          }
+        });
+
+        if (!deleteSignatureResponse.ok) {
+          const json = await deleteSignatureResponse.json();
+          console.error('Error deleting customer signature:', json.message);
+          return; // Stop further execution if deleting signature fails
+        } else {
+          console.log('Customer signature deleted successfully!');
+        }
       }
-    });
 
-    if (response.status === 401) {
-      const json = await response.json();
-      setAlertMessage(json.message);
-      setloading(false);
-      window.scrollTo(0, 0);
-      return; // Stop further execution
-    } else {
-      const json = await response.json();
+      // Proceed with deleting the estimate data
+      const authToken = localStorage.getItem('authToken');
+      const response = await fetch(`https://grithomes.onrender.comapi/deldata/${invoiceid}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': authToken,
+        }
+      });
 
-      if (json.success) {
-        console.log('Data removed successfully!');
-        navigate('/userpanel/Invoice');
+      if (response.status === 401) {
+        const json = await response.json();
+        setAlertMessage(json.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
       } else {
-        console.error('Error deleting Invoice:', json.message);
-      }
-    }
+        const json = await response.json();
 
-  } catch (error) {
-    console.error('Error deleting Invoice:', error);
-  }
-};
+        if (json.success) {
+          console.log('Data removed successfully!');
+          navigate('/userpanel/Invoice');
+        } else {
+          console.error('Error deleting Invoice:', json.message);
+        }
+      }
+
+    } catch (error) {
+      console.error('Error deleting Invoice:', error);
+    }
+  };
 
   // const handleRemove = async (invoiceid,invoiceIdpass) => {
   //   const authToken = localStorage.getItem('authToken');
   //   try {
-  //     const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
+  //     const response = await fetch(`https://grithomes.onrender.comapi/deldata/${invoiceid}`, {
   //       method: 'GET',
   //       headers: {
   //         'Authorization': authToken,
@@ -1286,7 +1370,7 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
     const userid = invoiceData.userid;
     try {
       const finalContent = content.trim() || ``; // If content is empty, use default value
-      const response = await fetch('https://grithomes.onrender.com/api/send-invoice-email', {
+      const response = await fetch('https://grithomes.onrender.comapi/send-invoice-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1314,10 +1398,9 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
         // setShowModal(false);
         setShowEmailAlert(true);
 
-        if(invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid')
-        {
-          const updatedData = {invoiceData }
-          await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+        if (invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid') {
+          const updatedData = { invoiceData }
+          await fetch(`https://grithomes.onrender.comapi/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1325,9 +1408,9 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
             },
             body: JSON.stringify(updatedData),
           });
-        }else {
-          const updatedData = { ...invoiceData, status:'Send', emailsent: 'yes' }
-          await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+        } else {
+          const updatedData = { ...invoiceData, status: 'Send', emailsent: 'yes' }
+          await fetch(`https://grithomes.onrender.comapi/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1337,32 +1420,32 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
           });
         }
         // Check if customer signature already exists
-      const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceData._id)}`);
-      const checkJson = await checkResponse.json();
+        const checkResponse = await fetch(`https://grithomes.onrender.comapi/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceData._id)}`);
+        const checkJson = await checkResponse.json();
 
-      if (checkResponse.ok && !checkJson.hasSignature) {
-        // Create new customer signature only if it doesn't exist
-        await fetch('https://grithomes.onrender.com/api/customersignature', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            // 'Authorization': authToken,
-          },
-          body: JSON.stringify({
-            invoiceId: invoiceData._id,
-            userid,
-            // ownerEmail:ownerData.email,
-            // ownerId:ownerData.ownerId,
-            status:'Pending Signature',
-            customerName: invoiceData.customername,
-            customerEmail: invoiceData.customeremail,
-            customersign: "",
-            documentNumber: invoiceData.InvoiceNumber,
-            lastupdated: '',
-            completeButtonVisible: false,
-          }), 
-        });
-      }
+        if (checkResponse.ok && !checkJson.hasSignature) {
+          // Create new customer signature only if it doesn't exist
+          await fetch('https://grithomes.onrender.comapi/customersignature', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              // 'Authorization': authToken,
+            },
+            body: JSON.stringify({
+              invoiceId: invoiceData._id,
+              userid,
+              // ownerEmail:ownerData.email,
+              // ownerId:ownerData.ownerId,
+              status: 'Pending Signature',
+              customerName: invoiceData.customername,
+              customerEmail: invoiceData.customeremail,
+              customersign: "",
+              documentNumber: invoiceData.InvoiceNumber,
+              lastupdated: '',
+              completeButtonVisible: false,
+            }),
+          });
+        }
 
         // Fetch updated invoice data
         fetchinvoicedata();
@@ -1380,11 +1463,11 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
     const authToken = localStorage.getItem('authToken');
     const contentAsPdf = await generatePdfFromHtml();
     try {
-      console.log(formatCustomDate(duedepositDate),"duedepositDate");
-      console.log(savedDepositData,"savedDepositData");
-      
+      console.log(formatCustomDate(duedepositDate), "duedepositDate");
+      console.log(savedDepositData, "savedDepositData");
+
       const finalContent = content.trim() || ``; // If content is empty, use default value
-      const response = await fetch('https://grithomes.onrender.com/api/send-deposit-email', {
+      const response = await fetch('https://grithomes.onrender.comapi/send-deposit-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1410,13 +1493,12 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
         setShowSendEmailModal(false)
         setShowEmailAlert(true);
         const data = response.json();
-        console.log(data,"check");
-        
+        console.log(data, "check");
+
         // Update the database with emailsent status
-        if(invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid')
-        {
-          const updatedData = {invoiceData }
-          await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+        if (invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid') {
+          const updatedData = { invoiceData }
+          await fetch(`https://grithomes.onrender.comapi/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1424,9 +1506,9 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
             },
             body: JSON.stringify(updatedData),
           });
-        }else {
-          const updatedData = { ...invoiceData,status:"Send", emailsent: 'yes' }
-          await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+        } else {
+          const updatedData = { ...invoiceData, status: "Send", emailsent: 'yes' }
+          await fetch(`https://grithomes.onrender.comapi/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1436,7 +1518,7 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
           });
         }
         // const updatedData = { ...invoiceData, emailsent: 'yes' }; // Update emailsent status
-        // await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+        // await fetch(`https://grithomes.onrender.comapi/updateinvoicedata/${invoiceid}`, {
         //   method: 'POST',
         //   headers: {
         //     'Content-Type': 'application/json',
@@ -1636,24 +1718,24 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                 <address className='m-t-5 m-b-5'>
                                   <div className='mb-2'>
                                     <div className=''>{signupdata.address} </div>
-                                      {signupdata.city ? JSON.parse(signupdata.city).name+',' : ' '}
-                                      {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
-                                     {/* <div className=''>{JSON.parse(signupdata.city).name}, {JSON.parse(signupdata.state).name}</div>
+                                    {signupdata.city ? JSON.parse(signupdata.city).name + ',' : ' '}
+                                    {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
+                                    {/* <div className=''>{JSON.parse(signupdata.city).name}, {JSON.parse(signupdata.state).name}</div>
                                     <div className=''>{JSON.parse(signupdata.country).emoji}</div> */}
                                   </div>
-                                 
+
                                   <div>{signupdata.email}</div>
                                   <div>{signupdata.website} </div>
                                   <div>
                                     {signupdata.gstNumber == ''
-                                    ?
-                                  ""
-                                  :
-                                  `${signupdata.TaxName } ${signupdata.gstNumber}`
-                                  }
-                                    
-                                    
-                                    </div>
+                                      ?
+                                      ""
+                                      :
+                                      `${signupdata.TaxName} ${signupdata.gstNumber}`
+                                    }
+
+
+                                  </div>
 
                                 </address>
                               </div>
@@ -1701,22 +1783,22 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                   </div>
                                   <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(invoiceData.duedate)}</div>
                                 </div> */}
-                                
 
-                                  {
-                                    invoiceData.job == "" ||  invoiceData.job == null
+
+                                {
+                                  invoiceData.job == "" || invoiceData.job == null
                                     ?
                                     ""
                                     :
                                     <div className='row text-md-end'>
-                                    <div className='col-6 col-md'>
-                                    <strong>Job</strong>
-                                  </div>
-                                  <div className='col-6 col-md invoice-detail-right'>{invoiceData.job}</div>
-                                  </div>
-                                  }
-                                 
-                               
+                                      <div className='col-6 col-md'>
+                                        <strong>Job</strong>
+                                      </div>
+                                      <div className='col-6 col-md invoice-detail-right'>{invoiceData.job}</div>
+                                    </div>
+                                }
+
+
 
                               </div>
                             </div>
@@ -1768,36 +1850,36 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                       <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.subtotal)}</td>
                                     </tr>
                                     {
-                                      invoiceData.discountTotal > 0 
-                                      ?
+                                      invoiceData.discountTotal > 0
+                                        ?
                                         <tr>
                                           <td className='text-md-end' width="22%">Discount</td>
                                           <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.discountTotal)}</td>
                                         </tr>
-                                      :
+                                        :
                                         null
                                     }
-                                    
 
-                                     
-                                      {
-                                      signupdata.taxPercentage == 0 
-                                      ?
-                                      <tr></tr>
-                                      :
-                                      <tr>
-                                      <td className='text-md-end' width="22%">
-                                      {signupdata.TaxName} ({signupdata.taxPercentage}%)
-                                      
-                                      </td>
-                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.tax)}</td>
-                                      </tr>
-                                      }
-                                        
-                                        
-                                       
-                                      
-                                   
+
+
+                                    {
+                                      signupdata.taxPercentage == 0
+                                        ?
+                                        <tr></tr>
+                                        :
+                                        <tr>
+                                          <td className='text-md-end' width="22%">
+                                            {signupdata.TaxName} ({signupdata.taxPercentage}%)
+
+                                          </td>
+                                          <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.tax)}</td>
+                                        </tr>
+                                    }
+
+
+
+
+
                                     <tr>
 
                                       <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
@@ -1827,33 +1909,33 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                             </div>
                           </div>
 
-                          {invoiceData.isAddSignature || invoiceData.isCustomerSign  ? 
+                          {invoiceData.isAddSignature || invoiceData.isCustomerSign ?
                             <div className="invoice-body">
                               <p>By signing this document, the customer agrees to the services and conditions described in this document.</p>
                               <div className="row">
-                                  
-                                    {ownerData && invoiceData.isAddSignature && (
-                                      <div className="col-6">
-                                      <div className="my-2">
-                                        <div>
-                                          <p className='text-center fw-bold fs-5'>{ownerData.companyname}</p>
-                                          <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr/>
-                                          <p className='text-center'>{formatCustomDate(invoiceData.createdAt)}</p>
-                                        </div>
-                                      </div>
-                                      </div>
-                                    )}
+
+                                {ownerData && invoiceData.isAddSignature && (
                                   <div className="col-6">
                                     <div className="my-2">
                                       <div>
-                                        <p className='text-center fw-bold fs-5'>{invoiceData.customername}</p>
-                                        {signatureData != null ? 
-                                          signatureData.customersign== '' ? (''):
-                                            (<div className="signature-section">
-                                              <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr/>
-                                              <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
-                                            </div>):''}
-                                        {/* {signatureData ? (
+                                        <p className='text-center fw-bold fs-5'>{ownerData.companyname}</p>
+                                        <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr />
+                                        <p className='text-center'>{formatCustomDate(invoiceData.createdAt)}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                )}
+                                <div className="col-6">
+                                  <div className="my-2">
+                                    <div>
+                                      <p className='text-center fw-bold fs-5'>{invoiceData.customername}</p>
+                                      {signatureData != null ?
+                                        signatureData.customersign == '' ? ('') :
+                                          (<div className="signature-section">
+                                            <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr />
+                                            <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
+                                          </div>) : ''}
+                                      {/* {signatureData ? (
                                             <div className="signature-section">
                                               <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr/>
                                               <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
@@ -1861,17 +1943,17 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                           ) : (
                                             ''
                                           )} */}
-                                      </div>
                                     </div>
                                   </div>
+                                </div>
                               </div>
-                              
-                            </div>: ''
+
+                            </div> : ''
                           }
 
                           <div className='invoice-body invoice-body-text'>
                             <div className='mt-1'>
-                              <span>{invoiceData.information == '' ? '' : 'Note:'}</span> 
+                              <span>{invoiceData.information == '' ? '' : 'Note:'}</span>
                               <div className='information-content' dangerouslySetInnerHTML={{ __html: invoiceData.information }} />
 
                             </div>
@@ -1931,6 +2013,9 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                                               </a> */}
                             <a className='greenclr pointer mb-3' data-bs-toggle="modal" data-bs-target="#exampleModal1">
                               View Transactions
+                            </a>
+                            <a className='greenclr pointer mb-3' data-bs-toggle="modal" data-bs-target="#exampleModal2">
+                              Job Transactions
                             </a>
                             <a className='greenclr pointer' data-bs-toggle="modal" data-bs-target="#exampleModal">
                               Mark paid
@@ -2032,7 +2117,7 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
                     </div>
                     <div className="col-3">
                       <button data-bs-dismiss="modal" type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteTransClick(transaction._id)}>
-                          <i className="fas fa-trash"></i>
+                        <i className="fas fa-trash"></i>
                       </button>
                     </div>
                   </div><hr />
@@ -2046,6 +2131,137 @@ const handleRemove = async (invoiceid, invoiceIdpass) => {
         </div>
 
       </div>
+
+      <div className="modal fade" id="exampleModal2" tabIndex="-1" ref={modalRef} aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-xl modal-dialog-scrollable">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title fs-5" id="exampleModalLabel">View Entries</h1>
+              <button type="button" className="btn-close" id="closebutton" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div className="modal-body">
+              {/* Table */}
+              <table className="table table-striped table-bordered">
+                <thead className="table-dark text-center">
+                  <tr>
+                    <th scope="col">DATE</th>
+                    <th scope="col">CATEGORY</th>
+
+                    <th scope="col">VENDOR</th>
+                    <th scope="col">STATUS</th>
+                    <th scope="col">BILL LINK</th>
+                    <th scope="col">TYPE</th>
+                    <th scope="col">AMOUNT</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {expenseTransactions.map((transaction) => (
+                    <tr key={transaction._id} className="text-center align-middle">
+                      <td>{formatCustomDate(transaction.expenseDate)}</td>
+                      <td>{getExpenseTypeName(transaction.expenseType || "N/A")}</td>
+
+                      <td>{getVendorName(transaction.vendor || "N/A")}</td>
+                      <td>{transaction.paymentStatus}</td>
+                      <td>
+                        {transaction.receiptUrl ? (
+                          <a
+                            href={transaction.receiptUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View Bill
+                          </a>
+                        ) : (
+                          "N/A"
+                        )}
+                      </td>
+                      <td>{transaction.transactionType}</td>
+                      <td>
+                        <CurrencySign />
+                        {transaction.amount}
+                      </td>
+
+                    </tr>
+                  ))}
+                </tbody>
+                <tfoot>
+                  {/* Footer row to show sums */}
+                  <tr>
+                    <td colSpan="7"></td>
+                  </tr>
+
+                  <tr className="text-center align-middle">
+                    <td colSpan="5">
+
+                    </td>
+                    <td colSpan="">
+                      <strong>Total Invoice Bill</strong>
+                    </td>
+                    <td>
+                      <strong>
+                        <CurrencySign />
+                        {roundOff(invoiceData.total)}
+                      </strong>
+                    </td>
+
+                  </tr>
+                  <tr className="text-center align-middle">
+                    <td colSpan="5">
+
+                    </td>
+                    <td colSpan="">
+                      <strong>Total Expense Transactions</strong>
+                    </td>
+                    <td>
+                      <strong>
+                        <CurrencySign />
+                        {
+          // Filter transactions with "Expense" type and sum their amounts
+          expenseTransactions.filter(transaction => transaction.transactionType === 'Expense')
+            .reduce((sum, transaction) => sum + transaction.amount, 0)
+        }
+                      </strong>
+                    </td>
+
+                  </tr>
+                  <tr className="text-center align-middle">
+                    <td colSpan="5">
+
+                    </td>
+                    <td colSpan="">
+                      <strong>Remaining Amount</strong>
+                    </td>
+                    <td colSpan="">
+                      <strong>
+                        <CurrencySign />
+                        {
+          // Subtract the sum of "Expense" transactions from the total invoice amount
+          roundOff(
+            invoiceData.total -
+            expenseTransactions.filter(transaction => transaction.transactionType === 'Expense')
+              .reduce((sum, transaction) => sum + transaction.amount, 0)
+          )
+        }
+                      </strong>
+                    </td>
+
+                  </tr>
+                </tfoot>
+              </table>
+            </div>
+            <div className="modal-footer">
+              <a
+                data-bs-dismiss="modal"
+                className="pointer text-decoration-none text-dark"
+              >
+                Close
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
 
       {/* email model  */}
       <div class="modal fade" id="sendEmailModal" tabindex="-1" ref={modalRef} aria-labelledby="exampleModalLabel" aria-hidden="true">

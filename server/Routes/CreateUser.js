@@ -4132,7 +4132,7 @@ router.get('/getUserPreferences/:userid', async (req, res) => {
 // Create a new expense
 router.post('/expense', async (req, res) => {
     try {
-        const { invoiceId, vendor, expenseType,transactionType,paymentStatus, amount, description, receiptUrl } = req.body;
+        const { invoiceId, vendor, expenseType,expenseDate ,transactionType,paymentStatus, amount, description, receiptUrl } = req.body;
 
         // Check if the invoice exists
         const invoice = await Invoice.findById(invoiceId);
@@ -4145,6 +4145,7 @@ router.post('/expense', async (req, res) => {
             invoiceId,
             vendor,
             expenseType,
+            expenseDate ,
             amount,
             transactionType,
             description,

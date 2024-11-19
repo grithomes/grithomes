@@ -3,6 +3,7 @@ const { Schema } = mongoose;
 
 // Define schema for individual expense entries
 const ExpenseSchema = new Schema({
+    
     invoiceId: { // Reference to the associated invoice
         type: Schema.Types.ObjectId,
         ref: 'Invoice',
