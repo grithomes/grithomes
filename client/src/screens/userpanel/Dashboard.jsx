@@ -364,8 +364,18 @@ const handleOverdue = () => {
                   <div className='box1 rounded adminborder py-4 px-4 m-2 '>
                     <p className='fs-6 fw-bold'>PAYMENTS RECEIVED</p>
                     <p className='fs-3 fw-bold'><CurrencySign />{roundOff(totalInvoiceAmount)}</p>
-                    <p className='fs-6 fw-bold'>TOTAL EXPENSE</p>
-                    <p className='fs-3 fw-bold'><CurrencySign />{roundOff(totalExpense)}</p>
+                    <div className='d-flex'>
+                      <div className='pe-2'>
+                    <p className='fs-6 m-0'>TOTAL EXPENSE</p>
+                    <p className='fs-6 fw-bold'><CurrencySign />{roundOff(totalExpense)}</p>
+                    </div>
+                    
+                    <div className='ps-2'>
+                    <p className='fs-6 m-0'>TOTAL PROFIT</p>
+                    <p className='fs-6 fw-bold'><CurrencySign />{roundOff(totalInvoiceAmount - totalExpense)}</p>
+                    </div>
+                    </div>
+                    
                     {/* <p className='fs-3 fw-bold'><CurrencySign /></p> */}
                     <div className='d-flex'>
                       <p className='pe-3'><span className='text-primary'>Paid</span> <CurrencySign />{roundOff(totalPaymentsReceived)}</p>
