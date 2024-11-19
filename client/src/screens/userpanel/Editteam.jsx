@@ -30,7 +30,7 @@ export default function Editteam() {
     const fetchteamData = async () => {
         try {
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.comapi/getteamdata/${teamid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/getteamdata/${teamid}`, {
                 headers: {
                   'Authorization': authToken,
                 }
@@ -64,7 +64,7 @@ export default function Editteam() {
                 ...team
             };
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.comapi/updateteamdata/${teamid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/updateteamdata/${teamid}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

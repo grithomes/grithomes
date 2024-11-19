@@ -149,7 +149,7 @@ export default function Createestimate() {
         if (event.target.checked) {
             try {
                 const ownerId = localStorage.getItem('userid');
-                const response = await fetch(`https://grithomes.onrender.comapi/check-signature/${ownerId}`);
+                const response = await fetch(`https://grithomes.onrender.com/api/check-signature/${ownerId}`);
                 const data = await response.json();
                 setHasSignature(data.hasSignature);
 
@@ -187,7 +187,7 @@ export default function Createestimate() {
             const ownerId = localStorage.getItem('userid');
             const email = localStorage.getItem('userEmail');
             const companyname = localStorage.getItem('companyname');
-            await fetch('https://grithomes.onrender.comapi/ownersignature', {
+            await fetch('https://grithomes.onrender.com/api/ownersignature', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ export default function Createestimate() {
         try {
             const userid = localStorage.getItem('userid');
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.comapi/lastEstimateNumber/${userid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -246,7 +246,7 @@ export default function Createestimate() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.comapi/customers/${userid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -276,7 +276,7 @@ export default function Createestimate() {
         try {
           const userid = localStorage.getItem("userid");
           const authToken = localStorage.getItem('authToken');
-          const response = await fetch(`https://grithomes.onrender.comapi/getsignupdata/${userid}`, {
+          const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
             headers: {
               'Authorization': authToken,
             }
@@ -308,7 +308,7 @@ export default function Createestimate() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.comapi/itemdata/${userid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -625,7 +625,7 @@ export default function Createestimate() {
             console.log(data,"Data sdsdfsdsfsdf");
 
             // Sending estimate data to the backend API
-            const response = await fetch('https://grithomes.onrender.comapi/savecreateestimate', {
+            const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -734,7 +734,7 @@ export default function Createestimate() {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
         const authToken = localStorage.getItem('authToken');
-        const response = await fetch('https://grithomes.onrender.comapi/addcustomer', {
+        const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

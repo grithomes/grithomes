@@ -18,7 +18,7 @@ export default function Vendor() {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertMessageShow, setAlertMessageShow] = useState(false);
 
-    const apiURL = 'https://grithomes.onrender.comapi/vendor';
+    const apiURL = 'https://grithomes.onrender.com/api/vendor';
 
     // Fetch all vendors on component mount
     useEffect(() => {

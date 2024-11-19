@@ -25,9 +25,9 @@ export default function ExpenseEntries() {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertMessageShow, setAlertMessageShow] = useState(false);
 
-    const apiURL = 'https://grithomes.onrender.comapi/expense';
-    const expenseTypeURL = 'https://grithomes.onrender.comapi/expensetype';
-    const vendorURL = 'https://grithomes.onrender.comapi/vendor';
+    const apiURL = 'https://grithomes.onrender.com/api/expense';
+    const expenseTypeURL = 'https://grithomes.onrender.com/api/expensetype';
+    const vendorURL = 'https://grithomes.onrender.com/api/vendor';
     const [showModal, setShowModal] = useState(false); // State to manage modal visibility
     const [fileName, setFileName] = useState('');
     const [isUploading, setIsUploading] = useState(false);
@@ -80,7 +80,7 @@ export default function ExpenseEntries() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.comapi/invoicedata/${userid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/invoicedata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }

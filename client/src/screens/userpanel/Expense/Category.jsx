@@ -14,7 +14,7 @@ export default function ExpenseType() {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertmessageShow, setAlertmessageShow] = useState('');
 
-    const apiURL = 'https://grithomes.onrender.comapi/expensetype';
+    const apiURL = 'https://grithomes.onrender.com/api/expensetype';
 
     // Fetch all expense types on component mount
     useEffect(() => {
