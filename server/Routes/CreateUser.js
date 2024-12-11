@@ -4135,10 +4135,10 @@ router.post('/expense', async (req, res) => {
         const { invoiceId, vendor, expenseType,expenseDate ,transactionType,paymentStatus, amount, description, receiptUrl } = req.body;
 
         // Check if the invoice exists
-        const invoice = await Invoice.findById(invoiceId);
-        if (!invoice) {
-            return res.status(404).json({ error: 'Invoice not found' });
-        }
+        // const invoice = await Invoice.findById(invoiceId);
+        // if (!invoice) {
+        //     return res.status(404).json({ error: 'Invoice not found' });
+        // }
 
         // Create and save the expense
         const expense = new Expense({
