@@ -34,6 +34,7 @@ export default function ExpenseEntries() {
 
     const [filters, setFilters] = useState({
         transactionType: '',
+        vendor:'',
         expenseType: '',
         startDate: '',
         endDate: '',
@@ -106,6 +107,10 @@ export default function ExpenseEntries() {
         }
     };
 
+    const roundOff = (value) => {
+        return Math.round(value * 100) / 100;
+      };
+
     // Fetch all expense entries
     const fetchExpenseEntries = async () => {
         setLoading(true);
@@ -159,6 +164,8 @@ export default function ExpenseEntries() {
         try {
             const response = await fetch(vendorURL);
             const data = await response.json();
+            console.log(data,"ds");
+            
             setVendors(data);
         } catch (error) {
             console.error('Error fetching vendors:', error);
@@ -177,10 +184,10 @@ export default function ExpenseEntries() {
         const formData = new FormData();
         formData.append('file', file);
         formData.append('upload_preset', 'employeeApp');
-        formData.append('cloud_name', 'dxwge5g8f');
+        formData.append('cloud_name', 'dcldwaiyq');
 
         try {
-            const response = await fetch('https://api.cloudinary.com/v1_1/dxwge5g8f/image/upload', {
+            const response = await fetch('https://api.cloudinary.com/v1_1/dcldwaiyq/image/upload', {
                 method: 'POST',
                 body: formData,
             });
@@ -269,32 +276,21 @@ export default function ExpenseEntries() {
 
     // Handle edit
     const handleEdit = (expense) => {
+        console.log(expense,"ex---");
+        
         setFormData({
             _id: expense._id,
-            expenseDate: expense.expenseDate,
-            expenseType: expense.expenseType._id || null,
+            expenseDate: expense.expenseDate ? new Date(expense.expenseDate).toISOString().split('T')[0] : '',
+            expenseType: expense.expenseType || null,
             transactionType: expense.transactionType,
-            vendor: expense.vendor._id || null,
+            vendor: expense.vendor || null,
             amount: expense.amount,
             description: expense.description,
             paymentStatus: expense.paymentStatus,
             receiptUrl: expense.receiptUrl,
-            invoiceId: expense.invoiceId ? expense.invoiceId._id : '' || null, // Set invoiceId if it exists
+            invoiceId: expense.invoiceId, // Set invoiceId if it exists
         });
-        console.log(JSON.stringify({
-            _id: expense._id,
-            expenseDate: expense.expenseDate,
-            expenseType: expense.expenseType._id,
-            transactionType: expense.transactionType,
-            vendor: expense.vendor._id,
-            amount: expense.amount,
-            description: expense.description,
-            paymentStatus: expense.paymentStatus,
-            receiptUrl: expense.receiptUrl,
-            invoiceId: expense.invoiceId ? expense.invoiceId._id : '',
-        }, "sd Update"
-
-        ));
+      
 
         setShowModal(true);
     };
@@ -344,6 +340,13 @@ export default function ExpenseEntries() {
         if (filters.invoiceId && entry.invoiceId !== filters.invoiceId) {
             isValid = false;
         }
+
+        // Filter by vendor
+        if (filters.vendor && entry.vendor !== filters.vendor) {
+            isValid = false;
+        }
+        console.log(entry, filters,"filters");
+        
 
         return isValid;
     });
@@ -626,6 +629,23 @@ export default function ExpenseEntries() {
                                                                     ))}
                                                                 </select>
                                                             </div>
+                                                            <div className="mb-3 col-6">
+                                                                <label htmlFor="vendor" className="form-label">Select Vendor</label>
+
+                                                                {/* Vendor Filter */}
+                                                                <select
+                                                                    value={filters.vendor}
+                                                                    onChange={(e) => setFilters({ ...filters, vendor: e.target.value })}
+                                                                    className="form-control"
+                                                                >
+                                                                    <option value="">Select Vendor</option>
+                                                                    {vendors.map((vendor) => (
+                                                                        <option key={vendor._id} value={vendor._id}>
+                                                                            {vendor.name}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                            </div>
                                                         </div>
                                                     </div>
                                                     <table className="table">
@@ -666,7 +686,7 @@ export default function ExpenseEntries() {
                                                                         }}
                                                                     >
                                                                         {entry.transactionType === "Expense" ? " - " : " + "}
-                                                                        <CurrencySign /> {entry.amount}
+                                                                        <CurrencySign /> {roundOff(entry.amount)}
                                                                     </td>
                                                                     <td>{getInvoiceName(entry.invoiceId)}</td>
                                                                     <td>{entry.transactionType === "Credit" ? "" : getVendorName(entry.vendor)}</td>
@@ -700,7 +720,7 @@ export default function ExpenseEntries() {
                                                                     <CurrencySign />
                                                                     {filteredExpenseEntries
                                                                         .filter(entry => entry.transactionType === "Expense")
-                                                                        .reduce((total, entry) => total + entry.amount, 0)}
+                                                                        .reduce((total, entry) => roundOff(total + entry.amount), 0)}
                                                                 </td>
                                                                 <td colSpan="5"></td>
                                                             </tr>

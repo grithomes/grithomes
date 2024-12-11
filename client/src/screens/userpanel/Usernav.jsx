@@ -91,6 +91,11 @@ export default function Usernav() {
                       </div>
                       {dropdownOpen.documents && (
                         <ul className="dropdown-list">
+                           <li>
+                            <Link to="/userpanel/Expense" className='nav-link text-black'>
+                              <img src={dollar} width="24px" height='24px' /> <span className='ps-2'>Expense Entry</span>
+                            </Link>
+                          </li>
                           <li>
                             <Link to="/userpanel/Category" className='nav-link text-black'>
                               <img src={dollar} width="24px" height='24px' /> <span className='ps-2'>Category</span>
