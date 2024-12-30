@@ -4405,5 +4405,138 @@ router.delete('/vendor/:id', async (req, res) => {
 });
 
 
+//Team Entry edit
+
+router.get('/userEntries/:userid', async (req, res) => {
+    try {
+        const { userid } = req.params;
+        let authtoken = req.headers.authorization;
+
+        // Verify JWT token
+        const decodedToken = jwt.verify(authtoken, jwrsecret);
+        console.log(decodedToken);
+        const userEntries = await Timeschema.find({ userid }).sort({ startTime: 1 });
+
+        if (userEntries) {
+            res.json({ userEntries });
+        } else {
+            res.status(404).json({ message: 'No entries found for this user' });
+        }
+    } catch (error) {
+        console.error(error);
+        // Handle token verification errors
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+        // Handle other errors
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+// Update time entry
+router.put('/userEntries/:entryId', async (req, res) => {
+    try {
+        const { entryId } = req.params;
+        const { startTime, endTime } = req.body;
+        const authToken = req.headers.authorization;
+
+        // Verify JWT token
+        const decodedToken = jwt.verify(authToken, jwrsecret);
+
+        if (!decodedToken) {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+
+        // Update the entry in the database
+        const updatedEntry = await Timeschema.findByIdAndUpdate(
+            entryId,
+            { startTime, endTime },
+            { new: true } // Return the updated document
+        );
+
+        if (!updatedEntry) {
+            return res.status(404).json({ message: 'Entry not found' });
+        }
+
+        // Recalculate totalTime and timeInSeconds
+        const start = new Date(startTime).getTime();
+        const end = new Date(endTime).getTime();
+        const timeInSeconds = Math.floor((end - start) / 1000);
+
+        updatedEntry.timeInSeconds = timeInSeconds;
+
+        const hours = Math.floor(timeInSeconds / 3600);
+        const minutes = Math.floor((timeInSeconds % 3600) / 60);
+        const seconds = timeInSeconds % 60;
+
+        updatedEntry.totalTime = `${hours} hours ${minutes} minutes ${seconds} seconds`;
+
+        await updatedEntry.save();
+
+        res.json({ message: 'Time updated successfully', updatedEntry });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
+// Update an entry
+router.put('/userEntriesUpdate/:entryId', async (req, res) => {
+    try {
+        const entryId = req.params.entryId; // Extract entry ID from the URL
+        const updatedData = req.body; // The updated fields from the frontend
+
+        // Update the entry in the database
+        const updatedEntry = await Timeschema.findByIdAndUpdate(
+            entryId,
+            updatedData,
+            { new: true } // Return the updated document
+        );
+
+        if (updatedEntry) {
+            res.json({ success: true, message: 'Entry updated successfully', updatedEntry });
+        } else {
+            res.status(404).json({ success: false, message: 'Entry not found' });
+        }
+    } catch (error) {
+        console.error('Error updating entry:', error);
+        res.status(500).json({ success: false, message: 'Failed to update entry' });
+    }
+});
+
+
+// Delete a category
+router.delete('/userEntries/:entryId', async (req, res) => {
+    try {
+        const entryId = req.params.entryId;
+        const result = await Timeschema.findByIdAndDelete(entryId);
+        if (result) {
+            res.json({ success: true, message: 'Entry deleted successfully' });
+        } else {
+            res.status(404).json({ success: false, message: 'Entry not found' });
+        }
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        res.status(500).json({ success: false, message: 'Failed to delete category' });
+    }
+});
+
+
+router.get('/allEntries', async (req, res) => {
+    try {
+        const allEntries = await Timeschema.find().sort({ startTime: 1 });
+
+        if (allEntries && allEntries.length > 0) {
+            res.json({ allEntries });
+        } else {
+            res.status(404).json({ message: 'No entries found' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 
 module.exports = router;
