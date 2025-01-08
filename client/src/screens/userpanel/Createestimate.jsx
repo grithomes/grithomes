@@ -602,9 +602,9 @@ export default function Createestimate() {
 
             const data = {
                 userid: userid,
-                customername: estimateData.customername,
-                customeremail: estimateData.customeremail,
-                customerphone: estimateData.customerphone,
+                customername: selectedCustomer.customername,
+                customeremail: selectedCustomer.customeremail,
+                customerphone: selectedCustomer.customerphone,
                 estimate_id: estimateData.estimate_id,
                 EstimateNumber: estimateData.EstimateNumber,
                 purchaseorder: estimateData.purchaseorder,
