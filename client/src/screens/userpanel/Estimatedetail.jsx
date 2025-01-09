@@ -746,32 +746,38 @@ thead{
     setShowEmailAlert(false); // Close the alert
   };
 
-  const convertToPdf = async () => {
+ const convertToPdf = async () => {
     console.log("Convert to PDF");
     try {
-      const content = document.getElementById('invoiceContent').outerHTML;
+        const content = document.getElementById('invoiceContent');
+        
+        // Temporarily make the content visible
+        content.style.display = 'block';
 
-      const opt = {
-        filename: 'Estimate.pdf',
-        html2canvas: {
-          scale: 2, // Improves rendering quality
-          useCORS: true,
-          scrollX: 0,
-          scrollY: 0,
-        },
-        image: { type: 'jpeg', quality: 0.98 },
-        jsPDF: {
-          unit: 'mm',
-          format: 'a4',
-          orientation: 'portrait',
-        },
-      };
+        const opt = {
+            filename: 'Estimate.pdf',
+            html2canvas: {
+                scale: 2, // Improves rendering quality
+                useCORS: true,
+                scrollX: 0,
+                scrollY: 0,
+            },
+            image: { type: 'jpeg', quality: 0.98 },
+            jsPDF: {
+                unit: 'mm',
+                format: 'a4',
+                orientation: 'portrait',
+            },
+        };
 
-      await html2pdf().from(content).set(opt).save();
+        await html2pdf().from(content).set(opt).save();
+
+        // Re-hide the content after generating the PDF
+        content.style.display = 'none';
     } catch (error) {
-      console.error('Error generating PDF:', error);
+        console.error('Error generating PDF:', error);
     }
-  };
+};
 
   const generatePdfFromHtml = async () => {
     return new Promise((resolve, reject) => {
