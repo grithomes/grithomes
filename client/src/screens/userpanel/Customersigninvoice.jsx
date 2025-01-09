@@ -1009,6 +1009,18 @@ console.log(offset);
                                       <td className='text-md-end' width="22%">Subtotal</td>
                                       <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData?.subtotal || '')}</td>
                                     </tr>
+
+                                    {
+                                  estimateData.tax > 0
+                                    ?
+                                    <tr>
+                                      <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%) </td>
+                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.tax)}</td>
+                                    </tr>
+                                    :
+                                    null
+                                }
+                                
                                     {
                                       invoiceData.discountTotal > 0 
                                       ?
@@ -1019,6 +1031,12 @@ console.log(offset);
                                       :
                                         null
                                     }
+                                    <tr>
+
+
+<td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
+<td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{roundOff(invoiceData.total)}</td>
+</tr>
                                     <tr>
                                     </tr>
                                     {transactions.map((transaction) => (
