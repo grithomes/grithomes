@@ -746,7 +746,7 @@ thead{
     setShowEmailAlert(false); // Close the alert
   };
 
- const convertToPdf = async () => {
+  const convertToPdf = async () => {
     console.log("Convert to PDF");
     try {
       const content = document.getElementById('invoiceContent').outerHTML;
