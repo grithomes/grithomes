@@ -2195,6 +2195,7 @@ router.post('/converttoinvoice/:estimateid', async (req, res) => {
                 items: estimate.items,
                 discountTotal: estimate.discountTotal,
                 subtotal: estimate.subtotal,
+                job: estimate.job,
                 total: estimate.total,
                 userid: estimate.userid,
                 information: estimate.information,
