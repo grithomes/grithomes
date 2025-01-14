@@ -389,6 +389,61 @@ router.get('/getemailsignupdata/:userid', async (req, res) => {
     }
 });
 
+// Transactions API
+router.get('/allTransactions', async (req, res) => {
+    try {
+        // Fetch all transactions from the Transactions collection
+        const allTransactions = await Transactions.find();
+
+        // Check if any transactions are found
+        if (allTransactions && allTransactions.length > 0) {
+            // Respond with JSON containing all transactions
+            res.json({ transactions: allTransactions });
+        } else {
+            // If no transactions found, respond with 404 status and a message
+            res.status(404).json({ message: 'No transactions found' });
+        }
+    } catch (error) {
+        // If an error occurs during the database operation, log it and respond with a 500 status
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+router.get('/deltransaction/:transactionid', async (req, res) => {
+    try {
+        const transactionid = req.params.transactionid;
+        let authtoken = req.headers.authorization;
+
+        // Verify JWT token
+        const decodedToken = jwt.verify(authtoken, jwrsecret);
+        console.log(decodedToken);
+
+        const result = await Transactions.findByIdAndDelete(transactionid);
+
+        if (result) {
+            res.json({
+                Success: true,
+                message: "teammember deleted successfully"
+            });
+        } else {
+            res.status(404).json({
+                Success: false,
+                message: "teammember not found"
+            });
+        }
+    } catch (error) {
+        console.error(error);
+        // Handle token verification errors
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+        // Handle other errors
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
+
+
 router.get('/currentMonthReceivedAmount/:userId', async (req, res) => {
     try {
         const userId = req.params.userId;
