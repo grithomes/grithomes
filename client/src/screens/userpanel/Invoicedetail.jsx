@@ -792,13 +792,6 @@ export default function Invoicedetail() {
     }
 };
 
-
-
-    } catch (error) {
-      console.error('Error adding payment:', error);
-    }
-  };
-
   const handlePrintContent = async () => {
     const content = document.getElementById('invoiceContent').innerHTML;
     const printWindow = window.open('', '_blank');
