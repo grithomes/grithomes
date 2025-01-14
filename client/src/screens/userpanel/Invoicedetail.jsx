@@ -709,7 +709,7 @@ export default function Invoicedetail() {
     return date.toLocaleDateString('en-US', options);
   };
 
-  const handleAddPayment = async () => {
+ const handleAddPayment = async () => {
     if (isSubmitting) return; // Prevent multiple clicks
     setIsSubmitting(true); // Set loading state
 
@@ -717,9 +717,10 @@ export default function Invoicedetail() {
         const userid = localStorage.getItem("userid");
         const authToken = localStorage.getItem('authToken');
 
+        // Validation checks
         if (transactionData.paidamount === '') {
             setpaidamounterror("Fill detail");
-            setIsSubmitting(false); // Reset loading state
+            setIsSubmitting(false);
             return;
         } else {
             setpaidamounterror("");
@@ -727,7 +728,7 @@ export default function Invoicedetail() {
 
         if (transactionData.paiddate === '') {
             setpaiddateerror("Fill detail");
-            setIsSubmitting(false); // Reset loading state
+            setIsSubmitting(false);
             return;
         } else {
             setpaiddateerror("");
@@ -735,7 +736,7 @@ export default function Invoicedetail() {
 
         if (transactionData.method === '') {
             setmethoderror("Fill detail");
-            setIsSubmitting(false); // Reset loading state
+            setIsSubmitting(false);
             return;
         } else {
             setmethoderror("");
@@ -752,7 +753,7 @@ export default function Invoicedetail() {
 
         if (paymentAmount > dueAmount) {
             setexceedpaymenterror("Payment amount exceeds the amount.");
-            setIsSubmitting(false); // Reset loading state
+            setIsSubmitting(false);
             return;
         } else {
             setexceedpaymenterror("");
@@ -777,8 +778,31 @@ export default function Invoicedetail() {
         if (response.ok) {
             const responseData = await response.json();
             if (responseData.success) {
-                // Update logic for successful payment addition...
                 console.log('Payment added successfully!');
+
+                // Update the transaction data and invoice state locally
+                const newTransaction = responseData.transaction;
+                const updatedTransactions = [...transactions, newTransaction];
+
+                const totalPaid = updatedTransactions.reduce(
+                    (total, payment) => total + parseFloat(payment.paidamount),
+                    0
+                );
+
+                const updatedAmountDue = invoiceData.total - totalPaid;
+
+                setTransactions(updatedTransactions); // Update transactions list
+                setInvoiceData({
+                    ...invoiceData,
+                    amountdue: updatedAmountDue,
+                    status: updatedAmountDue === 0 ? "Paid" : "Partially Paid",
+                });
+
+                // Close the modal
+                document.getElementById('closebutton').click();
+                if (modalRef.current) {
+                    modalRef.current.hide();
+                }
             } else {
                 console.error('Failed to add payment.');
             }
@@ -791,6 +815,7 @@ export default function Invoicedetail() {
         setIsSubmitting(false); // Reset loading state
     }
 };
+
 
   const handlePrintContent = async () => {
     const content = document.getElementById('invoiceContent').innerHTML;
