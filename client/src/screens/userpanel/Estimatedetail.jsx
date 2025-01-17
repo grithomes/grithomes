@@ -904,7 +904,6 @@ thead{
                           {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
                           <div className=''>{signupdata.state ? JSON.parse(signupdata.country).name : ' '}</div>
                           <div ><a className='text-decoration-none' href={`mailto:${signupdata.email}`}>{signupdata.email}</a></div>
-                          <div ><a className='text-decoration-none' href='https://www.instagram.com/immaculate.homes'>https://www.instagram.com/immaculate.homes</a></div>
                           <div ><a className='text-decoration-none' href={`${signupdata.website}`}>{signupdata.website}</a></div>
                           <div>
                             {signupdata.gstNumber == ''

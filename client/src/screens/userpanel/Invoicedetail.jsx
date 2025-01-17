@@ -18,6 +18,7 @@ export default function Invoicedetail() {
   const modalRefemail = useRef(null);
   const [items, setitems] = useState([]);
   const location = useLocation();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [selectedinvoices, setselectedinvoices] = useState(null);
   const [invoiceData, setInvoiceData] = useState({
     customername: '', itemname: '', customeremail: '', customerphone: '', InvoiceNumber: '', purchaseorder: '',
@@ -708,171 +709,113 @@ export default function Invoicedetail() {
     return date.toLocaleDateString('en-US', options);
   };
 
-  const handleAddPayment = async () => {
-    // const invoiceid = 'your-invoice-id'; 
-    const userid = localStorage.getItem("userid");
-    const authToken = localStorage.getItem('authToken');
-    // Check for errors
-    if (transactionData.paidamount === '') {
-      setpaidamounterror("Fill detail");
-      return; // Exit the function early if there's an error
-    } else {
-      setpaidamounterror(""); // Clear the error if the field is filled
-    }
+ const handleAddPayment = async () => {
+    if (isSubmitting) return; // Prevent multiple clicks
+    setIsSubmitting(true); // Set loading state
 
-    if (transactionData.paiddate === '') {
-      setpaiddateerror("Fill detail");
-      return;
-    } else {
-      setpaiddateerror("");
-    }
-
-    if (transactionData.method === '') {
-      setmethoderror("Fill detail");
-      return;
-    } else {
-      setmethoderror("");
-    }
-    // Fetch updated transaction data after payment addition
-    await fetchtransactiondata();
-
-
-    // Calculate total paid amount from transactions
-    // const totalPaidAmount = transactions.reduce((total, payment) => total + payment.paidamount, 0);
-    const totalPaidAmount = transactions.reduce(
-      (total, payment) => total + parseFloat(payment.paidamount),
-      0
-    );
-    // Check if the paid amount exceeds the due amount
-    const dueAmount = invoiceData.total - totalPaidAmount;
-    const paymentAmount = parseFloat(transactionData.paidamount);
-
-    if (paymentAmount > dueAmount) {
-      console.error('Payment amount exceeds the due amount.');
-      setexceedpaymenterror("Payment amount exceeds the amount.");
-      return;
-    } else {
-      setexceedpaymenterror("");
-    }
     try {
-      const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': authToken,
-        },
-        body: JSON.stringify({
-          paidamount: transactionData.paidamount,
-          paiddate: transactionData.paiddate,
-          method: transactionData.method,
-          note: transactionData.note,
-          userid: userid,
-          invoiceid: invoiceid,
-        }),
-      });
+        const userid = localStorage.getItem("userid");
+        const authToken = localStorage.getItem('authToken');
 
-      if (response.status === 401) {
-        const responseData = await response.json();
-        fetchExpensetransactiondata();
-        setAlertMessage(responseData.message);
-        setloading(false);
-        window.scrollTo(0, 0);
-        return; // Stop further execution
-      }
-      else {
-        if (response.ok) {
-          const responseData = await response.json();
-          if (responseData.success) {
-            console.log(responseData, 'Payment added successfully!');
-            console.log(roundOff(invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0) - responseData.transaction.paidamount), 'invoiceData');
-            // Fetch updated transaction data after payment addition
-
-            const setamountDue = roundOff(invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0) - responseData.transaction.paidamount)
-            console.log("setamountDue: ==============", setamountDue);
-
-
-            const updatedData = {
-
-              ...invoiceData,
-              amountdue: setamountDue,
-              status: `${setamountDue == 0
-                ?
-                "Paid"
-                :
-                "Partially Paid"
-                }`
-
-
-            }; // Update emailsent status
-            await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authToken,
-              },
-              body: JSON.stringify(updatedData),
-            });
-            // Add new expense
-            await fetch('https://grithomes.onrender.com/api/expense', {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authToken,
-              },
-              body: JSON.stringify({
-                expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
-                expenseType: null, // Specify the type of expense
-                vendor: null, // Specify the vendor
-                amount: transactionData.paidamount,
-                description: '', // Add a description if needed
-                paymentStatus: 'Paid',
-                transactionType: 'Credit',
-                receiptUrl: '', // If there's a receipt URL, provide it here
-                invoiceId: invoiceData._id,
-              }),
-            });
-
-
-            console.log(
-              JSON.stringify({
-                expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
-                expenseType: null, // Specify the type of expense
-                vendor: null, // Specify the vendor
-                amount: transactionData.paidamount,
-                description: '', // Add a description if needed
-                paymentStatus: 'Paid',
-                transactionType: 'Credit',
-                receiptUrl: '', // If there's a receipt URL, provide it here
-                invoiceId: invoiceData._id,
-              }),
-            );
-
-            await fetchtransactiondata();
-
-            // Calculate total paid amount from transactions
-            const totalPaidAmount = transactions.reduce((total, payment) => total + payment.paidamount, 0);
-
-            // Update amount due by subtracting totalPaidAmount from total invoice amount
-            const updatedAmountDue = invoiceData.total - totalPaidAmount;
-            setInvoiceData({ ...invoiceData, amountdue: updatedAmountDue });
-            // Close the modal after adding payment
-            document.getElementById('closebutton').click();
-            if (modalRef.current) {
-              modalRef.current.hide();
-            }
-          } else {
-            console.error('Failed to add payment.');
-          }
+        // Validation checks
+        if (transactionData.paidamount === '') {
+            setpaidamounterror("Fill detail");
+            setIsSubmitting(false);
+            return;
         } else {
-          console.error('Failed to add payment.');
+            setpaidamounterror("");
         }
-      }
 
+        if (transactionData.paiddate === '') {
+            setpaiddateerror("Fill detail");
+            setIsSubmitting(false);
+            return;
+        } else {
+            setpaiddateerror("");
+        }
 
+        if (transactionData.method === '') {
+            setmethoderror("Fill detail");
+            setIsSubmitting(false);
+            return;
+        } else {
+            setmethoderror("");
+        }
+
+        await fetchtransactiondata();
+
+        const totalPaidAmount = transactions.reduce(
+            (total, payment) => total + parseFloat(payment.paidamount),
+            0
+        );
+        const dueAmount = invoiceData.total - totalPaidAmount;
+        const paymentAmount = parseFloat(transactionData.paidamount);
+
+        if (paymentAmount > dueAmount) {
+            setexceedpaymenterror("Payment amount exceeds the amount.");
+            setIsSubmitting(false);
+            return;
+        } else {
+            setexceedpaymenterror("");
+        }
+
+        const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken,
+            },
+            body: JSON.stringify({
+                paidamount: transactionData.paidamount,
+                paiddate: transactionData.paiddate,
+                method: transactionData.method,
+                note: transactionData.note,
+                userid: userid,
+                invoiceid: invoiceid,
+            }),
+        });
+
+        if (response.ok) {
+            const responseData = await response.json();
+            if (responseData.success) {
+                console.log('Payment added successfully!');
+
+                // Update the transaction data and invoice state locally
+                const newTransaction = responseData.transaction;
+                const updatedTransactions = [...transactions, newTransaction];
+
+                const totalPaid = updatedTransactions.reduce(
+                    (total, payment) => total + parseFloat(payment.paidamount),
+                    0
+                );
+
+                const updatedAmountDue = invoiceData.total - totalPaid;
+
+                setTransactions(updatedTransactions); // Update transactions list
+                setInvoiceData({
+                    ...invoiceData,
+                    amountdue: updatedAmountDue,
+                    status: updatedAmountDue === 0 ? "Paid" : "Partially Paid",
+                });
+
+                // Close the modal
+                document.getElementById('closebutton').click();
+                if (modalRef.current) {
+                    modalRef.current.hide();
+                }
+            } else {
+                console.error('Failed to add payment.');
+            }
+        } else {
+            console.error('Failed to add payment.');
+        }
     } catch (error) {
-      console.error('Error adding payment:', error);
+        console.error('Error adding payment:', error);
+    } finally {
+        setIsSubmitting(false); // Reset loading state
     }
-  };
+};
+
 
   const handlePrintContent = async () => {
     const content = document.getElementById('invoiceContent').innerHTML;
@@ -2134,7 +2077,13 @@ thead{
               </div>
               <div class="modal-footer">
                 <a data-bs-dismiss="modal" className='pointer text-decoration-none text-dark'>Close</a>
-                <a className='greenclr ms-2 text-decoration-none pointer' onClick={handleAddPayment}>Add Payment</a>
+                <a
+    className={`greenclr ms-2 text-decoration-none pointer ${isSubmitting ? 'disabled' : ''}`}
+    onClick={!isSubmitting ? handleAddPayment : null}
+>
+    {isSubmitting ? 'Processing...' : 'Add Payment'}
+</a>
+                
               </div>
             </div>
           </div>
