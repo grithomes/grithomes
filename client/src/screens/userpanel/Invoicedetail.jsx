@@ -713,108 +713,174 @@ export default function Invoicedetail() {
     if (isSubmitting) return; // Prevent multiple clicks
     setIsSubmitting(true); // Set loading state
 
+    // const invoiceid = 'your-invoice-id'; 
+    const userid = localStorage.getItem("userid");
+    const authToken = localStorage.getItem('authToken');
+    // Check for errors
+    if (transactionData.paidamount === '') {
+      setpaidamounterror("Fill detail");
+      setIsSubmitting(false);
+      return; // Exit the function early if there's an error
+    } else {
+      setpaidamounterror(""); // Clear the error if the field is filled
+    }
+
+    if (transactionData.paiddate === '') {
+      setpaiddateerror("Fill detail");
+      setIsSubmitting(false);
+      return;
+    } else {
+      setpaiddateerror("");
+    }
+
+    if (transactionData.method === '') {
+      setmethoderror("Fill detail");
+      setIsSubmitting(false);
+      return;
+    } else {
+      setmethoderror("");
+    }
+    // Fetch updated transaction data after payment addition
+    await fetchtransactiondata();
+
+
+    // Calculate total paid amount from transactions
+    // const totalPaidAmount = transactions.reduce((total, payment) => total + payment.paidamount, 0);
+    const totalPaidAmount = transactions.reduce(
+      (total, payment) => total + parseFloat(payment.paidamount),
+      0
+    );
+    // Check if the paid amount exceeds the due amount
+    const dueAmount = invoiceData.total - totalPaidAmount;
+    const paymentAmount = parseFloat(transactionData.paidamount);
+
+    if (paymentAmount > dueAmount) {
+      console.error('Payment amount exceeds the due amount.');
+      setexceedpaymenterror("Payment amount exceeds the amount.");
+      setIsSubmitting(false);
+      return;
+    } else {
+      setexceedpaymenterror("");
+    }
     try {
-        const userid = localStorage.getItem("userid");
-        const authToken = localStorage.getItem('authToken');
+      const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': authToken,
+        },
+        body: JSON.stringify({
+          paidamount: transactionData.paidamount,
+          paiddate: transactionData.paiddate,
+          method: transactionData.method,
+          note: transactionData.note,
+          userid: userid,
+          invoiceid: invoiceid,
+        }),
+      });
 
-        // Validation checks
-        if (transactionData.paidamount === '') {
-            setpaidamounterror("Fill detail");
-            setIsSubmitting(false);
-            return;
-        } else {
-            setpaidamounterror("");
-        }
+      if (response.status === 401) {
+        const responseData = await response.json();
+        fetchExpensetransactiondata();
+        setAlertMessage(responseData.message);
+        setloading(false);
+        window.scrollTo(0, 0);
+        return; // Stop further execution
+      }
+      else {
+        if (response.ok) {
+          const responseData = await response.json();
+          if (responseData.success) {
+            console.log(responseData, 'Payment added successfully!');
+            console.log(roundOff(invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0) - responseData.transaction.paidamount), 'invoiceData');
+            // Fetch updated transaction data after payment addition
 
-        if (transactionData.paiddate === '') {
-            setpaiddateerror("Fill detail");
-            setIsSubmitting(false);
-            return;
-        } else {
-            setpaiddateerror("");
-        }
+            const setamountDue = roundOff(invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0) - responseData.transaction.paidamount)
+            console.log("setamountDue: ==============", setamountDue);
 
-        if (transactionData.method === '') {
-            setmethoderror("Fill detail");
-            setIsSubmitting(false);
-            return;
-        } else {
-            setmethoderror("");
-        }
 
-        await fetchtransactiondata();
+            const updatedData = {
 
-        const totalPaidAmount = transactions.reduce(
-            (total, payment) => total + parseFloat(payment.paidamount),
-            0
-        );
-        const dueAmount = invoiceData.total - totalPaidAmount;
-        const paymentAmount = parseFloat(transactionData.paidamount);
+              ...invoiceData,
+              amountdue: setamountDue,
+              status: `${setamountDue == 0
+                ?
+                "Paid"
+                :
+                "Partially Paid"
+                }`
 
-        if (paymentAmount > dueAmount) {
-            setexceedpaymenterror("Payment amount exceeds the amount.");
-            setIsSubmitting(false);
-            return;
-        } else {
-            setexceedpaymenterror("");
-        }
 
-        const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
-            method: 'POST',
-            headers: {
+            }; // Update emailsent status
+            await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+              method: 'POST',
+              headers: {
                 'Content-Type': 'application/json',
                 'Authorization': authToken,
-            },
-            body: JSON.stringify({
-                paidamount: transactionData.paidamount,
-                paiddate: transactionData.paiddate,
-                method: transactionData.method,
-                note: transactionData.note,
-                userid: userid,
-                invoiceid: invoiceid,
-            }),
-        });
+              },
+              body: JSON.stringify(updatedData),
+            });
+            // Add new expense
+            await fetch('https://immaculate.onrender.com/api/expense', {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken,
+              },
+              body: JSON.stringify({
+                expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
+                expenseType: null, // Specify the type of expense
+                vendor: null, // Specify the vendor
+                amount: transactionData.paidamount,
+                description: '', // Add a description if needed
+                paymentStatus: 'Paid',
+                transactionType: 'Credit',
+                receiptUrl: '', // If there's a receipt URL, provide it here
+                invoiceId: invoiceData._id,
+              }),
+            });
 
-        if (response.ok) {
-            const responseData = await response.json();
-            if (responseData.success) {
-                console.log('Payment added successfully!');
 
-                // Update the transaction data and invoice state locally
-                const newTransaction = responseData.transaction;
-                const updatedTransactions = [...transactions, newTransaction];
+            console.log(
+              JSON.stringify({
+                expenseDate: new Date().toISOString().split('T')[0], // Provide appropriate date here
+                expenseType: null, // Specify the type of expense
+                vendor: null, // Specify the vendor
+                amount: transactionData.paidamount,
+                description: '', // Add a description if needed
+                paymentStatus: 'Paid',
+                transactionType: 'Credit',
+                receiptUrl: '', // If there's a receipt URL, provide it here
+                invoiceId: invoiceData._id,
+              }),
+            );
 
-                const totalPaid = updatedTransactions.reduce(
-                    (total, payment) => total + parseFloat(payment.paidamount),
-                    0
-                );
+            await fetchtransactiondata();
 
-                const updatedAmountDue = invoiceData.total - totalPaid;
+            // Calculate total paid amount from transactions
+            const totalPaidAmount = transactions.reduce((total, payment) => total + payment.paidamount, 0);
 
-                setTransactions(updatedTransactions); // Update transactions list
-                setInvoiceData({
-                    ...invoiceData,
-                    amountdue: updatedAmountDue,
-                    status: updatedAmountDue === 0 ? "Paid" : "Partially Paid",
-                });
-
-                // Close the modal
-                document.getElementById('closebutton').click();
-                if (modalRef.current) {
-                    modalRef.current.hide();
-                }
-            } else {
-                console.error('Failed to add payment.');
+            // Update amount due by subtracting totalPaidAmount from total invoice amount
+            const updatedAmountDue = invoiceData.total - totalPaidAmount;
+            setInvoiceData({ ...invoiceData, amountdue: updatedAmountDue });
+            // Close the modal after adding payment
+            document.getElementById('closebutton').click();
+            if (modalRef.current) {
+              modalRef.current.hide();
             }
-        } else {
+          } else {
             console.error('Failed to add payment.');
+          }
+        } else {
+          console.error('Failed to add payment.');
         }
+      }
+
+
     } catch (error) {
-        console.error('Error adding payment:', error);
-    } finally {
-        setIsSubmitting(false); // Reset loading state
+      console.error('Error adding payment:', error);
     }
-};
+  };
 
 
   const handlePrintContent = async () => {
