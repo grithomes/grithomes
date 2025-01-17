@@ -1241,7 +1241,15 @@ thead{
     }
   };
 
+
   const handleRemove = async (invoiceid, invoiceIdpass) => {
+    const confirmDelete = window.confirm('Are you sure you want to delete this invoice?');
+  
+    // If the user cancels, stop execution
+    if (!confirmDelete) {
+      console.log('Invoice deletion cancelled by the user.');
+      return;
+    }
     try {
       // Check if there's a customer signature
       const signatureData = await checkCustomerSignature(invoiceIdpass);
@@ -1295,6 +1303,61 @@ thead{
       console.error('Error deleting Invoice:', error);
     }
   };
+
+  // const handleRemove = async (invoiceid, invoiceIdpass) => {
+  //   try {
+  //     // Check if there's a customer signature
+  //     const signatureData = await checkCustomerSignature(invoiceIdpass);
+
+  //     // If a signature exists, delete it
+  //     if (signatureData) {
+  //       const authToken = localStorage.getItem('authToken');
+  //       const deleteSignatureResponse = await fetch(`https://grithomes.onrender.com/api/delcustomersignature/${encodeURIComponent(invoiceIdpass)}`, {
+  //         method: 'DELETE',
+  //         headers: {
+  //           'Authorization': authToken,
+  //         }
+  //       });
+
+  //       if (!deleteSignatureResponse.ok) {
+  //         const json = await deleteSignatureResponse.json();
+  //         console.error('Error deleting customer signature:', json.message);
+  //         return; // Stop further execution if deleting signature fails
+  //       } else {
+  //         console.log('Customer signature deleted successfully!');
+  //       }
+  //     }
+
+  //     // Proceed with deleting the estimate data
+  //     const authToken = localStorage.getItem('authToken');
+  //     const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
+  //       method: 'GET',
+  //       headers: {
+  //         'Authorization': authToken,
+  //       }
+  //     });
+
+  //     if (response.status === 401) {
+  //       const json = await response.json();
+  //       setAlertMessage(json.message);
+  //       setloading(false);
+  //       window.scrollTo(0, 0);
+  //       return; // Stop further execution
+  //     } else {
+  //       const json = await response.json();
+
+  //       if (json.success) {
+  //         console.log('Data removed successfully!');
+  //         navigate('/userpanel/Invoice');
+  //       } else {
+  //         console.error('Error deleting Invoice:', json.message);
+  //       }
+  //     }
+
+  //   } catch (error) {
+  //     console.error('Error deleting Invoice:', error);
+  //   }
+  // };
 
   // const handleRemove = async (invoiceid,invoiceIdpass) => {
   //   const authToken = localStorage.getItem('authToken');

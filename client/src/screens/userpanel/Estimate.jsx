@@ -119,10 +119,14 @@ export default function Estimate() {
     if (!searchQuery) {
       return estimates;
     }
-    return estimates.filter(estimate =>
-      estimate.customername.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      estimate.job.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+    return estimates.filter(estimate => {
+      const customerName = estimate.customername || ""; // Default to an empty string if undefined
+      const jobName = estimate.job || ""; // Default to an empty string if undefined
+      return (
+        customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        jobName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    });
   };
 
   // Pagination functions

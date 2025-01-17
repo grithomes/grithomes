@@ -31,16 +31,16 @@ class MyCustomUploadAdapter {
                     method: 'POST',
                     body: formData,
                 })
-                .then(response => response.json())
-                .then(data => {
-                    resolve({
-                        default: data.secure_url
+                    .then(response => response.json())
+                    .then(data => {
+                        resolve({
+                            default: data.secure_url
+                        });
+                        console.log(data.secure_url, "================================================================");
+                    })
+                    .catch(error => {
+                        reject(error.message || 'Failed to upload image to Cloudinary');
                     });
-                    console.log(data.secure_url, "================================================================");
-                })
-                .catch(error => {
-                    reject(error.message || 'Failed to upload image to Cloudinary');
-                });
             });
         });
     }
@@ -81,13 +81,13 @@ export default function Createinvoice() {
     const [signUpData, setsignUpData] = useState(0);
     const [discountTotal, setdiscountTotal] = useState(0);
     const [invoiceData, setInvoiceData] = useState({
-        customername: '', itemname: '', customeremail: '',customerphone:'', invoice_id: '', InvoiceNumber: '', purchaseorder: '',
+        customername: '', itemname: '', customeremail: '', customerphone: '', invoice_id: '', InvoiceNumber: '', purchaseorder: '',
         date: format(new Date(), 'yyyy-MM-dd'), job: '', duedate: format(addDays(new Date(), 15), 'yyyy-MM-dd'), description: '', itemquantity: '', price: '', discount: '',
         amount: '', discountTotal: '', tax: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
     });
     // const [editorData, setEditorData] = useState("<p></p>");
     const [editorData, setEditorData] = useState(``);
-    const [noteimageUrl, setnoteImageUrl] = useState(''); 
+    const [noteimageUrl, setnoteImageUrl] = useState('');
     const [alertMessage, setAlertMessage] = useState('');
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
     const [hasSignature, setHasSignature] = useState(false);
@@ -107,7 +107,7 @@ export default function Createinvoice() {
         post: '',
     });
 
-    
+
 
     useEffect(() => {
         const fetchData = async () => {
@@ -115,7 +115,7 @@ export default function Createinvoice() {
                 navigate("/");
             }
             const getTaxOptions = localStorage.getItem("taxOptions")
-            console.log("getTaxOptions:===",JSON.parse(getTaxOptions)[0].name);
+            console.log("getTaxOptions:===", JSON.parse(getTaxOptions)[0].name);
             setsignUpData(JSON.parse(getTaxOptions)[0])
             await fetchcustomerdata();
             await fetchitemdata();
@@ -201,7 +201,7 @@ export default function Createinvoice() {
 
     const roundOff = (value) => {
         return Math.round(value * 100) / 100;
-      };
+    };
     const fetchLastInvoiceNumber = async () => {
         try {
             const userid = localStorage.getItem('userid');
@@ -238,38 +238,38 @@ export default function Createinvoice() {
         }
     };
 
-    
+
     const fetchsignupdata = async () => {
         try {
-          const userid = localStorage.getItem("userid");
-          const authToken = localStorage.getItem('authToken');
-          const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
-            headers: {
-              'Authorization': authToken,
+            const userid = localStorage.getItem("userid");
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+                headers: {
+                    'Authorization': authToken,
+                }
+            });
+
+            if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0, 0);
+                return; // Stop further execution
             }
-          });
-    
-          if (response.status === 401) {
-            const json = await response.json();
-            setAlertMessage(json.message);
-            setloading(false);
-            window.scrollTo(0, 0);
-            return; // Stop further execution
-          }
-          else {
-            const json = await response.json();
-    
-            // if (Array.isArray(json)) {
-            // setTaxPercentage(json.taxPercentage);
-            // setsignUpData(json)
-            console.log("json: ",json.taxPercentage);
-            // }
-          }
-    
+            else {
+                const json = await response.json();
+
+                // if (Array.isArray(json)) {
+                // setTaxPercentage(json.taxPercentage);
+                // setsignUpData(json)
+                console.log("json: ", json.taxPercentage);
+                // }
+            }
+
         } catch (error) {
-          console.error('Error fetching data:', error);
+            console.error('Error fetching data:', error);
         }
-      }
+    }
 
 
     const fetchcustomerdata = async () => {
@@ -360,7 +360,7 @@ export default function Createinvoice() {
 
     const onChangeQuantity = (event, itemId) => {
         let newQuantity = event.target.value ? parseFloat(event.target.value) : 1;
-        newQuantity = Math.max(newQuantity, 0); 
+        newQuantity = Math.max(newQuantity, 0);
 
         setQuantityMap((prevMap) => ({
             ...prevMap,
@@ -377,7 +377,7 @@ export default function Createinvoice() {
     const onChangecustomer = (event) => {
         const selectedCustomerId = event.value;
         console.log(selectedCustomerId, 'selectedCustomerId');
-        
+
         setSelectedCustomerId(selectedCustomerId);
         const selectedCustomer = customers.find((customer) => customer._id === selectedCustomerId);
 
@@ -403,12 +403,12 @@ export default function Createinvoice() {
     const handleNameChange = (e) => {
         const selectedName = e.target.value;
         setEditedName(selectedName);
-    
+
         const customer = customers.find(c => c.name === selectedName);
         if (customer) {
             setSelectedCustomerId(customer._id);
-            setEditedEmail(customer.email); 
-            setEditedPhone(customer.number);  
+            setEditedEmail(customer.email);
+            setEditedPhone(customer.number);
         }
     };
 
@@ -420,13 +420,13 @@ export default function Createinvoice() {
     //         setEditedEmail(selectedCustomer.email);
     //     }
     // };
-    
+
     const handleEditCustomer = () => {
         if (!SelectedCustomerId) {
             console.error('Unable to determine SelectedCustomerId');
             return;
         }
-    
+
         const updatedCustomerDetails = {
             name: editedName,
             email: editedEmail,
@@ -438,12 +438,12 @@ export default function Createinvoice() {
             email: editedEmail,
             number: editedPhone
         });
-    
+
         console.log(SelectedCustomerId, 'edited SelectedCustomerId');
         console.log('Updated customer details:', updatedCustomerDetails);
     };
-    
-    
+
+
     // const handleEditCustomer = () => {
     //     // console.log(event, "event structure");
     //     // const SelectedCustomerId = event.value || event.target.value || event.id; 
@@ -544,7 +544,7 @@ export default function Createinvoice() {
             const authToken = localStorage.getItem('authToken');
 
             await new Promise(resolve => setTimeout(resolve, 100));
-            
+
             const invoiceItems = searchitemResults.map((item) => {
                 const selectedItem = items.find((i) => i._id === item.value);
                 const itemPrice = selectedItem?.price || 0;
@@ -571,6 +571,12 @@ export default function Createinvoice() {
             // setSelectedCustomerId(SelectedCustomerId);
             const selectedCustomer = customers.find((customer) => customer._id === SelectedCustomerId);
 
+            // Validate customer fields
+            if (!selectedCustomerDetails.name || !selectedCustomerDetails.email || !selectedCustomerDetails.number) {
+                alert('Customer name, email, and phone are required. Please fill out these details.');
+                return;
+            }
+
             // Summing up subtotal, total, and amount due for the entire invoice
             const subtotal = invoiceItems.reduce((acc, curr) => acc + curr.amount, 0);
             const total = calculateTotal();
@@ -581,9 +587,9 @@ export default function Createinvoice() {
 
             const data = {
                 userid: userid,
-                customername: selectedCustomer.name,
-                customeremail: selectedCustomer.email,
-                customerphone:  selectedCustomer.number,
+                customername: selectedCustomerDetails.name,
+                customeremail: selectedCustomerDetails.email,
+                customerphone: selectedCustomerDetails.number,
                 invoice_id: invoiceData.invoice_id,
                 InvoiceNumber: invoiceData.InvoiceNumber,
                 purchaseorder: invoiceData.purchaseorder,
@@ -599,7 +605,7 @@ export default function Createinvoice() {
                 taxpercentage: signUpData.percentage,
                 amountdue: amountdue,
                 noteimageUrl: noteimageUrl,
-                isAddSignature: isAddSignatureSwitchOn, 
+                isAddSignature: isAddSignatureSwitchOn,
                 isCustomerSign: isCustomerSignSwitchOn,
             };
             console.log(data, "Invoice Data ====");
@@ -665,7 +671,7 @@ export default function Createinvoice() {
     //     setCloudImage(cloudinaryData.secure_url)
     //             return { default: cloudinaryData.secure_url }; // Return the URL of the uploaded image
     // };
-    
+
 
     // Alert Component
     const Alert = ({ message }) => {
@@ -689,31 +695,31 @@ export default function Createinvoice() {
     };
 
     const onChangePrice = (event, itemId) => {
-  const { value } = event.target;
-  const numericValue = value.replace(/[^0-9.]/g, ''); // Remove any non-numeric characters except decimal point
+        const { value } = event.target;
+        const numericValue = value.replace(/[^0-9.]/g, ''); // Remove any non-numeric characters except decimal point
 
-  // Limit the numeric value to two decimal places
-  const decimalIndex = numericValue.indexOf('.');
-  let formattedValue = numericValue;
-  if (decimalIndex !== -1) {
-    formattedValue = numericValue.slice(0, decimalIndex + 1) + numericValue.slice(decimalIndex + 1).replace(/[^0-9]/g, '').slice(0, 2);
-  }
+        // Limit the numeric value to two decimal places
+        const decimalIndex = numericValue.indexOf('.');
+        let formattedValue = numericValue;
+        if (decimalIndex !== -1) {
+            formattedValue = numericValue.slice(0, decimalIndex + 1) + numericValue.slice(decimalIndex + 1).replace(/[^0-9]/g, '').slice(0, 2);
+        }
 
-  const newPrice = parseFloat(formattedValue) || 0;
+        const newPrice = parseFloat(formattedValue) || 0;
 
-  // Update the item's price in the items array
-  const updatedItems = items.map(item => {
-    if (item._id === itemId) {
-      return {
-        ...item,
-        price: formattedValue // Update with formatted value
-      };
-    }
-    return item;
-  });
+        // Update the item's price in the items array
+        const updatedItems = items.map(item => {
+            if (item._id === itemId) {
+                return {
+                    ...item,
+                    price: formattedValue // Update with formatted value
+                };
+            }
+            return item;
+        });
 
-  setitems(updatedItems);
-};
+        setitems(updatedItems);
+    };
 
     const onChangeDescription = (event, editor, itemId) => {
         const value = editor.getData();
@@ -861,7 +867,7 @@ export default function Createinvoice() {
                                         </div>
 
                                         <div className="row">
-                                        <div className="col-lg-3 col-12">
+                                            <div className="col-lg-3 col-12">
                                                 <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
                                                     <div className="form-check form-switch">
                                                         <div>
@@ -1075,8 +1081,8 @@ export default function Createinvoice() {
                                                                 <tbody>
                                                                     {searchitemResults.map((item) => {
                                                                         const selectedItem = items.find((i) => i._id === item.value);
-                                                                        console.log(selectedItem,"sle");
-                                                                        
+                                                                        console.log(selectedItem, "sle");
+
                                                                         const itemPrice = selectedItem?.price || 0;
                                                                         const itemId = item.value;
                                                                         const quantity = quantityMap[itemId] || 1;
@@ -1129,7 +1135,7 @@ export default function Createinvoice() {
                                                                                     />
                                                                                 </td>
                                                                                 <td>
-                                                                                {selectedItem?.unit}
+                                                                                    {selectedItem?.unit}
                                                                                     {/* <input
                                                                                         type="text"
                                                                                         name={`unit-${itemId}`}
@@ -1152,7 +1158,7 @@ export default function Createinvoice() {
                                                                                         required
                                                                                     />
                                                                                 </td>
-                                                                                
+
 
                                                                                 <td className="text-center">
                                                                                     <p><CurrencySign />{formattedTotalAmount}</p>
@@ -1213,7 +1219,7 @@ export default function Createinvoice() {
                                                                     </div>
                                                                     <div className="col-6 col-md-9">
                                                                         <p><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
-                                                                        
+
                                                                         })}</p>
                                                                         <div className="mb-3">
                                                                             <input
@@ -1227,7 +1233,7 @@ export default function Createinvoice() {
                                                                                 min="0"
                                                                             />
                                                                         </div>
-                                                                    
+
 
                                                                         <p>{console.log("check Tax Amount", calculateTaxAmount())}<CurrencySign />{
 
@@ -1287,10 +1293,10 @@ export default function Createinvoice() {
                                                     </div>
                                                 </div>
                                             </div>
-                                            
-                                            
+
+
                                         </div>
-                                        
+
 
                                     </form>
                                 </div>

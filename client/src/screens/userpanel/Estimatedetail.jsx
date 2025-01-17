@@ -557,10 +557,19 @@ thead{
   };
 
   const handleRemove = async (estimateid, estimateIdpass) => {
+    // Show confirmation dialog
+    const confirmDelete = window.confirm('Are you sure you want to delete this invoice?');
+  
+    // If the user cancels, stop execution
+    if (!confirmDelete) {
+      console.log('Invoice deletion cancelled by the user.');
+      return;
+    }
+  
     try {
       // Check if there's a customer signature
       const signatureData = await checkCustomerSignature(estimateIdpass);
-
+  
       // If a signature exists, delete it
       if (signatureData) {
         const authToken = localStorage.getItem('authToken');
@@ -570,7 +579,7 @@ thead{
             'Authorization': authToken,
           }
         });
-
+  
         if (!deleteSignatureResponse.ok) {
           const json = await deleteSignatureResponse.json();
           console.error('Error deleting customer signature:', json.message);
@@ -579,7 +588,7 @@ thead{
           console.log('Customer signature deleted successfully!');
         }
       }
-
+  
       // Proceed with deleting the estimate data
       const authToken = localStorage.getItem('authToken');
       const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
@@ -588,7 +597,7 @@ thead{
           'Authorization': authToken,
         }
       });
-
+  
       if (response.status === 401) {
         const json = await response.json();
         setAlertMessage(json.message);
@@ -597,17 +606,17 @@ thead{
         return; // Stop further execution
       } else {
         const json = await response.json();
-
+  
         if (json.success) {
           console.log('Data removed successfully!');
           navigate('/userpanel/Userdashboard');
         } else {
-          console.error('Error deleting Invoice:', json.message);
+          console.error('Error deleting invoice:', json.message);
         }
       }
-
+  
     } catch (error) {
-      console.error('Error deleting Invoice:', error);
+      console.error('Error deleting invoice:', error);
     }
   };
 

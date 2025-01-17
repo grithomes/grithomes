@@ -592,6 +592,13 @@ export default function Createestimate() {
 
             const selectedCustomer = customers.find((customer) => customer._id === SelectedCustomerId);
 
+  // Validate customer fields
+  if (!selectedCustomerDetails.name || !selectedCustomerDetails.email || !selectedCustomerDetails.number) {
+    alert('Customer name, email, and phone are required. Please fill out these details.');
+    return;
+}
+
+
             // Summing up subtotal, total, and amount due for the entire estimate
             const subtotal = estimateItems.reduce((acc, curr) => acc + curr.amount, 0);
             const total = calculateTotal();
@@ -602,9 +609,9 @@ export default function Createestimate() {
 
             const data = {
                 userid: userid,
-                customername: selectedCustomer.customername,
-                customeremail: selectedCustomer.customeremail,
-                customerphone: selectedCustomer.customerphone,
+                customername: selectedCustomerDetails.name,
+                customeremail: selectedCustomerDetails.email,
+                customerphone: selectedCustomerDetails.number,
                 estimate_id: estimateData.estimate_id,
                 EstimateNumber: estimateData.EstimateNumber,
                 purchaseorder: estimateData.purchaseorder,
@@ -665,6 +672,127 @@ export default function Createestimate() {
             console.error('Error creating estimate:', error);
         }
     };
+
+
+  const handleSubmit1 = async (e) => {
+    e.preventDefault();
+    try {
+        const userid = localStorage.getItem('userid'); // Assuming you have user ID stored in local storage
+        const authToken = localStorage.getItem('authToken');
+
+        // Ensure the selected customer exists
+        const selectedCustomer = customers.find((customer) => customer._id === SelectedCustomerId);
+
+        if (!selectedCustomer) {
+            alert('Please select a customer.');
+            return;
+        }
+
+        const { customername, customeremail, customerphone } = selectedCustomer;
+
+        // Validate customer fields
+        if (!customername || !customeremail || !customerphone) {
+            alert('Customer name, email, and phone are required. Please fill out these details.');
+            return;
+        }
+
+        await new Promise(resolve => setTimeout(resolve, 100));
+
+        const estimateItems = searchitemResults.map((item) => {
+            const selectedItem = items.find((i) => i._id === item.value);
+            const itemPrice = selectedItem?.price || 0;
+            const unit = selectedItem?.unit || 0;
+            const itemId = item.value;
+            const quantity = quantityMap[itemId] || 1;
+            const discount = discountMap[itemId] || 0;
+            const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+
+            return {
+                itemId: itemId,
+                itemname: selectedItem.itemname,
+                itemquantity: quantity,
+                price: itemPrice,
+                unit,
+                discount,
+                description: selectedItem.description,
+                amount: discountedAmount, // Add subtotal to each item
+            };
+        });
+
+        // Summing up subtotal, total, and amount due for the entire estimate
+        const subtotal = estimateItems.reduce((acc, curr) => acc + curr.amount, 0);
+        const total = calculateTotal();
+        const amountdue = total;
+        const taxAmount = calculateTaxAmount(); // Calculate tax amount based on subtotal and tax percentage
+
+        const data = {
+            userid: userid,
+            customername: selectedCustomerDetails.name,
+            customeremail: selectedCustomerDetails.email,
+            customerphone: selectedCustomerDetails.number,
+            estimate_id: estimateData.estimate_id,
+            EstimateNumber: estimateData.EstimateNumber,
+            purchaseorder: estimateData.purchaseorder,
+            job: estimateData.job || 'No Job',
+            discountTotal: discountTotal || 0,
+            information: editorData,
+            date: estimateData.date,
+            items: estimateItems,
+            subtotal: subtotal,
+            total: total,
+            tax: taxAmount,
+            taxpercentage: signUpData.percentage,
+            amountdue: amountdue,
+            noteimageUrl: noteimageUrl,
+            isAddSignature: isAddSignatureSwitchOn, 
+            isCustomerSign: isCustomerSignSwitchOn,
+        };
+
+        console.log(data, "Data to send");
+
+        // Sending estimate data to the backend API
+        const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': authToken,
+            },
+            body: JSON.stringify({ userid, estimateData: data }),
+        });
+
+        if (response.status === 401) {
+            const responseData = await response.json();
+            setAlertMessage(responseData.message);
+            setloading(false);
+            window.scrollTo(0, 0);
+            return; // Stop further execution
+        } else {
+            if (response.ok) {
+                const responseData = await response.json();
+                console.log(responseData, "responseData");
+
+                if (responseData.success) {
+                    const estimateid = responseData.estimate._id;
+                    navigate('/userpanel/Estimatedetail', { state: { estimateid } });
+                    console.log('Estimate saved successfully!');
+                } else {
+                    console.error('Failed to save the estimate.');
+                }
+            } else {
+                const responseData = await response.json();
+                setmessage(true);
+                setAlertShow(responseData.error);
+                console.error('Failed to save the estimate.');
+            }
+        }
+
+    } catch (error) {
+        console.error('Error creating estimate:', error);
+    }
+};
+
+  
+  
     const handleDiscountChange = (event) => {
         const value = event.target.value;
         // If the input is empty or NaN, set the value to 0
