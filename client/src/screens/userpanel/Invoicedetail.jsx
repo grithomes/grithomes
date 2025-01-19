@@ -821,7 +821,7 @@ export default function Invoicedetail() {
               body: JSON.stringify(updatedData),
             });
             // Add new expense
-            await fetch('https://immaculate.onrender.com/api/expense', {
+            await fetch('https://grithomes.onrender.com/api/expense', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
