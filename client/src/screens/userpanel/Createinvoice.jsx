@@ -572,7 +572,7 @@ export default function Createinvoice() {
             const selectedCustomer = customers.find((customer) => customer._id === SelectedCustomerId);
 
             // Validate customer fields
-            if (!selectedCustomerDetails.name || !selectedCustomerDetails.email || !selectedCustomerDetails.number) {
+            if (!selectedCustomerDetails.name || !selectedCustomerDetails.email) {
                 alert('Customer name, email, and phone are required. Please fill out these details.');
                 return;
             }
