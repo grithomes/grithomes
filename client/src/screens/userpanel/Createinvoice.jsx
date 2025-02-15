@@ -785,7 +785,7 @@ export default function Createinvoice() {
         }
         else {
             const json = await response.json();
-            console.log(json);
+            console.log(json, "Happy");
 
             if (json.success) {
                 setCredentials({

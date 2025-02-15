@@ -900,7 +900,7 @@ export default function Createestimate() {
             const json = await response.json();
             console.log(json);
 
-            if (json.Success) {
+            if (json.success) {
                 setCredentials({
                     name: '',
                     email: '',
@@ -919,13 +919,10 @@ export default function Createestimate() {
                 window.location.reload();
                 //   navigate('/userpanel/Customerlist');
             }
-
             else {
                 alert("This Customer Email already exist")
             }
         }
-
-
     };
 
     const onchangeaddcustomer = (event) => {
