@@ -90,6 +90,128 @@ router.get('/getallesigncustomerdata', async (req, res) => {
 });
 
 
+// Get all invoices grouped by financial year for a user
+router.get('/all-invoices-by-financial-year', async (req, res) => {
+    try {
+        let authtoken = req.headers.authorization;
+        const decodedToken = jwt.verify(authtoken, jwrsecret);
+        
+        const { userid } = req.query;
+        
+        if (!userid) {
+            return res.status(400).json({
+                success: false,
+                message: 'User ID is required'
+            });
+        }
+
+        // Aggregation pipeline to group all invoices by financial year
+        const invoicesByYear = await Invoice.aggregate([
+            {
+                $match: { userid: userid }  // Filter by user
+            },
+            {
+                $addFields: {
+                    financialYear: {
+                        $cond: {
+                            if: { $gte: [{ $month: "$date" }, 4] },  // Assuming FY starts April 1st
+                            then: { 
+                                $concat: [
+                                    { $toString: { $year: "$date" } },
+                                    "-",
+                                    { $toString: { $add: [{ $year: "$date" }, 1] } }
+                                ]
+                            },
+                            else: { 
+                                $concat: [
+                                    { $toString: { $subtract: [{ $year: "$date" }, 1] } },
+                                    "-",
+                                    { $toString: { $year: "$date" } }
+                                ]
+                            }
+                        }
+                    }
+                }
+            },
+            {
+                $group: {
+                    _id: "$financialYear",
+                    invoices: { 
+                        $push: {
+                            _id: "$_id",
+                            invoice_id: "$invoice_id",
+                            InvoiceNumber: "$InvoiceNumber",
+                            customername: "$customername",
+                            job: "$job",
+                            customeremail: "$customeremail",
+                            emailsent: "$emailsent",
+                            date: "$date",
+                            duedate: "$duedate",
+                            items: "$items",
+                            subtotal: "$subtotal",
+                            total: "$total",
+                            amountdue: "$amountdue",
+                            discountTotal: "$discountTotal",
+                            information: "$information",
+                            tax: "$tax",
+                            taxpercentage: "$taxpercentage",
+                            status: "$status",
+                            isAddSignature: "$isAddSignature",
+                            isCustomerSign: "$isCustomerSign",
+                            createdAt: "$createdAt"
+                        }
+                    },
+                    totalAmount: { $sum: "$total" },
+                    invoiceCount: { $sum: 1 },
+                    totalDue: { $sum: "$amountdue" },
+                    totalTax: { $sum: { $toDouble: "$tax" } }
+                }
+            },
+            {
+                $sort: { "_id": -1 }  // Sort by financial year descending
+            },
+            {
+                $project: {
+                    financialYear: "$_id",
+                    invoices: 1,
+                    totalAmount: 1,
+                    invoiceCount: 1,
+                    totalDue: 1,
+                    totalTax: 1
+                }
+            }
+        ]);
+
+        // If no invoices found, return empty array
+        if (!invoicesByYear.length) {
+            return res.status(200).json({
+                success: true,
+                data: [],
+                message: 'No invoices found for this user'
+            });
+        }
+
+        res.status(200).json({
+            success: true,
+            data: invoicesByYear,
+            message: 'All invoices retrieved successfully'
+        });
+
+    } catch (error) {
+        console.error(error);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ 
+                success: false,
+                message: 'Unauthorized: Invalid token' 
+            });
+        }
+        res.status(500).json({ 
+            success: false,
+            message: 'Internal server error',
+            error: error.message
+        });
+    }
+});
 router.get('/getesigncustomerdata/:userid', async (req, res) => {
     try {
         const { userid } = req.params;
