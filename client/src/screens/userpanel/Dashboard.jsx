@@ -221,7 +221,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://immaculate.onrender.com/api/all-invoices-by-financial-year?userid=${userid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/all-invoices-by-financial-year?userid=${userid}`, {
         headers: {
           'Authorization': authToken,
         }
