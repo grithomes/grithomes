@@ -2276,33 +2276,41 @@ router.post('/savecreateestimate', async (req, res) => {
 
 router.get('/invoicedata/:userid', async (req, res) => {
     try {
-        let userid = req.params.userid;
-        let authtoken = req.headers.authorization;
-        let status = req.query.status; // Get the status from query parameters
+        const userid = req.params.userid;
+        const authtoken = req.headers.authorization;
+        const status = req.query.status;
+        const page = parseInt(req.query.page) || 0; // Default to page 0
+        const limit = parseInt(req.query.limit) || 20; // Default to 20 items
 
         // Verify JWT token
         const decodedToken = jwt.verify(authtoken, jwrsecret);
-        console.log(decodedToken);
 
         // Build the query object
         let query = { userid: userid };
-
-        // If a status is provided, add it to the query
-        if (status) {
+        if (status && status !== 'All') {
             query.status = status;
         }
 
-        // Find invoice data sorted by creation date in descending order
-        const invoicedata = await Invoice.find(query).sort({ createdAt: -1 });
+        // Get total count for pagination
+        const total = await Invoice.countDocuments(query);
 
-        res.json(invoicedata);
+        // Find invoice data with pagination
+        const invoicedata = await Invoice.find(query)
+            .sort({ createdAt: -1 })
+            .skip(page * limit)
+            .limit(limit);
+
+        res.json({
+            invoices: invoicedata,
+            total: total,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit)
+        });
     } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        // Handle token verification errors
         if (error.name === 'JsonWebTokenError') {
             return res.status(401).json({ message: 'Unauthorized: Invalid token' });
         }
-        // Handle other errors
         res.status(500).json({ message: 'Internal server error' });
     }
 });

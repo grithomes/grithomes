@@ -2,360 +2,243 @@ import React, { useState, useEffect } from 'react';
 import Usernavbar from './Usernavbar';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Usernav from './Usernav';
-import { ColorRing } from 'react-loader-spinner'
+import { ColorRing } from 'react-loader-spinner';
 import CurrencySign from '../../components/CurrencySign ';
 import Alertauthtoken from '../../components/Alertauthtoken';
-// import Nav from './Nav';
+// import './Invoice.css';
 
 export default function Invoice() {
-  const [loading, setloading] = useState(true);
-  const [invoices, setinvoices] = useState([]);
-  const [selectedinvoices, setselectedinvoices] = useState(null);
-  const location = useLocation();
-  const invoiceid = location.state?.invoiceid;
-  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [invoices, setInvoices] = useState([]);
   const [transactions, setTransactions] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
   const [alertMessage, setAlertMessage] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
-  const entriesPerPage = 10;
   const [searchQuery, setSearchQuery] = useState('');
+  const limit = 20;
+
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useEffect(() => {
-    if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true") {
+    if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") === "true") {
       navigate("/");
     }
     fetchData();
-  }, [])
+  }, [currentPage, filterStatus, searchQuery]);
 
-  // const getFilteredInvoices = () => {
-  //   if (filterStatus === 'All') {
-  //     return invoices;
-  //   }
-  //   return invoices.filter(invoice => invoice.status === filterStatus);
-  // };
-
-  const getFilteredInvoices = () => {
-    let filtered = invoices;
-    if (filterStatus !== 'All') {
-      filtered = filtered.filter(invoice => invoice.status === filterStatus);
-    }
-    if (searchQuery) {
-      filtered = filtered.filter(invoice =>
-        (invoice.customername?.toLowerCase() || '').includes(searchQuery.toLowerCase()) ||
-        (invoice.job?.toLowerCase() || '').includes(searchQuery.toLowerCase())
-      );
-    }
-    return filtered;
-  };
-
-  const roundOff = (value) => {
-    const roundedValue = Math.round(value * 100) / 100;
-    return roundedValue.toLocaleString('en-IN', {
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    });
-  };
   const fetchData = async () => {
     try {
+      setLoading(true);
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/invoicedata/${userid}`, {
-        headers: {
-          'Authorization': authToken,
-        }
-      });
+      const response = await fetch(
+        `https://grithomes.onrender.com/api/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`,
+        { headers: { 'Authorization': authToken } }
+      );
 
       if (response.status === 401) {
         const json = await response.json();
         setAlertMessage(json.message);
-        setloading(false);
+        setLoading(false);
         window.scrollTo(0, 0);
-        return; // Stop further execution
+        return;
       }
-      else {
-        const json = await response.json();
-        console.log("json:->===============", json);
-        if (Array.isArray(json)) {
-          setinvoices(json);
 
-          const transactionPromises = json.map(async (invoice) => {
-            const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
-              headers: {
-                'Authorization': authToken,
-              }
-            });
+      const json = await response.json();
+      setInvoices(json.invoices);
+      setTotalPages(json.totalPages);
 
-            if (response.status === 401) {
-              const transactionJson = await response.json();
-              setAlertMessage(transactionJson.message);
-              setloading(false);
-              window.scrollTo(0, 0);
-              return; // Stop further execution
-            }
-            else {
-              const transactionJson = await response.json();
-              return transactionJson.map(transaction => ({
-                ...transaction,
-                invoiceId: invoice._id // Attach invoiceId to each transaction
-              }));
-            }
-          });
-
-          const transactionsData = await Promise.all(transactionPromises);
-          const flattenedTransactions = transactionsData.flat(); // Flatten the transactions array
-          setTransactions(flattenedTransactions);
+      const transactionPromises = json.invoices.map(async (invoice) => {
+        const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
+          headers: { 'Authorization': authToken }
+        });
+        if (response.status === 401) {
+          const transactionJson = await response.json();
+          setAlertMessage(transactionJson.message);
+          return [];
         }
-        setloading(false);
-      }
+        const transactionJson = await response.json();
+        return transactionJson.map(transaction => ({ ...transaction, invoiceId: invoice._id }));
+      });
 
+      const transactionsData = await Promise.all(transactionPromises);
+      setTransactions(transactionsData.flat());
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
+      setLoading(false);
     }
   };
 
-  const handleViewClick = (invoice) => {
-    let invoiceid = invoice._id;
-    navigate('/userpanel/Invoicedetail', { state: { invoiceid } });
-
+  const roundOff = (value) => {
+    const roundedValue = Math.round(value * 100) / 100;
+    return roundedValue.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   };
 
   const formatCustomDate = (dateString) => {
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', options);
+    return new Date(dateString).toLocaleDateString('en-US', options);
+  };
+
+  const handleViewClick = (invoice) => {
+    navigate('/userpanel/Invoicedetail', { state: { invoiceid: invoice._id } });
   };
 
   const handleAddClick = () => {
     navigate('/userpanel/Createinvoice');
-  }
+  };
 
   const getStatus = (invoice) => {
-    // Filter transactions related to the current invoice
-    const relatedTransactions = transactions.filter(transaction => transaction.invoiceId === invoice._id);
+    // If the invoice status is explicitly "Send," use it directly
+    if (invoice.status === 'Send') {
+      return <span className="badge bg-primary"><i className="fa-solid fa-circle me-1"></i>Send</span>;
+    }
 
-    // console.log("relatedTransactions:", relatedTransactions);
-    // console.log("Transactions:", transactions);
-    // console.log("Invoices:", invoices);
-    // Calculate the total paid amount for the current invoice
-    const totalPaidAmount = relatedTransactions.reduce(
-      (total, payment) => total + parseFloat(payment.paidamount),
-      0
-    );
+    // Otherwise, calculate status based on transactions
+    const relatedTransactions = transactions.filter(t => t.invoiceId === invoice._id);
+    const totalPaidAmount = relatedTransactions.reduce((total, payment) => total + parseFloat(payment.paidamount), 0);
 
-    // console.log("totalPaidAmount:", totalPaidAmount);
     if (totalPaidAmount === 0) {
-      return (
-        <strong>
-          <i class="fa-solid fa-circle fs-12 mx-2 saved"></i> Saved
-        </strong>
-      )
+      return <span className="badge bg-secondary"><i className="fa-solid fa-circle me-1"></i>Saved</span>;
     } else if (totalPaidAmount > 0 && totalPaidAmount < invoice.total) {
-      return (
-        <strong>
-          <i class="fa-solid fa-circle fs-12 mx-2 partiallypaid"></i> Partially Paid
-        </strong>
-      )
-    } else if (totalPaidAmount === invoice.total) {
-      return (
-        <strong>
-          <i class="fa-solid fa-circle fs-12 mx-2 paid"></i> Paid
-        </strong>
-      )
-    } else {
-      return "Payment Pending";
+      return <span className="badge bg-warning"><i className="fa-solid fa-circle me-1"></i>Partially Paid</span>;
+    } else if (totalPaidAmount >= invoice.total) {
+      return <span className="badge bg-success"><i className="fa-solid fa-circle me-1"></i>Paid</span>;
     }
+    return <span className="badge bg-danger"><i className="fa-solid fa-circle me-1"></i>Pending</span>;
   };
 
-  // Pagination functions
-  const getPageCount = () => Math.ceil(getFilteredInvoices.length / entriesPerPage);
-
-  const getCurrentPageInvoices = () => {
-    const filteredInvoices = getFilteredInvoices();
-    const startIndex = currentPage * entriesPerPage;
-    const endIndex = startIndex + entriesPerPage;
-    return filteredInvoices.slice(startIndex, startIndex + entriesPerPage);
-    // return invoices.slice(startIndex, endIndex);
-  };
-
-  const handlePrevPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if ((currentPage + 1) * entriesPerPage < invoices.length) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
+  const handlePrevPage = () => currentPage > 0 && setCurrentPage(currentPage - 1);
+  const handleNextPage = () => currentPage < totalPages - 1 && setCurrentPage(currentPage + 1);
 
   return (
-    <div className='bg'>
-      {
-        loading ?
-          <div className='row'>
-            <ColorRing
-              // width={200}
-              loading={loading}
-              // size={500}
-              display="flex"
-              justify-content="center"
-              align-items="center"
-              aria-label="Loading Spinner"
-              data-testid="loader"
-            />
-          </div> :
-
-          <div className='container-fluid'>
-            <div className='row'>
-              <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
-                <div>
-                  <Usernavbar />
-                </div>
+    <div className="bg">
+      {loading ? (
+        <div className="d-flex justify-content-center align-items-center vh-100">
+          <ColorRing loading={loading} aria-label="Loading Spinner" />
+        </div>
+      ) : (
+        <div className="container-fluid">
+          <div className="row">
+            <div className="col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none">
+              <Usernavbar />
+            </div>
+            <div className="col-lg-10 col-md-9 col-12 mx-auto">
+              <div className="d-lg-none d-md-none d-block mt-2">
+                <Usernav />
               </div>
-
-              <div className='col-lg-10 col-md-9 col-12 mx-auto'>
-                <div className='d-lg-none d-md-none d-block mt-2'>
-                  <Usernav />
+              <div className="bg-white my-5 p-3 box mx-2 mx-md-4">
+                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
+                  <h5 className="fw-bold">Invoices</h5>
+                  <button className="btn btn-primary rounded-pill fw-bold" onClick={handleAddClick}>+ Add New</button>
                 </div>
-                <div className='bg-white my-5 p-4 box mx-4'>
-                  <div className=''>
-                    {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                <hr />
+                <div className="row mb-3 g-2">
+                  <div className="col-6 col-md-3">
+                    <select className="form-select" onChange={(e) => setFilterStatus(e.target.value)} value={filterStatus}>
+                      <option value="All">All</option>
+                      <option value="Paid">Paid</option>
+                      <option value="Partially Paid">Partially Paid</option>
+                      <option value="Saved">Saved</option>
+                      <option value="Send">Send</option>
+                    </select>
                   </div>
-                  <div className='row py-2'>
-                    <div className='col-lg-4 col-md-6 col-sm-6 col-7 me-auto'>
-                      <p className='h5 fw-bold'>Invoice</p>
-                    </div>
-                    <div className='col-lg-3 col-md-4 col-sm-4 col-5 text-lg-end text-md-end text-sm-end text-end'>
-                      <button className='btn rounded-pill btnclr text-white fw-bold' onClick={handleAddClick}>
-                        + Add New
-                      </button>
-                    </div>
+                  <div className="col-6 col-md-3">
+                    <input
+                      type="text"
+                      className="form-control"
+                      placeholder="Search by Name / Job"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                   </div>
-                  <hr />
-                  <div className='row mb-3'>
-                    <div className='col-3'>
-                      <select onChange={(e) => setFilterStatus(e.target.value)} className='form-select'>
-                        <option value='All'>All</option>
-                        <option value='Paid'>Paid</option>
-                        <option value='Partially Paid'>Partially Paid</option>
-                        <option value='Saved'>Saved</option>
-                        <option value='Send'>Send</option>
-                      </select>
-                    </div>
-                    <div className='col-3'>
-                      <input
-                        type="text"
-                        className="form-control mb-2"
-                        placeholder="Search by name or job"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
-                    </div>
-                  </div>
+                </div>
 
-                  <div className='row px-2 table-responsive'>
-                    <table className='table table-bordered'>
-                      <thead>
-                        <tr>
-                          <th scope='col'>INVOICE</th>
-                          <th scope='col'>STATUS</th>
-                          {/* <th scope='col'>Status</th> */}
-                          <th scope='col'>DATE</th>
-                          {/* <th scope='col'>EMAIL STATUS</th> */}
-                          <th scope='col'>VIEW</th>
-                          <th scope='col'>AMOUNT</th>
+                {/* Desktop Table */}
+                <div className="d-none d-md-block table-responsive">
+                  <table className="table table-bordered">
+                    <thead>
+                      <tr>
+                        <th>INVOICE</th>
+                        <th>STATUS</th>
+                        <th>DATE</th>
+                        <th>VIEW</th>
+                        <th>AMOUNT</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {invoices.map((invoice, index) => (
+                        <tr key={index}>
+                          <td>
+                            <p className="fw-bold mb-0">{invoice.customername}</p>
+                            <p className="mb-0">{invoice.InvoiceNumber}</p>
+                            <p className="mb-0">Job: {invoice.job}</p>
+                          </td>
+                          <td>{getStatus(invoice)}</td>
+                          <td>
+                            <p className="mb-0">Issued: {formatCustomDate(invoice.date)}</p>
+                            <p className="mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
+                          </td>
+                          <td className="text-center">
+                            <button className="btn btn-link" onClick={() => handleViewClick(invoice)}>
+                              <i className="fa-solid fa-eye"></i>
+                            </button>
+                          </td>
+                          <td><CurrencySign />{roundOff(invoice.total)}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {getCurrentPageInvoices().map((invoice, index) => (
-                          <tr key={index}>
-                            <td>
-                              <p className='my-0 fw-bold clrtrxtstatus'>{invoice.customername}</p>
-                              <p className='my-0'>{invoice.InvoiceNumber}</p>
-                              <p className='my-0'>Job: {invoice.job}</p>
-                            </td>
-                            {/* <td>
-                        <span className='clrtrxtstatus'>{getStatus(invoice)}</span>
-                      </td> */}
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-
-                            <td>
-                              {invoice.status === 'Saved' ? (
-                                <span className='saved p-2 rounded-pill'>
-                                  <i className="fa-solid fa-circle fs-12 me-2 grey-3"></i>
-                                  <span className='clrtrxtstatus fw-bold'>Saved</span>
-                                </span>
-                              ) : invoice.status === 'Send' ? (
-                                <span className='sent p-2 rounded-pill'>
-                                  <i className="fa-solid fa-circle fs-12 me-2 text-primary"></i>
-                                  <span className='clrtrxtstatus fw-bold'>Send</span>
-                                </span>
-                              ) : invoice.status === 'Paid' ? (
-                                <span className='paid p-2 rounded-pill'>
-                                  <i class="fa-solid fa-circle fs-12 me-2 "></i>
-                                  <span className='clrtrxtstatus fw-bold'>Paid</span>
-                                </span>
-                              ) : invoice.status === 'Partially Paid' ? (
-                                <span className='paid p-2 rounded-pill'>
-                                  <i class="fa-solid fa-circle fs-12 me-2"></i>
-                                  <span className='clrtrxtstatus fw-bold'>Partially Paid</span>
-                                </span>
-                              ) : (
-                                <>
-                                  <i className="fa-solid fa-circle fs-12 me-2 unknown"></i>
-                                  <span className='clrtrxtstatus fw-bold'>Unknown Status</span>
-                                </>
-                              )}
-                            </td>
-
-                            <td>
-                              <div className=''>
-                                <div className='d-flex'>
-                                  <p className='issue px-1 my-1'>Issued</p>
-                                  <p className='datetext my-1'>{formatCustomDate(invoice.date)}</p>
-                                </div>
-                                <div className='d-flex'>
-                                  <p className='due px-1'>Due</p>
-                                  <p className='datetext'>{formatCustomDate(invoice.duedate)}</p>
-                                </div>
-                              </div>
-                            </td>
-                            {/* <td className='text-center'>
-                        <p className='datetext'>{invoice.emailsent}</p>
-                      </td> */}
-                            <td className='text-center'>
-                              <a role='button' className='text-black text-center' onClick={() => handleViewClick(invoice)}>
-                                <i className='fa-solid fa-eye'></i>
-                              </a>
-                            </td>
-                            <td><CurrencySign />{roundOff(invoice.total)}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className='row mt-3'>
-                    <div className='col-12'>
-                      <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
-                        Previous Page
-                      </button>
-                      <button
-                        onClick={handleNextPage}
-                        disabled={(currentPage + 1) * entriesPerPage >= invoices.length}
-                      >
-                        Next Page
-                      </button>
+                {/* Mobile Card Layout */}
+                <div className="d-md-none">
+                  {invoices.map((invoice, index) => (
+                    <div key={index} className="card mb-3 shadow-sm">
+                      <div className="card-body">
+                        <div className="d-flex justify-content-between align-items-start">
+                          <div>
+                            <p className="fw-bold mb-1">{invoice.customername}</p>
+                            <p className="small mb-1">{invoice.InvoiceNumber}</p>
+                            <p className="small mb-1">Job: {invoice.job}</p>
+                          </div>
+                          <button className="btn btn-link p-0" onClick={() => handleViewClick(invoice)}>
+                            <i className="fa-solid fa-eye"></i>
+                          </button>
+                        </div>
+                        <div className="d-flex justify-content-between mt-2">
+                          <div>
+                            <p className="small mb-0">Issued: {formatCustomDate(invoice.date)}</p>
+                            <p className="small mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
+                          </div>
+                          <div className="text-end">
+                            <p className="fw-bold mb-0"><CurrencySign />{roundOff(invoice.total)}</p>
+                            {getStatus(invoice)}
+                          </div>
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  ))}
+                </div>
+
+                {/* Pagination */}
+                <div className="d-flex justify-content-between mt-3 flex-wrap">
+                  <button className="btn btn-outline-primary" onClick={handlePrevPage} disabled={currentPage === 0}>
+                    Previous
+                  </button>
+                  <span className="align-self-center">Page {currentPage + 1} of {totalPages}</span>
+                  <button className="btn btn-outline-primary" onClick={handleNextPage} disabled={currentPage >= totalPages - 1}>
+                    Next
+                  </button>
                 </div>
               </div>
             </div>
           </div>
-      }
+        </div>
+      )}
     </div>
-  )
+  );
 }
-
