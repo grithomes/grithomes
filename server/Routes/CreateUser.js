@@ -2314,6 +2314,39 @@ router.get('/invoicedata/:userid', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+router.get('/searchinvoices/:userid', async (req, res) => {
+    try {
+      const userid = req.params.userid;
+      const authtoken = req.headers.authorization;
+      const search = req.query.search || '';
+      const status = req.query.status;
+  
+      // Verify JWT token
+      const decodedToken = jwt.verify(authtoken, jwrsecret);
+  
+      let query = {
+        userid,
+        $or: [
+          { customername: { $regex: search, $options: 'i' } },
+          { job: { $regex: search, $options: 'i' } }
+        ]
+      };
+  
+      if (status && status !== 'All') {
+        query.status = status;
+      }
+  
+      const invoices = await Invoice.find(query).sort({ createdAt: -1 });
+  
+      res.json({ invoices });
+    } catch (error) {
+      console.error('Search error:', error);
+      if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+      }
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 
 router.get('/customerwisedata/:customeremail', async (req, res) => {
     try {

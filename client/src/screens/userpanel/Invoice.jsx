@@ -5,7 +5,6 @@ import Usernav from './Usernav';
 import { ColorRing } from 'react-loader-spinner';
 import CurrencySign from '../../components/CurrencySign ';
 import Alertauthtoken from '../../components/Alertauthtoken';
-// import './Invoice.css';
 
 export default function Invoice() {
   const [loading, setLoading] = useState(true);
@@ -25,7 +24,12 @@ export default function Invoice() {
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") === "true") {
       navigate("/");
     }
-    fetchData();
+
+    const debounceTimer = setTimeout(() => {
+      fetchData();
+    }, 500);
+
+    return () => clearTimeout(debounceTimer);
   }, [currentPage, filterStatus, searchQuery]);
 
   const fetchData = async () => {
@@ -33,10 +37,14 @@ export default function Invoice() {
       setLoading(true);
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(
-        `https://grithomes.onrender.com/api/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`,
-        { headers: { 'Authorization': authToken } }
-      );
+
+      const endpoint = searchQuery.trim()
+        ? `https://grithomes.onrender.com/api/searchinvoices/${userid}?search=${encodeURIComponent(searchQuery)}&status=${filterStatus}`
+        : `https://grithomes.onrender.com/api/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`;
+
+      const response = await fetch(endpoint, {
+        headers: { 'Authorization': authToken }
+      });
 
       if (response.status === 401) {
         const json = await response.json();
@@ -47,10 +55,17 @@ export default function Invoice() {
       }
 
       const json = await response.json();
-      setInvoices(json.invoices);
-      setTotalPages(json.totalPages);
+      const invoicesList = json.invoices;
+      setInvoices(invoicesList);
 
-      const transactionPromises = json.invoices.map(async (invoice) => {
+      if (!searchQuery.trim()) {
+        setTotalPages(json.totalPages);
+      } else {
+        setTotalPages(1);
+        setCurrentPage(0);
+      }
+
+      const transactionPromises = invoicesList.map(async (invoice) => {
         const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
           headers: { 'Authorization': authToken }
         });
@@ -91,12 +106,10 @@ export default function Invoice() {
   };
 
   const getStatus = (invoice) => {
-    // If the invoice status is explicitly "Send," use it directly
     if (invoice.status === 'Send') {
       return <span className="badge bg-primary"><i className="fa-solid fa-circle me-1"></i>Send</span>;
     }
 
-    // Otherwise, calculate status based on transactions
     const relatedTransactions = transactions.filter(t => t.invoiceId === invoice._id);
     const totalPaidAmount = relatedTransactions.reduce((total, payment) => total + parseFloat(payment.paidamount), 0);
 
@@ -225,15 +238,17 @@ export default function Invoice() {
                 </div>
 
                 {/* Pagination */}
-                <div className="d-flex justify-content-between mt-3 flex-wrap">
-                  <button className="btn btn-outline-primary" onClick={handlePrevPage} disabled={currentPage === 0}>
-                    Previous
-                  </button>
-                  <span className="align-self-center">Page {currentPage + 1} of {totalPages}</span>
-                  <button className="btn btn-outline-primary" onClick={handleNextPage} disabled={currentPage >= totalPages - 1}>
-                    Next
-                  </button>
-                </div>
+                {!searchQuery && (
+                  <div className="d-flex justify-content-between mt-3 flex-wrap">
+                    <button className="btn btn-outline-primary" onClick={handlePrevPage} disabled={currentPage === 0}>
+                      Previous
+                    </button>
+                    <span className="align-self-center">Page {currentPage + 1} of {totalPages}</span>
+                    <button className="btn btn-outline-primary" onClick={handleNextPage} disabled={currentPage >= totalPages - 1}>
+                      Next
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
