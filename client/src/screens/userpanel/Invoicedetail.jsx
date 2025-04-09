@@ -751,8 +751,10 @@ export default function Invoicedetail() {
       0
     );
     // Check if the paid amount exceeds the due amount
-    const dueAmount = invoiceData.total - totalPaidAmount;
+    const dueAmount = roundOff(invoiceData.total - totalPaidAmount);
     const paymentAmount = parseFloat(transactionData.paidamount);
+    console.log(dueAmount, paymentAmount, "paymentAmountpaymentAmount");
+    
 
     if (paymentAmount > dueAmount) {
       console.error('Payment amount exceeds the due amount.');
