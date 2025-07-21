@@ -1,24 +1,348 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="http://res.cloudinary.com/dxwge5g8f/image/upload/v1715784054/if4ykslqjn9zv7grargq.png" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Grit Homes | Invoice Management</title>
-    <link href="db.onlinewebfonts.com/c/f21923cb0f60b46d41a66875255790b3?family=NHaasGroteskDSPro-65Md" rel="stylesheet" type="text/css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <link rel="stylesheet" href="path-to-react-virtualized-select/styles.css">
-  </head>
-  <body >
-    <div id="root" style="overflow-y: scroll; height: auto;"></div>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bison Transport</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            background: url('https://via.placeholder.com/1200x300?text=Header+Image') no-repeat center;
+            background-size: cover;
+            height: 300px;
+            position: relative;
+            color: #fff;
+        }
+        .navbar {
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 10px 0;
+        }
+        .navbar-brand img {
+            height: 40px;
+        }
+        .nav-link {
+            color: #fff !important;
+            font-size: 0.9rem;
+            margin-left: 15px;
+        }
+        .header-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            width: 100%;
+        }
+        .header-content h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: #d4a017;
+            margin-bottom: 10px;
+        }
+        .header-content p {
+            font-size: 1.2rem;
+            color: #fff;
+            margin-bottom: 20px;
+        }
+        .btn-primary {
+            background-color: #d4a017;
+            border: none;
+            padding: 10px 30px;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        .btn-primary:hover {
+            background-color: #b78c15;
+        }
+        .btn-outline-light {
+            border-color: #fff;
+            color: #fff;
+            padding: 10px 30px;
+        }
+        .btn-outline-light:hover {
+            background-color: #fff;
+            color: #d4a017;
+        }
+        .section {
+            padding: 80px 0;
+        }
+        .section h2 {
+            color: #d4a017;
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #d4a017;
+            display: inline-block;
+        }
+        .section p {
+            color: #6c757d;
+            font-size: 1rem;
+        }
+        .who-bison .col-md-4 {
+            padding-right: 40px;
+        }
+        .who-bison img {
+            width: 100%;
+            height: auto;
+        }
+        .safety-sign {
+            width: 80px;
+            position: absolute;
+            right: 20px;
+            bottom: 20px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 40px;
+            border-top: 1px solid #dee2e6;
+            padding-top: 20px;
+        }
+        .stats div {
+            text-align: center;
+        }
+        .stats h3 {
+            color: #d4a017;
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        .stats p {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+        .work-with-us img {
+            width: 100%;
+            height: auto;
+        }
+        .ship-partner .col-md-6 {
+            padding: 20px;
+        }
+        .ship-partner img {
+            width: 100%;
+            height: auto;
+        }
+        .blog .col-md-4 {
+            margin-bottom: 20px;
+        }
+        .blog img {
+            width: 100%;
+            height: auto;
+        }
+        .blog p {
+            font-size: 0.9rem;
+            color: #6c757d;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 40px 0;
+            color: #6c757d;
+        }
+        .footer h5 {
+            color: #333;
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+        .footer a {
+            color: #6c757d;
+            display: block;
+            margin-bottom: 10px;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            color: #d4a017;
+        }
+        .footer input {
+            margin-bottom: 10px;
+        }
+        .footer .btn-primary {
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="navbar navbar-expand-lg">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <img src="https://via.placeholder.com/100x40?text=Bison+Logo" alt="Bison Logo">
+                </a>
+                <div class="collapse navbar-collapse justify-content-end">
+                    <ul class="navbar-nav">
+                        <li class="nav-item"><a class="nav-link" href="#">About</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Shippers</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Carriers</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Careers</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Locations</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Call Us: 1-800-GO-BISON</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Login</a></li>
+                        <li class="nav-item"><a class="nav-link" href="#">Request Quote</a></li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+        <div class="header-content">
+            <h1>LOGISTICS - FREIGHT SOLUTIONS: FLEXIBLE & RELIABLE SERVICE</h1>
+            <p>Track Your Load</p>
+            <a href="#" class="btn btn-primary">START TRACKING</a>
+            <a href="#" class="btn btn-outline-light ms-2">LEARN MORE</a>
+        </div>
+    </header>
 
-    <script>
-window.addEventListener('load', () => {
-  document.body.style.overflow = '';
-});
-</script>
-    <script type="module" src="/src/main.jsx"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <script src="https://kit.fontawesome.com/b2bcb2eb22.js"></script>
-  </body>
+    <!-- Who is Bison Section -->
+    <section class="section who-bison">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <h2>Who is Bison?</h2>
+                    <p>Bison is a privately held, professionally managed transportation company, established in 1969. With a network of terminals, warehouses, and yards throughout Canada, the U.S. and Mexico, Bison is a leading asset-based freight solutions provider that employs over 4,000 professional drivers and staff. We proudly deliver award-winning transportation services to our valued clients throughout North America. We operate one of the largest, safest, and most modern fleets on the road today with an industry-low claims ratio of less than 0.1%. Our ongoing investments in tractor, trailer, and container equipment is a testament to our commitment.</p>
+                    <a href="#" class="btn btn-outline-primary mt-3">ABOUT BISON</a>
+                </div>
+                <div class="col-md-8 position-relative">
+                    <img src="https://via.placeholder.com/600x400?text=Trucks" alt="Bison Trucks" class="img-fluid">
+                    <img src="https://via.placeholder.com/80?text=SAFETY" alt="Safety Sign" class="safety-sign">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Supply Chain Section -->
+    <section class="section bg-light">
+        <div class="container">
+            <h2>Supply chain solutions to fuel your business.</h2>
+            <p>Bison is North America's Trusted Supply Chain Solutions Partner. Mile after mile, customer service sets us apart from the rest - and dedication to excellence is in our DNA.</p>
+            <div class="stats">
+                <div><h3>1969</h3><p>Year of Operation</p></div>
+                <div><h3>4,000+</h3><p>Employees & Contractors</p></div>
+                <div><h3>3,000+</h3><p>Trailers & Containers</p></div>
+                <div><h3><0.1%</h3><p>Claims Ratio</p></div>
+                <div><h3>10,000+</h3><p>Customers</p></div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Work With Us Section -->
+    <section class="section">
+        <div class="container">
+            <h2>Work with Us</h2>
+            <div class="row align-items-center">
+                <div class="col-md-4">
+                    <p><strong>Put Safety First:</strong> With North America's Safest Fleet, we gain the trust of Shippers. WIN-WIN: Drivers, Customers, Communities.</p>
+                    <p><strong>Drive Your Future:</strong> State-of-the-Art Equipment, Top-Notch Accommodations. We elevate the Professional Driver experience like no other, and award-winning safety is a journey we take together.</p>
+                    <a href="#" class="btn btn-outline-primary">DRIVING JOBS</a>
+                    <a href="#" class="btn btn-outline-primary ms-2">NON-DRIVING JOBS</a>
+                </div>
+                <div class="col-md-8">
+                    <img src="https://via.placeholder.com/500x300?text=Team" alt="Team" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Ship With Us & Partner With Us -->
+    <section class="section bg-light ship-partner">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h2>Ship With Us</h2>
+                    <ul class="list-unstyled">
+                        <li>✔ Award-winning transportation solutions</li>
+                        <li>✔ Custom freight-forwarding services</li>
+                        <li>✔ Virtually unlimited capacity</li>
+                    </ul>
+                    <p>Bison offers unparalleled capacity, backed by a growing fleet of proprietary tractors, trailers, and equipment and an extensive network of Partner Carriers.</p>
+                    <a href="#" class="btn btn-outline-primary">SHIP WITH US</a>
+                </div>
+                <div class="col-md-6">
+                    <img src="https://via.placeholder.com/500x300?text=Truck" alt="Truck" class="img-fluid">
+                </div>
+            </div>
+            <div class="row align-items-center mt-5">
+                <div class="col-md-6">
+                    <h2>Partner With Us</h2>
+                    <ul class="list-unstyled">
+                        <li>✔ Ease of partnership & eligible carriers</li>
+                        <li>✔ Industry-leading fuel card to save you money</li>
+                    </ul>
+                    <p>Bison is committed to providing partnership opportunities for small carriers that reward safety and excellence in customer service with an exclusive Partner Carrier Loyalty Program.</p>
+                    <a href="#" class="btn btn-outline-primary">PARTNER WITH BISON</a>
+                </div>
+                <div class="col-md-6">
+                    <img src="https://via.placeholder.com/500x300?text=Handshake" alt="Handshake" class="img-fluid">
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Blog Section -->
+    <section class="section">
+        <div class="container">
+            <h2>Keeping Up-to-Date with Bison</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <img src="https://via.placeholder.com/300x200?text=Blog1" alt="Blog 1" class="img-fluid">
+                    <p>Mar 15, 2025 - Through-Trailer Border Shipping Strategy for the United States...</p>
+                </div>
+                <div class="col-md-4">
+                    <img src="https://via.placeholder.com/300x200?text=Blog2" alt="Blog 2" class="img-fluid">
+                    <p>Mar 10, 2025 - Simplifying the Customs Process: When Business considers expanding their...</p>
+                </div>
+                <div class="col-md-4">
+                    <img src="https://via.placeholder.com/300x200?text=Blog3" alt="Blog 3" class="img-fluid">
+                    <p>Feb 20, 2025 - Inventory Management & Reasons to Leverage...</p>
+                </div>
+            </div>
+            <a href="#" class="btn btn-outline-primary mt-3">ALL ARTICLES</a>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-3">
+                    <img src="https://via.placeholder.com/100x40?text=Bison+Logo" alt="Bison Logo" class="mb-3">
+                    <p>Bison Transport Head Office<br>Winnipeg, MB, R3H 0R3<br>Phone: 1-204-800-3333<br>Email: info@bisontransport.com</p>
+                </div>
+                <div class="col-md-2">
+                    <h5>Shippers</h5>
+                    <a href="#">Tracking</a>
+                    <a href="#">Logistics</a>
+                    <a href="#">Mexico</a>
+                </div>
+                <div class="col-md-2">
+                    <h5>Carriers</h5>
+                    <a href="#">Become a Carrier</a>
+                    <a href="#">Carrier Login</a>
+                    <a href="#">Company</a>
+                </div>
+                <div class="col-md-2">
+                    <h5>Careers</h5>
+                    <a href="#">Driving Jobs</a>
+                    <a href="#">Non-Driving Jobs</a>
+                    <a href="#">Heritage, Social & Charitable</a>
+                </div>
+                <div class="col-md-3">
+                    <h5>News delivered</h5>
+                    <p>What’s next to your industry?</p>
+                    <input type="email" class="form-control mb-2" placeholder="Email">
+                    <button class="btn btn-primary">SUBSCRIBE</button>
+                    <div class="mt-3">
+                        <a href="#">Request Quote</a> | <a href="#">Accessibility Feedback</a>
+                    </div>
+                </div>
+            </div>
+            <p class="text-muted mt-4">© 2025 Bison Transport. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
 </html>

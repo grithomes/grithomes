@@ -46,7 +46,7 @@ export default function Customerlist() {
         try {
             const userid =  localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/customers/${userid}`, {
                 headers: {
                   'Authorization': authToken,
                 }
@@ -78,38 +78,38 @@ export default function Customerlist() {
         navigate('/userpanel/Editcustomer', { state: { customerId } });
     };
 
-    const handleDeleteClick = async (customerId) => {
-        try {
-            const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/delcustomers/${customerId}`, {
-                method: 'GET',
-                headers: {
-                    'Authorization': authToken,
-                  }
-            });
+const handleDeleteClick = async (customerId) => {
+  try {
+    const authToken = localStorage.getItem('authToken');
+    const response = await fetch(`http://localhost:3001/api/delcustomers/${customerId}`, {
+      method: 'GET',
+      headers: {
+        'Authorization': authToken,
+      }
+    });
 
-            if (response.status === 401) {
-              const json = await response.json();
-              setAlertMessage(json.message);
-              setloading(false);
-              window.scrollTo(0,0);
-              return; // Stop further execution
-            }
-            else{
-                const json = await response.json();
-    
-                if (json.Success) {
-                    fetchdata(); // Refresh the customers list
-                } else {
-                    console.error('Error deleting customer:', json.message);
-                }  
-            }
-    
-            
-        } catch (error) {
-            console.error('Error deleting customer:', error);
-        }
-    };
+    const json = await response.json();
+
+    if (response.status === 401) {
+      setAlertMessage(json.message);
+      setloading(false);
+      window.scrollTo(0, 0);
+      return;
+    }
+
+    if (json.Success) {
+      toast.success('Customer deleted successfully');
+      fetchdata(); // refresh list
+    } else {
+      toast.error(json.message || 'Failed to delete customer');
+    }
+
+  } catch (error) {
+    toast.error('Something went wrong while deleting.');
+    console.error('Error deleting customer:', error);
+  }
+};
+
 
     // Filtering function
     const filteredCustomers = customers.filter(customer =>
@@ -223,7 +223,13 @@ export default function Customerlist() {
                                     <tr key={index}>
                                         <th scope="row">{index + 1}</th>
                                         <td>{customer.name}</td>
-                                        <td>{customer.email}</td>
+                                      <td>
+  {customer.emails && customer.emails.length > 0
+    ? customer.emails.map((email, idx) => (
+        <div key={idx}>{email}</div>
+      ))
+    : '—'}
+</td>
                                         <td>{formatDate(customer.createdAt)}</td>
                                         <td>{customer.number}</td>
                                         <td className='text-center'>

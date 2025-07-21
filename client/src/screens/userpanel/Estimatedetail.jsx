@@ -72,7 +72,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`, {
+      const response = await fetch(`http://localhost:3001/api/getestimatedata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -116,7 +116,7 @@ export default function Estimatedetail() {
     }
 
     try {
-      const response = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
+      const response = await fetch(`http://localhost:3001/api/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
       const json = await response.json();
       console.log('Customer signature response:', json);
       if (response.ok && json.hasSignature) {
@@ -133,7 +133,7 @@ export default function Estimatedetail() {
     try {
       const ownerId = localStorage.getItem('userid');
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getownerdata/${ownerId}`, {
+      const response = await fetch(`http://localhost:3001/api/getownerdata/${ownerId}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -158,7 +158,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`, {
+      const response = await fetch(`http://localhost:3001/api/gettransactiondata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -195,7 +195,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -573,7 +573,7 @@ thead{
       // If a signature exists, delete it
       if (signatureData) {
         const authToken = localStorage.getItem('authToken');
-        const deleteSignatureResponse = await fetch(`https://grithomes.onrender.com/api/delcustomersignature/${encodeURIComponent(estimateIdpass)}`, {
+        const deleteSignatureResponse = await fetch(`http://localhost:3001/api/delcustomersignature/${encodeURIComponent(estimateIdpass)}`, {
           method: 'DELETE',
           headers: {
             'Authorization': authToken,
@@ -591,7 +591,7 @@ thead{
   
       // Proceed with deleting the estimate data
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
+      const response = await fetch(`http://localhost:3001/api/delestimatedata/${estimateid}`, {
         method: 'GET',
         headers: {
           'Authorization': authToken,
@@ -623,7 +623,7 @@ thead{
   // const handleRemove = async (estimateid) => {
   //   try {
   //     const authToken = localStorage.getItem('authToken');
-  //     const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
+  //     const response = await fetch(`http://localhost:3001/api/delestimatedata/${estimateid}`, {
   //       method: 'GET',
   //       headers: {
   //         'Authorization': authToken,
@@ -677,7 +677,7 @@ thead{
     // console.log(userEmail, "userEmail ============");
     try {
       const finalContent = content.trim() || ``; // If content is empty, use default value
-      const response = await fetch('https://grithomes.onrender.com/api/send-estimate-email', {
+      const response = await fetch('http://localhost:3001/api/send-estimate-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -706,7 +706,7 @@ thead{
         setShowEmailAlert(true);
         // Update the database with emailsent status
         const updatedData = { ...estimateData, status: 'Send', emailsent: 'yes' }; // Update emailsent status
-        await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
+        await fetch(`http://localhost:3001/api/updateestimateData/${estimateid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -716,12 +716,12 @@ thead{
         });
 
         // Check if customer signature already exists
-        const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
+        const checkResponse = await fetch(`http://localhost:3001/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
         const checkJson = await checkResponse.json();
 
         if (checkResponse.ok && !checkJson.hasSignature) {
           // Create new customer signature only if it doesn't exist
-          await fetch('https://grithomes.onrender.com/api/customersignature', {
+          await fetch('http://localhost:3001/api/customersignature', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -965,8 +965,8 @@ thead{
                                 </td>
                                 <td className='e d-md-table-cell' width="15%">{item.itemquantity}</td>
                                 <td className=' d-md-table-cell' width="15%">{item.unit}</td>
-                                <td className=' d-md-table-cell' width="15%">{roundOff(item.price)}</td>
-                                <td className=' d-md-table-cell text-end' width="15%">{roundOff(item.amount)}</td>
+                                <td className=' d-md-table-cell' width="15%">{roundOff(item.price).toLocaleString('en-CA')}</td>
+                                <td className=' d-md-table-cell text-end' width="15%">{roundOff(item.amount).toLocaleString('en-CA')}</td>
                               </tr>
                             ))}
                           </tbody>
@@ -976,7 +976,7 @@ thead{
                         <table className='fs12'>
                           <tr>
                             <td className='text-end'>Subtotal:</td>
-                            <td style={{ textAlign: 'right' }}><CurrencySign />{roundOff(estimateData.subtotal)}</td>
+                            <td style={{ textAlign: 'right' }}><CurrencySign />{roundOff(estimateData.subtotal).toLocaleString('en-CA')}</td>
                           </tr>
 
                           {
@@ -984,7 +984,7 @@ thead{
                               ?
                               <tr>
                                 <td className='text-end' width="22%">Discount</td>
-                                <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.discountTotal)}</td>
+                                <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.discountTotal).toLocaleString('en-CA')}</td>
                               </tr>
                               :
                               null
@@ -1000,20 +1000,20 @@ thead{
                                   {signupdata.TaxName} ({signupdata.taxPercentage}%)
 
                                 </td>
-                                <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.tax)}</td>
+                                <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.tax).toLocaleString('en-CA')}</td>
                               </tr>
                           }
 
 
                           <tr>
                             <td className='text-end'>Total</td>
-                            <td style={{ textAlign: 'right' }}><CurrencySign />{roundOff(estimateData.total)}</td>
+                            <td style={{ textAlign: 'right' }}><CurrencySign />{roundOff(estimateData.total).toLocaleString('en-CA')}</td>
                           </tr>
 
                           {transactions.map((transaction) => (
                             <tr key={transaction._id}>
                               <td className='text-md-end' width="100%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
-                              <td className='text-end' width="100%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount}</td>
+                              <td className='text-end' width="100%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount.toLocaleString('en-CA')}</td>
                             </tr>
                           ))}
                         </table>
@@ -1024,7 +1024,7 @@ thead{
 
 
                       <div className='ps text-right' >
-                        <p className='text-end'> <span className='p-3 text-green' style={{ background: '#f0f3f4' }} >Estimate Total: <strong><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</strong></span></p>
+                        <p className='text-end'> <span className='p-3 text-green' style={{ background: '#f0f3f4' }} >Estimate Total: <strong><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0)).toLocaleString('en-CA')}</strong></span></p>
                       </div>
 
 

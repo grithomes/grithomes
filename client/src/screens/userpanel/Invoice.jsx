@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import Usernavbar from './Usernavbar';
 import { useNavigate, useLocation } from 'react-router-dom';
@@ -8,9 +9,10 @@ import Alertauthtoken from '../../components/Alertauthtoken';
 
 export default function Invoice() {
   const [loading, setLoading] = useState(true);
+  const [tableloading, settableLoading] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [currentPage, setCurrentPage] = useState(0);
+  const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(0);
   const [alertMessage, setAlertMessage] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -21,41 +23,51 @@ export default function Invoice() {
   const navigate = useNavigate();
 
   useEffect(() => {
+
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") === "true") {
       navigate("/");
-    }
-
-    const debounceTimer = setTimeout(() => {
+     
+    } else {
+  
+      
       fetchData();
-    }, 500);
-
-    return () => clearTimeout(debounceTimer);
+   
+    }
   }, [currentPage, filterStatus, searchQuery]);
 
   const fetchData = async () => {
+    console.log("Hello it fecthdata start")
     try {
-      setLoading(true);
+      // setLoading(true);
+      settableLoading(true)
       const userid = localStorage.getItem("userid");
-      const authToken = localStorage.getItem('authToken');
-
+      
       const endpoint = searchQuery.trim()
-        ? `https://grithomes.onrender.com/api/searchinvoices/${userid}?search=${encodeURIComponent(searchQuery)}&status=${filterStatus}`
-        : `https://grithomes.onrender.com/api/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`;
-
+      ? `http://localhost:3001/api/searchinvoices/${userid}?search=${encodeURIComponent(searchQuery)}&status=${filterStatus}`
+      : `http://localhost:3001/api/invoicedata/${userid}/?page=${currentPage}&limit=${limit}&status=${filterStatus}`;
+      
+      const authToken = localStorage.getItem('authToken');
+      console.log(authToken,"authToken");
+      
       const response = await fetch(endpoint, {
-        headers: { 'Authorization': authToken }
+         headers: { 'Authorization': authToken }
       });
+      console.log(response, "Hello it fecthdata after endpoint")
 
       if (response.status === 401) {
         const json = await response.json();
         setAlertMessage(json.message);
-        setLoading(false);
+        // setLoading(false);
+        settableLoading(false);
         window.scrollTo(0, 0);
         return;
       }
 
       const json = await response.json();
-      const invoicesList = json.invoices;
+      // const invoicesList = json.invoices;
+      const invoicesList = Array.isArray(json.invoices) ? json.invoices : [];
+      console.log(invoicesList, "invoicesList");
+setTotalPages(json.totalPages);
       setInvoices(invoicesList);
 
       if (!searchQuery.trim()) {
@@ -66,8 +78,8 @@ export default function Invoice() {
       }
 
       const transactionPromises = invoicesList.map(async (invoice) => {
-        const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
-          headers: { 'Authorization': authToken }
+        const response = await fetch(`http://localhost:3001/api/gettransactiondata/${invoice._id}`, {
+        headers: { 'Authorization': authToken }
         });
         if (response.status === 401) {
           const transactionJson = await response.json();
@@ -81,9 +93,11 @@ export default function Invoice() {
       const transactionsData = await Promise.all(transactionPromises);
       setTransactions(transactionsData.flat());
       setLoading(false);
+      settableLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
       setLoading(false);
+      settableLoading(false);
     }
   };
 
@@ -165,86 +179,112 @@ export default function Invoice() {
                       className="form-control"
                       placeholder="Search by Name / Job"
                       value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setSearchQuery(value);
+
+                        if (value.trim() === '') {
+                          setCurrentPage(0);
+                        }
+                      }}
                     />
                   </div>
                 </div>
 
                 {/* Desktop Table */}
                 <div className="d-none d-md-block table-responsive">
-                  <table className="table table-bordered">
-                    <thead>
-                      <tr>
-                        <th>INVOICE</th>
-                        <th>STATUS</th>
-                        <th>DATE</th>
-                        <th>VIEW</th>
-                        <th>AMOUNT</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {invoices.map((invoice, index) => (
-                        <tr key={index}>
-                          <td>
-                            <p className="fw-bold mb-0">{invoice.customername}</p>
-                            <p className="mb-0">{invoice.InvoiceNumber}</p>
-                            <p className="mb-0">Job: {invoice.job}</p>
-                          </td>
-                          <td>{getStatus(invoice)}</td>
-                          <td>
-                            <p className="mb-0">Issued: {formatCustomDate(invoice.date)}</p>
-                            <p className="mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
-                          </td>
-                          <td className="text-center">
-                            <button className="btn btn-link" onClick={() => handleViewClick(invoice)}>
-                              <i className="fa-solid fa-eye"></i>
-                            </button>
-                          </td>
-                          <td><CurrencySign />{roundOff(invoice.total)}</td>
+                  {tableloading ? (
+                    <div className="text-center py-3">
+                      <ColorRing height="50" />
+                    </div>
+                  ) : (
+                    <table className="table table-bordered">
+                      <thead>
+                        <tr>
+                          <th>INVOICE</th>
+                          <th>STATUS</th>
+                          <th>DATE</th>
+                          <th>VIEW</th>
+                          <th>AMOUNT</th>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                      </thead>
+                      <tbody>
+                        {console.log(invoices, "invoices")}
+                        {Array.isArray(invoices) && invoices.length > 0 ? (
+                          invoices.map((invoice, index) => (
+                            <tr key={index}>
+                              <td>
+                                <p className="fw-bold mb-0">{invoice.customername}</p>
+                                <p className="mb-0">{invoice.InvoiceNumber}</p>
+                                <p className="mb-0">Job: {invoice.job}</p>
+                              </td>
+                              <td>{getStatus(invoice)}</td>
+                              <td>
+                                <p className="mb-0">Issued: {formatCustomDate(invoice.date)}</p>
+                                <p className="mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
+                              </td>
+                              <td className="text-center">
+                                <button className="btn btn-link" onClick={() => handleViewClick(invoice)}>
+                                  <i className="fa-solid fa-eye"></i>
+                                </button>
+                              </td>
+                              <td><CurrencySign />{roundOff(invoice.total)}</td>
+                            </tr>
+                          ))) : (
+                          <tr>
+                            <td colSpan="5" className="text-center">No invoices found</td>
+                          </tr>
+                        )}
+                      </tbody>
+                    </table>
+                  )}
                 </div>
 
                 {/* Mobile Card Layout */}
                 <div className="d-md-none">
-                  {invoices.map((invoice, index) => (
-                    <div key={index} className="card mb-3 shadow-sm">
-                      <div className="card-body">
-                        <div className="d-flex justify-content-between align-items-start">
-                          <div>
-                            <p className="fw-bold mb-1">{invoice.customername}</p>
-                            <p className="small mb-1">{invoice.InvoiceNumber}</p>
-                            <p className="small mb-1">Job: {invoice.job}</p>
+                  {Array.isArray(invoices) && invoices.length > 0 ? (
+
+                    invoices.map((invoice, index) => (
+                      <div key={index} className="card mb-3 shadow-sm">
+                        <div className="card-body">
+                          <div className="d-flex justify-content-between align-items-start">
+                            <div>
+                              <p className="fw-bold mb-1">{invoice.customername}</p>
+                              <p className="small mb-1">{invoice.InvoiceNumber}</p>
+                              <p className="small mb-1">Job: {invoice.job}</p>
+                            </div>
+                            <button className="btn btn-link p-0" onClick={() => handleViewClick(invoice)}>
+                              <i className="fa-solid fa-eye"></i>
+                            </button>
                           </div>
-                          <button className="btn btn-link p-0" onClick={() => handleViewClick(invoice)}>
-                            <i className="fa-solid fa-eye"></i>
-                          </button>
-                        </div>
-                        <div className="d-flex justify-content-between mt-2">
-                          <div>
-                            <p className="small mb-0">Issued: {formatCustomDate(invoice.date)}</p>
-                            <p className="small mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
-                          </div>
-                          <div className="text-end">
-                            <p className="fw-bold mb-0"><CurrencySign />{roundOff(invoice.total)}</p>
-                            {getStatus(invoice)}
+                          <div className="d-flex justify-content-between mt-2">
+                            <div>
+                              <p className="small mb-0">Issued: {formatCustomDate(invoice.date)}</p>
+                              <p className="small mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
+                            </div>
+                            <div className="text-end">
+                              <p className="fw-bold mb-0"><CurrencySign />{roundOff(invoice.total).toLocaleString('en-CA')}</p>
+                              {getStatus(invoice)}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="5" className="text-center">No invoices found</td>
+                    </tr>
+                  )}
                 </div>
 
                 {/* Pagination */}
                 {!searchQuery && (
                   <div className="d-flex justify-content-between mt-3 flex-wrap">
-                    <button className="btn btn-outline-primary" onClick={handlePrevPage} disabled={currentPage === 0}>
+                    <button type="button" className="btn btn-outline-primary" onClick={handlePrevPage} disabled={currentPage === 0}>
                       Previous
                     </button>
                     <span className="align-self-center">Page {currentPage + 1} of {totalPages}</span>
-                    <button className="btn btn-outline-primary" onClick={handleNextPage} disabled={currentPage >= totalPages - 1}>
+                    <button type="button" className="btn btn-outline-primary" onClick={handleNextPage} disabled={currentPage >= totalPages - 1}>
                       Next
                     </button>
                   </div>

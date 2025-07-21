@@ -65,7 +65,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -88,7 +88,7 @@ export default function Dashboard() {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
       const response = await fetch(
-        `https://grithomes.onrender.com/api/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`,
+        `http://localhost:3001/api/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`,
         { headers: { 'Authorization': authToken } }
       );
 
@@ -105,7 +105,7 @@ export default function Dashboard() {
       setTotalPages(json.totalPages);
 
       const transactionPromises = json.invoices.map(async (invoice) => {
-        const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
+        const response = await fetch(`http://localhost:3001/api/gettransactiondata/${invoice._id}`, {
           headers: { 'Authorization': authToken }
         });
         if (response.status === 401) {
@@ -130,7 +130,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/currentMonthReceivedAmount/${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/currentMonthReceivedAmount/${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -153,7 +153,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userId = localStorage.getItem('userid');
-      const response = await fetch(`https://grithomes.onrender.com/api/totalPaymentReceived/${userId}`, {
+      const response = await fetch(`http://localhost:3001/api/totalPaymentReceived/${userId}`, {
         headers: { Authorization: authToken }
       });
       if (response.status === 401) {
@@ -174,7 +174,7 @@ export default function Dashboard() {
   const fetchTotalExpense = async () => {
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/expense`, {
+      const response = await fetch(`http://localhost:3001/api/expense`, {
         headers: { Authorization: authToken }
       });
       if (response.status === 401) {
@@ -197,7 +197,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userid = localStorage.getItem('userid');
-      const response = await fetch(`https://grithomes.onrender.com/api/overdueInvoices/${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/overdueInvoices/${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -218,7 +218,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/all-invoices-by-financial-year?userid=${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/all-invoices-by-financial-year?userid=${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -239,18 +239,14 @@ export default function Dashboard() {
   };
 
   const getCurrentFinancialYearData = () => {
-    const currentMonth = new Date().getMonth();
-    const currentYear = new Date().getFullYear();
-    const currentFY = currentMonth >= 3 
-      ? `${currentYear}-${currentYear + 1}` 
-      : `${currentYear - 1}-${currentYear}`;
-    
-    return financialYearData.find(fy => fy.financialYear === currentFY) || {
-      totalAmount: 0,
-      totalDue: 0,
-      totalTax: 0,
-      invoiceCount: 0
-    };
+  const currentYear = new Date().getFullYear();
+const currentFY = `${currentYear}`;
+   return financialYearData.find(fy => fy.financialYear === currentFY) || {
+  totalAmount: 0,
+  totalDue: 0,
+  totalTax: 0,
+  invoiceCount: 0
+};
   };
 
   const handleOverdue = () => {
@@ -351,20 +347,21 @@ export default function Dashboard() {
               <div className='col-12 col-sm-4 col-md-4 col-lg-4'>
                 <div className='box1 rounded adminborder py-4 px-4 m-2'>
                   <p className='fs-6 fw-bold'>CURRENT FINANCIAL YEAR ({currentFYData.financialYear || 'Loading...'})</p>
-                  <p className='fs-3 fw-bold'><CurrencySign />{roundOff(currentFYData.totalAmount)}</p>
+
+                  <p className='fs-3 fw-bold'><CurrencySign />{roundOff(currentFYData.totalAmount).toLocaleString('en-CA')}</p>
                   <div className='d-flex'>
                     <div className='pe-2'>
                       <p className='fs-6 m-0'>TOTAL EXPENSE</p>
-                      <p className='fs-6 fw-bold'><CurrencySign />{roundOff(totalExpense)}</p>
+                      <p className='fs-6 fw-bold'><CurrencySign />{roundOff(totalExpense).toLocaleString('en-CA')}</p>
                     </div>
                     <div className='ps-2'>
                       <p className='fs-6 m-0'>TOTAL PROFIT</p>
-                      <p className='fs-6 fw-bold'><CurrencySign />{roundOff(currentFYData.totalAmount - totalExpense)}</p>
+                      <p className='fs-6 fw-bold'><CurrencySign />{roundOff(currentFYData.totalAmount - totalExpense).toLocaleString('en-CA')}</p>
                     </div>
                   </div>
                   <div className='d-flex'>
-                    <p className='pe-3'><span className='text-primary'>Paid</span> <CurrencySign />{roundOff(currentFYData.totalAmount - currentFYData.totalDue)}</p>
-                    <p><span className='text-warning'>Unpaid</span> <CurrencySign />{roundOff(currentFYData.totalDue)}</p>
+                    <p className='pe-3'><span className='text-primary'>Paid</span> <CurrencySign />{roundOff(currentFYData.totalAmount - currentFYData.totalDue).toLocaleString('en-CA')}</p>
+                    <p><span className='text-warning'>Unpaid</span> <CurrencySign />{roundOff(currentFYData.totalDue).toLocaleString('en-CA')}</p>
                   </div>
                   <div className='d-flex'>
                     <p className='pe-3'><span className='text-danger'>Overdue </span>{overdueCount} <span className='pointer' onClick={handleOverdue}>Invoices</span></p>
@@ -374,10 +371,10 @@ export default function Dashboard() {
               <div className='col-12 col-sm-4 col-md-4 col-lg-4'>
                 <div className='box1 rounded adminborder py-4 px-4 m-2'>
                   <p className='fs-6 fw-bold'>{currentMonth.toUpperCase()} INVOICE AMOUNT</p>
-                  <p className='fs-3 fw-bold'><CurrencySign /> {roundOff(curMonTotalAmount)}</p>
+                  <p className='fs-3 fw-bold'><CurrencySign /> {roundOff(curMonTotalAmount).toLocaleString('en-CA')}</p>
                   <div className='d-flex'>
-                    <p className='pe-3'><span className='text-primary'>Paid</span> <CurrencySign />{roundOff(curMonPaidAmount)}</p>
-                    <p><span className='text-warning'>Unpaid</span> <CurrencySign />{roundOff(curMonUnpaidAmount)}</p>
+                    <p className='pe-3'><span className='text-primary'>Paid</span> <CurrencySign />{roundOff(curMonPaidAmount).toLocaleString('en-CA')}</p>
+                    <p><span className='text-warning'>Unpaid</span> <CurrencySign />{roundOff(curMonUnpaidAmount).toLocaleString('en-CA')}</p>
                   </div>
                 </div>
               </div>
@@ -411,7 +408,8 @@ export default function Dashboard() {
                     </tr>
                   </thead>
                   <tbody>
-                    {invoices.map((invoice, index) => (
+                    {Array.isArray(invoices) && invoices.length > 0 ? (
+                    invoices.map((invoice, index) => (
                       <tr key={index}>
                         <td>
                           <p className="fw-bold mb-0">{invoice.customername}</p>
@@ -428,16 +426,21 @@ export default function Dashboard() {
                             <i className="fa-solid fa-eye"></i>
                           </button>
                         </td>
-                        <td><CurrencySign />{roundOff(invoice.total)}</td>
+                        <td><CurrencySign />{roundOff(invoice.total).toLocaleString('en-CA')}</td>
                       </tr>
-                    ))}
+                    ))):(
+                       <tr>
+    <td colSpan="5" className="text-center">No invoices found</td>
+  </tr>
+                    )}
                   </tbody>
                 </table>
               </div>
 
               {/* Mobile Card Layout */}
               <div className="d-md-none">
-                {invoices.map((invoice, index) => (
+                {Array.isArray(invoices) && invoices.length > 0 ? (
+                invoices.map((invoice, index) => (
                   <div key={index} className="card mb-3 shadow-sm">
                     <div className="card-body">
                       <div className="d-flex justify-content-between align-items-start">
@@ -462,7 +465,10 @@ export default function Dashboard() {
                       </div>
                     </div>
                   </div>
-                ))}
+                ))):
+                (
+                  <p className="text-center">No invoices found</p>
+                )}
               </div>
 
               {/* Pagination */}

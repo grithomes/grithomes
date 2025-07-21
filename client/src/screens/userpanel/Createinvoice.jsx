@@ -61,7 +61,7 @@ export default function Createinvoice() {
     const modalRef = useRef(null);
     const [customers, setcustomers] = useState([]);
     const [items, setitems] = useState([]);
-    const [searchCustomerResults, setSearchcustomerResults] = useState([]);
+    const [searchcustomerResults, setSearchcustomerResults] = useState([]);
     const [searchitemResults, setSearchitemResults] = useState([]);
     const [quantityMap, setQuantityMap] = useState({});
     const [discountMap, setDiscountMap] = useState({});
@@ -94,6 +94,8 @@ export default function Createinvoice() {
     const [ownerId, setOwnerId] = useState('');
     const [isAddSignatureSwitchOn, setIsAddSignatureSwitchOn] = useState(false);
     const [isCustomerSignSwitchOn, setIsCustomerSignSwitchOn] = useState(false);
+    const [emailOptions, setEmailOptions] = useState([]);
+    const [showEmailModal, setShowEmailModal] = useState(false);
     const [credentials, setCredentials] = useState({
         name: '',
         email: '',
@@ -147,7 +149,7 @@ export default function Createinvoice() {
         if (event.target.checked) {
             try {
                 const ownerId = localStorage.getItem('userid');
-                const response = await fetch(`https://grithomes.onrender.com/api/check-signature/${ownerId}`);
+                const response = await fetch(`http://localhost:3001/api/check-signature/${ownerId}`);
                 const data = await response.json();
                 setHasSignature(data.hasSignature);
 
@@ -185,7 +187,7 @@ export default function Createinvoice() {
             const ownerId = localStorage.getItem('userid');
             const email = localStorage.getItem('userEmail');
             const companyname = localStorage.getItem('companyname');
-            await fetch('https://grithomes.onrender.com/api/ownersignature', {
+            await fetch('http://localhost:3001/api/ownersignature', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -206,7 +208,7 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem('userid');
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/lastinvoicenumber/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/lastinvoicenumber/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -243,7 +245,7 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -276,7 +278,7 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/customers/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -307,7 +309,7 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/itemdata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -374,7 +376,7 @@ export default function Createinvoice() {
         });
     };
 
-    const onChangeCustomer = (event) => {
+    const onChangecustomer = (event) => {
         const selectedCustomerId = event.value;
         console.log(selectedCustomerId, 'selectedCustomerId');
 
@@ -385,13 +387,23 @@ export default function Createinvoice() {
             setInvoiceData({
                 ...invoiceData,
                 customername: selectedCustomer.name,
-                customeremail: selectedCustomer.email,
+                // customeremail: selectedCustomer.email,
                 customerphone: selectedCustomer.number,
             });
-
+            // If multiple emails, ask user to pick
+            if (selectedCustomer.emails?.length > 1) {
+                setEmailOptions(selectedCustomer.emails);
+                setShowEmailModal(true); // open modal
+            } else {
+                setInvoiceData(prev => ({
+                    ...prev,
+                    customeremail: selectedCustomer.emails?.[0] || '',
+                }));
+            }
             setSelectedCustomerDetails({
                 name: selectedCustomer.name,
-                email: selectedCustomer.email,
+                email: selectedCustomer.emails?.[0] || '',
+                // email: selectedCustomer.email,
                 number: selectedCustomer.number
             });
             setIsCustomerSelected(true);
@@ -407,7 +419,8 @@ export default function Createinvoice() {
         const customer = customers.find(c => c.name === selectedName);
         if (customer) {
             setSelectedCustomerId(customer._id);
-            setEditedEmail(customer.email);
+            // setEditedEmail(customer.email);
+            setEditedEmail(customer.emails?.[0] || '');
             setEditedPhone(customer.number);
         }
     };
@@ -611,7 +624,7 @@ export default function Createinvoice() {
             console.log(data, "Invoice Data ====");
 
             // Sending invoice data to the backend API
-            const response = await fetch('https://grithomes.onrender.com/api/savecreateinvoice', {
+            const response = await fetch('http://localhost:3001/api/savecreateinvoice', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -749,7 +762,7 @@ export default function Createinvoice() {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
         const authToken = localStorage.getItem('authToken');
-        const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
+        const response = await fetch('http://localhost:3001/api/addcustomer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -818,511 +831,797 @@ export default function Createinvoice() {
 
 
     return (
-        <div className="bg">
-        {loading ? (
-          <div className="d-flex justify-content-center align-items-center vh-100">
-            <ColorRing loading={loading} aria-label="Loading Spinner" data-testid="loader" />
-          </div>
-        ) : (
-          <div className="container-fluid">
-            <div className="row">
-              <div className="col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none">
-                <Usernavbar />
-              </div>
-              <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                <div className="d-lg-none d-md-none d-block mt-2">
-                  <Usernav />
-                </div>
-                <div className="invoice-container mx-3 mx-md-4">
-                  <form onSubmit={handleSubmit}>
-                    <div className="invoice-header bg-light p-3 rounded-top shadow-sm mb-4">
-                      <div className="row align-items-center">
-                        <div className="col-lg-6 col-md-6 col-12">
-                          <h2 className="fs-3 fw-bold text-primary mb-1">Create Invoice</h2>
-                          <nav aria-label="breadcrumb">
-                            <ol className="breadcrumb mb-0">
-                              <li className="breadcrumb-item">
-                                <a href="/Userpanel/Userdashboard" className="text-decoration-none text-muted">Dashboard</a>
-                              </li>
-                              <li className="breadcrumb-item active" aria-current="page">Invoice</li>
-                            </ol>
-                          </nav>
-                        </div>
-                        <div className="col-lg-6 col-md-6 col-12 text-md-end mt-3 mt-md-0">
-                          <button className="btn btn-success fw-bold px-4" type="submit">
-                            <i className="fas fa-save me-2"></i> Save Invoice
-                          </button>
-                        </div>
-                      </div>
-                      {alertMessage && (
-                        <div className="mt-3">
-                          <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />
-                        </div>
-                      )}
-                    </div>
-  
-                    <div className="row">
-                      <div className="col-lg-3 col-12 mb-4">
-                        <div className="card shadow-sm p-3">
-                          <h5 className="card-title fw-bold text-muted">Signature Options</h5>
-                          <div className="form-check form-switch mb-3">
-                            <label className="form-check-label" htmlFor="signatureSwitch">Enable Signature</label>
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              role="switch"
-                              id="signatureSwitch"
-                              onChange={handleSignatureSwitch}
-                              checked={hasSignature}
-                            />
-                          </div>
-                          {hasSignature && (
-                            <>
-                              <div className="form-check form-switch mb-3">
-                                <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  role="switch"
-                                  id="addSignatureSwitch"
-                                  checked={isAddSignatureSwitchOn}
-                                  onChange={handleAddSignatureSwitch}
-                                />
-                              </div>
-                              <div className="form-check form-switch">
-                                <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  role="switch"
-                                  id="customerSignSwitch"
-                                  checked={isCustomerSignSwitchOn}
-                                  onChange={handleCustomerSignSwitch}
-                                />
-                              </div>
-                            </>
-                          )}
-                        </div>
-                      </div>
-  
-                      <div className="col-lg-9 col-12">
-                        <div className="card shadow-sm p-4">
-                          <div className="row g-4">
-                            <div className="col-md-5 col-12">
-                              {isCustomerSelected ? (
-                                <div className="customer-card p-3 bg-light rounded">
-                                  <h4 className="fw-bold text-dark">{selectedCustomerDetails.name}</h4>
-                                  <p className="mb-1 text-muted">{selectedCustomerDetails.email}</p>
-                                  <p className="mb-2 text-muted">{selectedCustomerDetails.number}</p>
-                                  <a href="#" className="text-primary text-decoration-none" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                    <i className="fas fa-edit me-1"></i> Edit Customer
-                                  </a>
+        <div className='bg'>
+            {
+                loading ?
+                    <div className='row'>
+                        <ColorRing
+                            // width={200}
+                            loading={loading}
+                            // size={500}
+                            display="flex"
+                            justify-content="center"
+                            align-items="center"
+                            aria-label="Loading Spinner"
+                            data-testid="loader"
+                        />
+                    </div> :
+                    <div className='container-fluid'>
+                        <div className="row">
+                            <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
+                                <div  >
+                                    <Usernavbar />
                                 </div>
-                              ) : (
-                                <div className="customer-select">
-                                  <label className="form-label fw-bold">Select Customer</label>
-                                  <div className="input-group">
-                                    <Select
-                                      value={searchCustomerResults}
-                                      onChange={onChangeCustomer}
-                                      options={customers.map(customer => ({ value: customer._id, label: customer.name }))}
-                                      placeholder="Choose a customer..."
-                                      className="flex-grow-1"
-                                      classNamePrefix="react-select"
-                                    />
-                                    <button type="button" className="btn btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#exampleModal1">
-                                      <i className="fas fa-plus"></i>
-                                    </button>
-                                  </div>
-                                </div>
-                              )}
                             </div>
-                            <div className="col-md-7 col-12">
-                              <div className="row g-3">
-                                {message && (
-                                  <div className="col-12">
-                                    <div className="alert alert-warning alert-dismissible fade show" role="alert">
-                                      <strong>{alertShow}</strong>
-                                      <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                    </div>
-                                  </div>
-                                )}
-                                <div className="col-md-6">
-                                  <label htmlFor="invoicenumbr" className="form-label fw-bold">Invoice Number</label>
-                                  <input
-                                    type="text"
-                                    name="InvoiceNumber"
-                                    className="form-control"
-                                    value={invoiceData.InvoiceNumber}
-                                    onChange={onchange}
-                                    id="invoicenumbr"
-                                    required
-                                  />
+
+                            <div className="col-lg-10 col-md-9 col-12 mx-auto">
+                                <div className='d-lg-none d-md-none d-block mt-2'>
+                                    <Usernav />
                                 </div>
-                                <div className="col-md-6">
-                                  <label htmlFor="purchaseoder" className="form-label fw-bold">Purchase Order (PO) #</label>
-                                  <input
-                                    type="text"
-                                    name="purchaseorder"
-                                    className="form-control"
-                                    onChange={onchange}
-                                    id="purchaseoder"
-                                  />
-                                </div>
-                                <div className="col-md-6">
-                                  <label htmlFor="Date" className="form-label fw-bold">Date</label>
-                                  <input
-                                    type="date"
-                                    name="date"
-                                    className="form-control"
-                                    value={invoiceData.date}
-                                    onChange={onchange}
-                                    id="Date"
-                                    required
-                                  />
-                                </div>
-                                <div className="col-md-6">
-                                  <label htmlFor="Job" className="form-label fw-bold">Job</label>
-                                  <input
-                                    type="text"
-                                    name="job"
-                                    className="form-control"
-                                    value={invoiceData.job}
-                                    onChange={onchange}
-                                    id="job"
-                                    required
-                                  />
-                                </div>
-                                <div className="col-md-6">
-                                  <label htmlFor="duedate" className="form-label fw-bold">Due Date</label>
-                                  <input
-                                    type="date"
-                                    name="duedate"
-                                    className="form-control"
-                                    value={invoiceData.duedate}
-                                    onChange={onchange}
-                                    id="duedate"
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-  
-                          <div className="card mt-4 shadow-sm">
-                            <div className="card-body">
-                              <h5 className="card-title fw-bold text-muted mb-4">Items</h5>
-                              <div className="table-responsive">
-                                <table className="table table-hover">
-                                  <thead className="table-light">
-                                    <tr>
-                                      <th>Item</th>
-                                      <th>Quantity</th>
-                                      <th>Unit</th>
-                                      <th>Price</th>
-                                      <th>Amount</th>
-                                    </tr>
-                                  </thead>
-                                  <tbody>
-                                    {searchitemResults.map((item) => {
-                                      const selectedItem = items.find((i) => i._id === item.value);
-                                      const itemPrice = selectedItem?.price || 0;
-                                      const itemId = item.value;
-                                      const quantity = quantityMap[itemId] || 1;
-                                      const discount = discountMap[itemId] || 0;
-                                      const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
-                                      const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN');
-  
-                                      return (
-                                        <tr key={item.value}>
-                                          <td>
-                                            <div className="d-flex justify-content-between align-items-center">
-                                              <p className="fw-bold mb-0">{item.label}</p>
-                                              <button type="button" className="btn btn-outline-danger btn-sm" onClick={() => onDeleteItem(item.value)}>
-                                                <i className="fas fa-trash"></i>
-                                              </button>
+                                <div className='mx-4'>
+                                    <form onSubmit={handleSubmit}>
+                                        <div className='row py-4 px-2 breadcrumbclr'>
+                                            <div className="col-lg-4 col-md-6 col-sm-12 col-7 me-auto">
+                                                <p className='fs-35 fw-bold'>Invoice</p>
+                                                <nav aria-label="breadcrumb">
+                                                    <ol class="breadcrumb mb-0">
+                                                        <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
+                                                        <li class="breadcrumb-item active" aria-current="page">Invoice</li>
+                                                    </ol>
+                                                </nav>
                                             </div>
-                                            <CKEditor
-                                              editor={ClassicEditor}
-                                              data={selectedItem?.description || ''}
-                                              name={`description-${itemId}`}
-                                              onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
-                                            />
-                                          </td>
-                                          <td>
-                                            <input
-                                              type="number"
-                                              name={`quantity-${itemId}`}
-                                              className="form-control form-control-sm"
-                                              value={quantity}
-                                              onChange={(event) => onChangeQuantity(event, itemId)}
-                                              id={`quantity-${itemId}`}
-                                              required
-                                              min="1"
-                                            />
-                                          </td>
-                                          <td>{selectedItem?.unit}</td>
-                                          <td>
-                                            <input
-                                              type="text"
-                                              name={`price-${itemId}`}
-                                              className="form-control form-control-sm"
-                                              value={itemPrice}
-                                              onChange={(event) => onChangePrice(event, itemId)}
-                                              id={`price-${itemId}`}
-                                              required
-                                            />
-                                          </td>
-                                          <td className="text-center">
-                                            <CurrencySign />{formattedTotalAmount}
-                                          </td>
-                                        </tr>
-                                      );
-                                    })}
-                                  </tbody>
-                                </table>
-                                {itemExistsMessage && (
-                                  <div className="alert alert-warning mt-3" role="alert">{itemExistsMessage}</div>
-                                )}
-                              </div>
-  
-                              <div className="row mt-4">
-                                <div className="col-md-6">
-                                  <label className="form-label fw-bold">Add Item</label>
-                                  <Select
-                                    value={searchitemResults}
-                                    onChange={onChangeitem}
-                                    options={items.map(item => ({ value: item._id, label: item.itemname }))}
-                                    placeholder="Select an item..."
-                                    classNamePrefix="react-select"
-                                  />
+                                            <div className="col-lg-3 col-md-4 col-sm-12 col-5 text-right">
+                                                <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit">Save</button>
+                                            </div>
+
+                                            <div className='mt-4'>
+                                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                                            </div>
+                                        </div>
+
+                                        <div className="row">
+                                            <div className="col-lg-3 col-12">
+                                                <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
+                                                    <div className="form-check form-switch">
+                                                        <div>
+                                                            <label className="form-check-label" htmlFor="signatureSwitch">Signature</label>
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                role="switch"
+                                                                id="signatureSwitch"
+                                                                onChange={handleSignatureSwitch}
+                                                                checked={hasSignature}
+                                                            />
+                                                        </div>
+                                                        {hasSignature && (
+                                                            <>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="addSignatureSwitch"
+                                                                        checked={isAddSignatureSwitchOn}
+                                                                        onChange={handleAddSignatureSwitch}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="customerSignSwitch"
+                                                                        checked={isCustomerSignSwitchOn}
+                                                                        onChange={handleCustomerSignSwitch}
+                                                                    />
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {isSignatureModalOpen && (
+                                                    <SignatureModal
+                                                        onSave={saveSignature}
+                                                        onClose={() => setIsSignatureModalOpen(false)}
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="col-lg-12 col-12 order-2 order-lg-1">
+                                                <div className='box1 rounded adminborder p-4 m-2 mb-5'>
+                                                    <div className='row me-2'>
+                                                        <div className="col-md-6 col-lg-5 col-12">
+                                                            {isCustomerSelected ? (
+                                                                <div className="customerdetail p-3">
+                                                                    <ul>
+                                                                        <li className='fw-bold fs-4'>{selectedCustomerDetails.name}</li>
+                                                                        <li>
+                                                                            <a href="" className='text-decoration-none' data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a>
+                                                                        </li>
+                                                                    </ul>
+                                                                    <p className='m-0'>{selectedCustomerDetails.email}</p>
+                                                                    <p>{selectedCustomerDetails.number}</p>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="search-container forms">
+                                                                    <p className='fs-20 mb-0'>Select Customers</p>
+                                                                    <div className="row">
+                                                                        <div className="col-6">
+                                                                            {/* <VirtualizedSelect
+                                                                                id="searchitems"
+                                                                                name="customername"
+                                                                                className="form-control zindex op pl-0"
+                                                                                placeholder=""
+                                                                                onChange={onChangecustomer}
+                                                                                required
+                                                                                options={customers.map((customer, index) =>
+                                                                                    ({ label: customer.name, value: customer._id })
+
+                                                                                )}
+                                                                            /> */}
+                                                                            <Select
+                                                                                value={searchcustomerResults}
+                                                                                onChange={onChangecustomer}
+                                                                                options={customers.map(customer => ({
+                                                                                    value: customer._id,
+                                                                                    label: customer.name,
+                                                                                }))}
+                                                                                placeholder=""
+                                                                                required
+                                                                            />
+
+                                                                        </div>
+                                                                        <div className="col-3">
+                                                                            <a role='button' className="btn btn-success btn-sm me-2 text-white mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal1">
+                                                                                <i class="fa-solid fa-plus"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+
+                                                        </div>
+                                                        <div className="col-lg-7 col-md-6">
+                                                            <div className="row">
+                                                                {message == true ? (
+                                                                    <div className="alert alert-warning alert-dismissible fade show" role="alert">
+                                                                        <strong>{alertShow}</strong>
+                                                                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                                    </div>
+                                                                ) : (
+                                                                    ""
+                                                                )}
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="invoicenumbr" className="form-label">
+                                                                            Invoice Number
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            name="InvoiceNumber"
+                                                                            className="form-control"
+                                                                            value={invoiceData.InvoiceNumber}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Invoice Number"
+                                                                            id="invoicenumbr"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="purchaseoder" className="form-label">
+                                                                            Purchase Order (PO) #
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            name="purchaseorder"
+                                                                            className="form-control"
+                                                                            onChange={onchange}
+                                                                            id="purchaseoder"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="Date" className="form-label">
+                                                                            Date
+                                                                        </label>
+                                                                        <input
+                                                                            type="date"
+                                                                            name="date"
+                                                                            className="form-control"
+                                                                            value={invoiceData.date}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Date"
+                                                                            id="Date"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="Job" className="form-label">
+                                                                            Job
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            name="job"
+                                                                            className="form-control"
+                                                                            value={invoiceData.job}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Date"
+                                                                            id="job"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-6">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="duedate" className="form-label">
+                                                                            Due Date
+                                                                        </label>
+                                                                        <input
+                                                                            type="date"
+                                                                            name="duedate"
+                                                                            className="form-control"
+                                                                            value={invoiceData.duedate}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Due Date"
+                                                                            id="duedate"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className='box1 rounded adminborder p-4 m-2'>
+                                                        <div className="table-responsive">
+                                                            <table className="table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">ITEM</th>
+                                                                        <th scope="col">QUANTITY</th>
+                                                                        <th scope="col">UNIT</th>
+                                                                        <th scope="col">PRICE</th>
+                                                                        <th scope="col">AMOUNT</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {searchitemResults.map((item) => {
+                                                                        const selectedItem = items.find((i) => i._id === item.value);
+                                                                        console.log(selectedItem, "sle");
+
+                                                                        const itemPrice = selectedItem?.price || 0;
+                                                                        const itemId = item.value;
+                                                                        const quantity = quantityMap[itemId] || 1;
+                                                                        const discount = discountMap[itemId] || 0;
+
+                                                                        const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+                                                                        const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        });
+
+                                                                        return (
+                                                                            <tr key={item.value}>
+                                                                                <td >
+                                                                                    <div className="mb-3 d-flex align-items-baseline justify-content-between">
+                                                                                        <p>{item.label}</p>
+                                                                                        <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
+                                                                                            <i className="fas fa-trash"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                    <div className="row">
+                                                                                        <div className="col" >
+                                                                                            <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
+
+                                                                                            <CKEditor
+                                                                                                editor={ClassicEditor}
+                                                                                                data={selectedItem?.description || ''}
+                                                                                                name={`description-${itemId}`}
+                                                                                                onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
+                                                                                                onBlur={(event, editor) => {
+                                                                                                    console.log('Blur.', editor);
+                                                                                                }}
+                                                                                                onFocus={(event, editor) => {
+                                                                                                    console.log('Focus.', editor);
+                                                                                                }}
+                                                                                            />
+                                                                                        </div>
+
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        name={`quantity-${itemId}`}
+                                                                                        className="form-control"
+                                                                                        value={quantity}
+                                                                                        onChange={(event) => onChangeQuantity(event, itemId)}
+                                                                                        id={`quantity-${itemId}`}
+                                                                                        required
+                                                                                    />
+                                                                                </td>
+                                                                                <td>
+                                                                                    {selectedItem?.unit}
+                                                                                    {/* <input
+                                                                                        type="text"
+                                                                                        name={`unit-${itemId}`}
+                                                                                        className="form-control"
+                                                                                        value={selectedItem?.unit || ''}
+                                                                                        onChange={(event) => onChangePrice(event, itemId)}
+                                                                                        id={`unit-${itemId}`}
+                                                                                        required
+                                                                                    /> */}
+                                                                                </td>
+
+                                                                                <td>
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        name={`price-${itemId}`}
+                                                                                        className="form-control"
+                                                                                        value={itemPrice}
+                                                                                        onChange={(event) => onChangePrice(event, itemId)}
+                                                                                        id={`price-${itemId}`}
+                                                                                        required
+                                                                                    />
+                                                                                </td>
+
+
+                                                                                <td className="text-center">
+                                                                                    <p><CurrencySign />{formattedTotalAmount}</p>
+                                                                                </td>
+                                                                            </tr>
+
+                                                                        );
+
+                                                                    })}
+
+                                                                    {itemExistsMessage && (
+                                                                        <div className="alert alert-warning mt-3" role="alert">
+                                                                            {itemExistsMessage}
+                                                                        </div>
+                                                                    )}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+                                                        <div className="row pt-3">
+                                                            <div className="col-lg-6 col-md-12">
+                                                                <div className="search-container forms">
+                                                                    <p className='fs-20 mb-0'>Select Item</p>
+                                                                    {/* <VirtualizedSelect
+                                                                        id="searchitems"
+                                                                        name="itemname"
+                                                                        className="form-control zindex op pl-0"
+                                                                        placeholder=""
+                                                                        onChange={onChangeitem}
+                                                                        options={items.map((item, index) =>
+                                                                            ({ label: item.itemname, value: item._id })
+
+                                                                        )}
+                                                                    >
+                                                                    </VirtualizedSelect> */}
+                                                                    <Select
+                                                                        value={searchitemResults}
+                                                                        onChange={onChangeitem}
+                                                                        options={items.map(item => ({
+                                                                            value: item._id,
+                                                                            label: item.itemname,
+                                                                        }))}
+                                                                        placeholder=""
+                                                                    />
+
+                                                                </div>
+                                                            </div>
+                                                            <div className="col-lg-6 col-md-12">
+                                                                <div className="row">
+                                                                    <div className="col-6 col-md-3">
+                                                                        <p>Subtotal</p>
+                                                                        <p>Discount</p>
+                                                                        {console.log(signUpData, "====signUpData")}
+                                                                        {/* <p>GST</p> */}
+                                                                        <p className='pt-3'>{signUpData.name} {signUpData.percentage}%</p>
+
+                                                                        <p>Total</p>
+                                                                    </div>
+                                                                    <div className="col-6 col-md-9">
+                                                                        <p><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
+
+                                                                        })}</p>
+                                                                        <div className="mb-3">
+                                                                            <input
+                                                                                type="number"
+                                                                                name="totaldiscount"
+                                                                                className="form-control"
+                                                                                value={discountTotal}
+                                                                                onChange={handleDiscountChange} // Ensure proper event binding
+                                                                                placeholder="Enter Discount Total"
+                                                                                id="discountInput"
+                                                                                min="0"
+                                                                            />
+                                                                        </div>
+
+
+                                                                        <p>{console.log("check Tax Amount", calculateTaxAmount())}<CurrencySign />{
+
+                                                                            calculateTaxAmount().toLocaleString('en-IN', {
+                                                                                // style: 'currency',
+                                                                                // currency: 'INR',
+                                                                            })}</p>
+
+                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        })}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <hr />
+                                                        <div className="row pt-3">
+                                                            <div className="col-lg-6 col-md-12"></div>
+                                                            <div className="col-lg-6 col-md-12">
+                                                                <div className="row">
+                                                                    <div className="col-6 col-md-3">
+                                                                        <p>Amount due</p>
+                                                                    </div>
+                                                                    <div className="col-6 col-md-9">
+                                                                        {/* <p><CurrencySign /> {calculateTotal().toLocaleString}</p> */}
+                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        })}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <label htmlFor="" className='fs-4 ms-2 mt-5'>Note</label>
+                                                    <div className='box1 rounded adminborder m-2'>
+                                                        <CKEditor
+                                                            editor={ClassicEditor}
+                                                            data={editorData}
+                                                            // onReady={ editor => {
+                                                            //     console.log( 'Editor is ready to use!', editor );
+                                                            // } }
+
+                                                            onChange={handleEditorChange}
+                                                            config={{
+                                                                extraPlugins: [MyCustomUploadAdapterPlugin],
+                                                            }}
+                                                            onBlur={(event, editor) => {
+                                                                console.log('Blur.', editor);
+                                                            }}
+                                                            onFocus={(event, editor) => {
+                                                                console.log('Focus.', editor);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                        </div>
+
+
+                                    </form>
                                 </div>
-                                <div className="col-md-6">
-                                  <div className="row g-2 text-end">
-                                    <div className="col-6 fw-bold">Subtotal</div>
-                                    <div className="col-6"><CurrencySign />{calculateSubtotal().toLocaleString('en-IN')}</div>
-                                    <div className="col-6 fw-bold">Discount</div>
-                                    <div className="col-6">
-                                      <input
-                                        type="number"
-                                        name="totaldiscount"
-                                        className="form-control form-control-sm"
-                                        value={discountTotal}
-                                        onChange={handleDiscountChange}
-                                        placeholder="0.00"
-                                        min="0"
-                                      />
-                                    </div>
-                                    <div className="col-6 fw-bold">{signUpData.name} ({signUpData.percentage}%)</div>
-                                    <div className="col-6"><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN')}</div>
-                                    <div className="col-6 fw-bold text-primary">Total</div>
-                                    <div className="col-6 text-primary fw-bold"><CurrencySign />{calculateTotal().toLocaleString('en-IN')}</div>
-                                  </div>
-                                </div>
-                              </div>
-                              <hr />
-                              <div className="row">
-                                <div className="col-md-6"></div>
-                                <div className="col-md-6 text-end">
-                                  <div className="fw-bold">Amount Due</div>
-                                  <div className="text-muted"><CurrencySign />{calculateTotal().toLocaleString('en-IN')}</div>
-                                </div>
-                              </div>
                             </div>
-                          </div>
-  
-                          <div className="mt-4">
-                            <h5 className="fw-bold text-muted">Notes</h5>
-                            <div className="card shadow-sm">
-                              <div className="card-body">
-                                <CKEditor
-                                  editor={ClassicEditor}
-                                  data={editorData}
-                                  onChange={handleEditorChange}
-                                  config={{ extraPlugins: [MyCustomUploadAdapterPlugin] }}
-                                />
-                              </div>
-                            </div>
-                          </div>
                         </div>
-                      </div>
                     </div>
-                  </form>
+
+
+
+            }
+
+
+
+            <form action="">
+                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h1 className="modal-title fs-5" id="exampleModalLabel">Edit Customer</h1>
+                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="mb-3">
+                                    <label htmlFor="customerName" className="form-label">Name</label>
+                                    <select className="form-control" id="customerName" value={editedName} onChange={handleNameChange}>
+                                        <option value="" disabled>Select Name</option>
+                                        {customers.map(customer => (
+                                            <option key={customer._id} value={customer.name}>{customer.name}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                               <div className="mb-3">
+  <label htmlFor="customerEmail" className="form-label">Select Email</label>
+  <select
+    className="form-control"
+    id="customerEmail"
+    value={editedEmail}
+    onChange={(e) => setEditedEmail(e.target.value)}
+  >
+    <option value="">-- Select an email --</option>
+    {customers.find(c => c.name === editedName)?.emails?.map((email, index) => (
+      <option key={index} value={email}>
+        {email}
+      </option>
+    ))}
+  </select>
+</div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="customerPhone" className="form-label">Phone Number</label>
+                                    <input type="number" className="form-control" id="customerPhone" value={editedPhone} onChange={(e) => setEditedPhone(e.target.value)} />
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleEditCustomer}>Save changes</button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-              </div>
-            </div>
-  
-            {/* Edit Customer Modal */}
-            <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-              <div className="modal-dialog modal-lg">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title" id="exampleModalLabel">Edit Customer</h5>
-                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div className="modal-body">
-                    <div className="mb-3">
-                      <label htmlFor="customerName" className="form-label fw-bold">Name</label>
-                      <select className="form-select" id="customerName" value={editedName} onChange={handleNameChange}>
-                        <option value="" disabled>Select Name</option>
-                        {customers.map(customer => (
-                          <option key={customer._id} value={customer.name}>{customer.name}</option>
-                        ))}
-                      </select>
+            </form>
+
+            {/* add customer */}
+
+            <form action="">
+                <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                    <div className="modal-dialog modal-lg">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h1 className="modal-title fs-5" id="exampleModalLabel">Add Customer</h1>
+                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div className="modal-body">
+                                <div className="row">
+                                    <div className="col-12 col-sm-6 col-lg-4">
+                                        <div className="mb-3">
+                                            <label htmlFor="exampleInputtext1" className="form-label">
+                                                Customer Name
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="form-control"
+                                                name="name"
+                                                value={credentials.name}
+                                                onChange={onchangeaddcustomer}
+                                                placeholder="Customer Name"
+                                                id="exampleInputtext1"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12 col-sm-6 col-lg-4">
+                                        <div className="mb-3">
+                                            <label htmlFor="exampleInputEmail1" className="form-label">
+                                                Contact Email
+                                            </label>
+                                            <input
+                                                type="email"
+                                                className="form-control"
+                                                name="email"
+                                                value={credentials.email}
+                                                onChange={onchangeaddcustomer}
+                                                placeholder="Contact Email"
+                                                id="email"
+                                                aria-describedby="emailHelp"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12 col-sm-6 col-lg-4">
+                                        <div className="mb-3">
+                                            <label htmlFor="Number" className="form-label">
+                                                Phone Number
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="number"
+                                                className="form-control"
+                                                onChange={onchangeaddcustomer}
+                                                placeholder="Phone Number"
+                                                id="phonenumber"
+                                                required
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12 col-sm-12 col-lg-12">
+                                        <div className="mb-3">
+                                            <label htmlFor="information" className="form-label">
+                                                Additional Information
+                                            </label>
+                                            <textarea
+                                                type="text"
+                                                className="form-control"
+                                                name="information"
+                                                onChange={onchangeaddcustomer}
+                                                placeholder="Information"
+                                                id="information"
+
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12 col-sm-6 col-lg-6">
+                                        <div className="mb-3">
+                                            <label htmlFor="Address1" className="form-label">
+                                                Address 1
+                                            </label>
+                                            <input
+                                                type="message"
+                                                name="address1"
+                                                onChange={onchangeaddcustomer}
+                                                className="form-control"
+                                                placeholder="Address 1"
+                                                id="Address1"
+
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12 col-sm-6 col-lg-6">
+                                        <div className="mb-3">
+                                            <label htmlFor="Address2" className="form-label">
+                                                Address 2
+                                            </label>
+                                            <input
+                                                type="message"
+                                                name="address2"
+                                                onChange={onchangeaddcustomer}
+                                                className="form-control"
+                                                placeholder="Address 2"
+                                                id="Address2"
+
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12 col-sm-6 col-lg-6">
+                                        <div className="mb-3">
+                                            <label htmlFor="Country" className="form-label">
+                                                Country
+                                            </label>
+                                            <CountrySelect
+                                                name="country"
+                                                value={credentials.countryid}
+                                                onChange={(val) => {
+                                                    console.log(val);
+                                                    setcountryid(val.id);
+                                                    setcountry(val.name);
+                                                    // setCredentials({ ...credentials, country: val.name })
+                                                    // setCredentials({ ...credentials, countryid: val.id })
+                                                    setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
+
+                                                }}
+                                                valueType="short"
+                                                class="form-control"
+                                                placeHolder="Select Country"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12 col-sm-6 col-lg-6">
+                                        <div className="mb-3">
+                                            <label htmlFor="State" className="form-label">
+                                                State
+                                            </label>
+                                            <StateSelect
+                                                name="state"
+                                                countryid={countryid} // Set the country selected in the CountryDropdown
+                                                onChange={(val) => {
+                                                    console.log(val);
+                                                    setstateid(val.id);
+                                                    setstate(val.name);
+                                                    // setCredentials({ ...credentials, state: val.name })
+                                                    // setCredentials({ ...credentials, stateid: val.id })
+                                                    setCredentials({ ...credentials, statedata: JSON.stringify(val) })
+                                                }}
+                                                placeHolder="Select State"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12 col-sm-6 col-lg-6">
+                                        <div className="mb-3">
+                                            <label htmlFor="City" className="form-label">
+                                                City
+                                            </label>
+                                            <CitySelect
+                                                countryid={countryid}
+                                                stateid={stateid}
+                                                onChange={(val) => {
+                                                    console.log(val);
+                                                    setcityid(val.id);
+                                                    setcity(val.name);
+                                                    // setCredentials({ ...credentials, city: val.name })
+                                                    // setCredentials({ ...credentials, cityid: val.id })
+                                                    setCredentials({ ...credentials, citydata: JSON.stringify(val) })
+                                                }}
+                                                placeHolder="Select City"
+                                            />
+                                        </div>
+                                    </div>
+
+                                    <div className="col-12 col-sm-6 col-lg-6">
+                                        <div className="mb-3">
+                                            <label htmlFor="post" className="form-label">
+                                                Post Code
+                                            </label>
+                                            <input
+                                                type="text"
+                                                name="post"
+                                                onChange={onchangeaddcustomer}
+                                                className="form-control"
+                                                placeholder="Post Code"
+                                                id="post"
+
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="modal-footer">
+                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
+                            </div>
+                        </div>
                     </div>
-                    <div className="mb-3">
-                      <label htmlFor="customerEmail" className="form-label fw-bold">Email</label>
-                      <input type="email" className="form-control" id="customerEmail" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} />
-                    </div>
-                    <div className="mb-3">
-                      <label htmlFor="customerPhone" className="form-label fw-bold">Phone Number</label>
-                      <input type="number" className="form-control" id="customerPhone" value={editedPhone} onChange={(e) => setEditedPhone(e.target.value)} />
-                    </div>
-                  </div>
-                  <div className="modal-footer">
-                    <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleEditCustomer}>Save Changes</button>
-                  </div>
                 </div>
-              </div>
-            </div>
-  
-            {/* Add Customer Modal */}
-            <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel1" aria-hidden="true">
-              <div className="modal-dialog modal-lg">
-                <div className="modal-content">
-                  <div className="modal-header">
-                    <h5 className="modal-title" id="exampleModalLabel1">Add Customer</h5>
-                    <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                  </div>
-                  <div className="modal-body">
-                    <div className="row g-3">
-                      <div className="col-md-4">
-                        <label htmlFor="exampleInputtext1" className="form-label fw-bold">Customer Name</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          name="name"
-                          value={credentials.name}
-                          onChange={onchangeaddcustomer}
-                          placeholder="Customer Name"
-                          id="exampleInputtext1"
-                          required
-                        />
-                      </div>
-                      <div className="col-md-4">
-                        <label htmlFor="email" className="form-label fw-bold">Contact Email</label>
-                        <input
-                          type="email"
-                          className="form-control"
-                          name="email"
-                          value={credentials.email}
-                          onChange={onchangeaddcustomer}
-                          placeholder="Contact Email"
-                          id="email"
-                          required
-                        />
-                      </div>
-                      <div className="col-md-4">
-                        <label htmlFor="phonenumber" className="form-label fw-bold">Phone Number</label>
-                        <input
-                          type="text"
-                          name="number"
-                          className="form-control"
-                          onChange={onchangeaddcustomer}
-                          placeholder="Phone Number"
-                          id="phonenumber"
-                          required
-                        />
-                      </div>
-                      <div className="col-12">
-                        <label htmlFor="information" className="form-label fw-bold">Additional Information</label>
-                        <textarea
-                          className="form-control"
-                          name="information"
-                          onChange={onchangeaddcustomer}
-                          placeholder="Information"
-                          id="information"
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label htmlFor="Address1" className="form-label fw-bold">Address 1</label>
-                        <input
-                          type="text"
-                          name="address1"
-                          onChange={onchangeaddcustomer}
-                          className="form-control"
-                          placeholder="Address 1"
-                          id="Address1"
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label htmlFor="Address2" className="form-label fw-bold">Address 2</label>
-                        <input
-                          type="text"
-                          name="address2"
-                          onChange={onchangeaddcustomer}
-                          className="form-control"
-                          placeholder="Address 2"
-                          id="Address2"
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label htmlFor="Country" className="form-label fw-bold">Country</label>
-                        <CountrySelect
-                          name="country"
-                          value={credentials.countryid}
-                          onChange={(val) => {
-                            setCredentials({ ...credentials, countrydata: JSON.stringify(val) });
-                          }}
-                          valueType="short"
-                          className="form-control"
-                          placeHolder="Select Country"
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label htmlFor="State" className="form-label fw-bold">State</label>
-                        <StateSelect
-                          name="state"
-                          countryid={credentials.countryid}
-                          onChange={(val) => {
-                            setCredentials({ ...credentials, statedata: JSON.stringify(val) });
-                          }}
-                          placeHolder="Select State"
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label htmlFor="City" className="form-label fw-bold">City</label>
-                        <CitySelect
-                          countryid={credentials.countryid}
-                          stateid={credentials.stateid}
-                          onChange={(val) => {
-                            setCredentials({ ...credentials, citydata: JSON.stringify(val) });
-                          }}
-                          placeHolder="Select City"
-                        />
-                      </div>
-                      <div className="col-md-6">
-                        <label htmlFor="post" className="form-label fw-bold">Post Code</label>
-                        <input
-                          type="text"
-                          name="post"
-                          onChange={onchangeaddcustomer}
-                          className="form-control"
-                          placeholder="Post Code"
-                          id="post"
-                        />
-                      </div>
+            </form>
+            {showEmailModal && (
+                <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Select an Email for Invoice</h5>
+                                <button type="button" className="btn-close" onClick={() => setShowEmailModal(false)}></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>This customer has multiple emails. Please select one:</p>
+                                {emailOptions.map((email, index) => (
+                                    <div className="form-check" key={index}>
+                                        <input
+                                            className="form-check-input"
+                                            type="radio"
+                                            name="selectedEmail"
+                                            id={`email-${index}`}
+                                            value={email}
+                                            onChange={() => {
+                                                setInvoiceData(prev => ({
+                                                    ...prev,
+                                                    customeremail: email,
+                                                }));
+                                                setSelectedCustomerDetails(prev => ({
+    ...prev,
+    email: email,
+  }));
+                                                setShowEmailModal(false);
+                                            }}
+                                        />
+                                        <label className="form-check-label" htmlFor={`email-${index}`}>
+                                            {email}
+                                        </label>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
-                  </div>
-                  <div className="modal-footer">
-                    <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
-                  </div>
                 </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
+            )}
+
+        </div>
     )
 }

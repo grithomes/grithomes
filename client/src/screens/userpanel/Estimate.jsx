@@ -6,19 +6,17 @@ import { ColorRing } from 'react-loader-spinner';
 import CurrencySign from '../../components/CurrencySign ';
 import Alertauthtoken from '../../components/Alertauthtoken';
 
-
 export default function Estimate() {
-  const [loading, setLoading] = useState(true);
-  const [estimates, setEstimates] = useState([]);
-  const [selectedEstimates, setSelectedEstimates] = useState(null);
+  const [loading, setloading] = useState(true);
+  const [estimates, setestimates] = useState([]);
+  const [convertedEstimates, setConvertedEstimates] = useState([]);
   const location = useLocation();
   const estimateid = location.state?.estimateid;
   const navigate = useNavigate();
-  const [convertedEstimates, setConvertedEstimates] = useState([]);
   const [currentPage, setCurrentPage] = useState(0);
   const [alertMessage, setAlertMessage] = useState('');
-  const entriesPerPage = 10;
   const [searchQuery, setSearchQuery] = useState('');
+  const entriesPerPage = 10;
 
   useEffect(() => {
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") === "true") {
@@ -33,58 +31,68 @@ export default function Estimate() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/estimatedata/${userid}`, {
-        headers: { 'Authorization': authToken }
+      const response = await fetch(`http://localhost:3001/api/estimatedata/${userid}`, {
+        headers: {
+          'Authorization': authToken,
+        }
       });
       if (response.status === 401) {
         const json = await response.json();
         setAlertMessage(json.message);
-        setLoading(false);
+        setloading(false);
         window.scrollTo(0, 0);
         return;
+      } else {
+        const json = await response.json();
+        if (Array.isArray(json)) {
+          setestimates(json);
+        }
+        setloading(false);
       }
-      const json = await response.json();
-      if (Array.isArray(json)) setEstimates(json);
-      setLoading(false);
     } catch (error) {
       console.error('Error fetching data:', error);
     }
   };
 
   const handleViewClick = (estimate) => {
-    const estimateid = estimate._id;
+    let estimateid = estimate._id;
     navigate('/userpanel/estimatedetail', { state: { estimateid } });
   };
 
   const formatCustomDate = (dateString) => {
     const options = { day: 'numeric', month: 'short', year: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', options);
   };
 
-  const handleAddClick = () => navigate('/userpanel/Createestimate');
+  const handleAddClick = () => {
+    navigate('/userpanel/Createestimate');
+  }
 
   const handleConvertToInvoice = async (estimateid) => {
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/converttoinvoice/${estimateid}`, {
+      const response = await fetch(`http://localhost:3001/api/converttoinvoice/${estimateid}`, {
         method: 'POST',
-        headers: { 'Authorization': authToken }
+        headers: {
+          'Authorization': authToken,
+        }
       });
       if (response.status === 401) {
         const data = await response.json();
         setAlertMessage(data.message);
-        setLoading(false);
+        setloading(false);
         window.scrollTo(0, 0);
         return;
-      }
-      if (response.ok) {
-        const data = await response.json();
-        console.log('Converted to Invoice:', data);
-        fetchData();
-        setConvertedEstimates([...convertedEstimates, estimateid]);
       } else {
-        const errorMessage = await response.json();
-        console.error('Error converting to invoice:', errorMessage.message);
+        if (response.ok) {
+          const data = await response.json();
+          fetchData(); // refresh list
+          setConvertedEstimates([...convertedEstimates, estimateid]);
+        } else {
+          const errorMessage = await response.json();
+          console.error('Error converting to invoice:', errorMessage.message);
+        }
       }
     } catch (error) {
       console.error('Error converting to invoice:', error);
@@ -94,157 +102,145 @@ export default function Estimate() {
   const getFilteredEstimates = () => {
     if (!searchQuery) return estimates;
     return estimates.filter(estimate => {
-      const customerName = (estimate.customername || "").toLowerCase();
-      const jobName = (estimate.job || "").toLowerCase();
-      return customerName.includes(searchQuery.toLowerCase()) || jobName.includes(searchQuery.toLowerCase());
+      const customerName = estimate.customername || "";
+      const jobName = estimate.job || "";
+      return (
+        customerName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        jobName.toLowerCase().includes(searchQuery.toLowerCase())
+      );
     });
   };
 
   const getPageCount = () => Math.ceil(getFilteredEstimates().length / entriesPerPage);
 
   const getCurrentPageEstimates = () => {
-    const filteredEstimates = getFilteredEstimates();
+    const filtered = getFilteredEstimates();
     const startIndex = currentPage * entriesPerPage;
     const endIndex = startIndex + entriesPerPage;
-    return filteredEstimates.slice(startIndex, endIndex);
+    return filtered.slice(startIndex, endIndex);
   };
 
-  const handlePrevPage = () => currentPage > 0 && setCurrentPage(currentPage - 1);
-  const handleNextPage = () => (currentPage + 1) * entriesPerPage < getFilteredEstimates().length && setCurrentPage(currentPage + 1);
+  const handlePrevPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if ((currentPage + 1) * entriesPerPage < getFilteredEstimates().length) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
-    <div className="bg">
+    <div className='bg'>
       {loading ? (
-        <div className="d-flex justify-content-center align-items-center vh-100">
-          <ColorRing loading={loading} aria-label="Loading Spinner" data-testid="loader" />
+        <div className='row'>
+          <ColorRing />
         </div>
       ) : (
-        <div className="container-fluid">
-          <div className="row">
-            <div className="col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none">
+        <div className='container-fluid'>
+          <div className='row'>
+            <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
               <Usernavbar />
             </div>
-            <div className="col-lg-10 col-md-9 col-12 mx-auto">
-              <div className="d-lg-none d-md-none d-block mt-2">
+            <div className='col-lg-10 col-md-9 col-12 mx-auto'>
+              <div className='d-lg-none d-md-none d-block mt-2'>
                 <Usernav />
               </div>
-              <div className="estimate-container mx-3 mx-md-4 mt-4">
-                {alertMessage && (
-                  <div className="mb-4">
-                    <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />
+
+              <div className='mt-4 mx-4'>
+                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+              </div>
+
+              <div className='bg-white my-5 p-4 box mx-4'>
+                <div className='row py-2'>
+                  <div className='col-lg-4 col-md-6 col-sm-6 col-7 me-auto'>
+                    <p className='h5 fw-bold'>Estimate</p>
                   </div>
-                )}
-                <div className="card shadow-sm p-4">
-                  <div className="row align-items-center mb-3">
-                    <div className="col-lg-6 col-md-6 col-12">
-                      <h2 className="fs-3 fw-bold text-primary mb-0">Estimates</h2>
-                    </div>
-                    <div className="col-lg-6 col-md-6 col-12 text-md-end mt-3 mt-md-0">
-                      <button className="btn btn-primary fw-bold" onClick={handleAddClick}>
-                        <i className="fas fa-plus me-2"></i> Add New
-                      </button>
-                    </div>
+                  <div className='col-lg-3 col-md-4 col-sm-4 col-5 text-end'>
+                    <button className='btn rounded-pill btn-primary text-white fw-bold' onClick={handleAddClick}>
+                      + Add New
+                    </button>
                   </div>
-                  <hr />
-                  <div className="row mb-4">
-                    <div className="col-lg-4 col-md-6 col-12">
-                      <div className="input-group">
-                        <span className="input-group-text"><i className="fas fa-search"></i></span>
-                        <input
-                          type="text"
-                          className="form-control"
-                          placeholder="Search by name or job"
-                          value={searchQuery}
-                          onChange={(e) => setSearchQuery(e.target.value)}
-                        />
-                      </div>
-                    </div>
+                </div>
+                <hr />
+                <div className="row mb-3">
+                  <div className='col-3'>
+                    <input
+                      type="text"
+                      className="form-control mb-2"
+                      placeholder="Search by name or job"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                    />
                   </div>
-                  <div className="table-responsive">
-                    <table className="table table-hover">
-                      <thead className="table-light">
-                        <tr>
-                          <th>Estimate</th>
-                          <th>Status</th>
-                          <th>Date</th>
-                          <th className="text-center">View</th>
-                          <th className="text-center">Convert</th>
-                          <th className="text-end">Amount</th>
+                </div>
+
+                <div className='row px-2 table-responsive'>
+                  <table className='table table-bordered'>
+                    <thead>
+                      <tr>
+                        <th>Estimate</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>View</th>
+                        <th>Convert Into Invoice</th>
+                        <th>Amount</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {getCurrentPageEstimates().map((estimate, index) => (
+                        <tr key={index}>
+                          <td>
+                            <p className='my-0 fw-bold clrtrxtstatus'>{estimate.customername}</p>
+                            <p className='my-0'>{estimate.EstimateNumber}</p>
+                            <p className='my-0'>Job: {estimate.job}</p>
+                          </td>
+                          <td>
+                            <span className={`p-2 rounded-pill ${estimate.status === 'Send' ? 'sent' : estimate.status === 'Paid' ? 'paid' : 'saved'}`}>
+                              <i className="fa-solid fa-circle fs-12 me-2"></i>
+                              <span className='clrtrxtstatus fw-bold'>{estimate.status || 'Unknown'}</span>
+                            </span>
+                          </td>
+                          <td>
+                            <div className='d-flex'>
+                              <p className='issue px-1 my-1'>Issued</p>
+                              <p className='datetext my-1'>{formatCustomDate(estimate.date)}</p>
+                            </div>
+                          </td>
+                          <td className='text-center'>
+                            <a role='button' className='text-black' onClick={() => handleViewClick(estimate)}>
+                              <i className='fa-solid fa-eye'></i>
+                            </a>
+                          </td>
+                          <td className='text-center'>
+                            {estimate.convertedToInvoice ? (
+                              <span className='badge bg-success'>Converted</span>
+                            ) : (
+                              <button className='btn converbtn' onClick={() => handleConvertToInvoice(estimate._id)}>
+                                Convert
+                              </button>
+                            )}
+                          </td>
+                          <td><CurrencySign />{roundOff(estimate.total).toLocaleString('en-CA')}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {getCurrentPageEstimates().map((estimate) => (
-                          !estimate.convertedToInvoice && (
-                            <tr key={estimate._id}>
-                              <td>
-                                <p className="mb-1 fw-bold text-dark">{estimate.customername}</p>
-                                <p className="mb-1 text-muted">{estimate.EstimateNumber}</p>
-                                {estimate.job && <p className="mb-0 text-muted">Job: {estimate.job}</p>}
-                              </td>
-                              <td>
-                                {estimate.status === 'Saved' ? (
-                                  <span className="badge bg-secondary">
-                                    <i className="fas fa-circle me-1"></i> Saved
-                                  </span>
-                                ) : estimate.status === 'Send' ? (
-                                  <span className="badge bg-primary">
-                                    <i className="fas fa-circle me-1"></i> Sent
-                                  </span>
-                                ) : estimate.status === 'Paid' ? (
-                                  <span className="badge bg-success">
-                                    <i className="fas fa-circle me-1"></i> Paid
-                                  </span>
-                                ) : estimate.status === 'Partially Paid' ? (
-                                  <span className="badge bg-warning text-dark">
-                                    <i className="fas fa-circle me-1"></i> Partially Paid
-                                  </span>
-                                ) : (
-                                  <span className="badge bg-dark">
-                                    <i className="fas fa-circle me-1"></i> Unknown
-                                  </span>
-                                )}
-                              </td>
-                              <td>
-                                <span className="badge bg-light text-dark me-1">Issued</span>
-                                {formatCustomDate(estimate.date)}
-                              </td>
-                              <td className="text-center">
-                                <button className="btn btn-link text-primary p-0" onClick={() => handleViewClick(estimate)}>
-                                  <i className="fas fa-eye"></i>
-                                </button>
-                              </td>
-                              <td className="text-center">
-                                <button className="btn btn-outline-success btn-sm" onClick={() => handleConvertToInvoice(estimate._id)}>
-                                  Convert
-                                </button>
-                              </td>
-                              <td className="text-end">
-                                <CurrencySign />{roundOff(estimate.total)}
-                              </td>
-                            </tr>
-                          )
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                  <div className="row mt-4">
-                    <div className="col-12 d-flex justify-content-between align-items-center">
-                      <button
-                        className="btn btn-outline-primary"
-                        onClick={handlePrevPage}
-                        disabled={currentPage === 0}
-                      >
-                        <i className="fas fa-chevron-left me-2"></i> Previous
-                      </button>
-                      <span>Page {currentPage + 1} of {getPageCount()}</span>
-                      <button
-                        className="btn btn-outline-primary"
-                        onClick={handleNextPage}
-                        disabled={(currentPage + 1) * entriesPerPage >= getFilteredEstimates().length}
-                      >
-                        Next <i className="fas fa-chevron-right ms-2"></i>
-                      </button>
-                    </div>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                <div className='row mt-3'>
+                  <div className='col-12'>
+                    <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
+                      Previous Page
+                    </button>
+                    <button
+                      onClick={handleNextPage}
+                      disabled={(currentPage + 1) * entriesPerPage >= getFilteredEstimates().length}
+                    >
+                      Next Page
+                    </button>
                   </div>
                 </div>
               </div>

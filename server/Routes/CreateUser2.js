@@ -33,13 +33,6 @@ const bodyParser = require('body-parser');
 const nodemailer = require('nodemailer');
 const multer = require('multer');
 const path = require('path');
-const archiver = require('archiver');
-const fs = require('fs');
-
-
-const dbName = 'grithomes';
-
-
 
 const getCurrencySign = (currencyType) => {
     switch (currencyType) {
@@ -53,43 +46,6 @@ const getCurrencySign = (currencyType) => {
     }
 };
 
-router.get('/backup', (req, res) => {
-    console.log("StartBackup");
-    
-    const dumpDir = path.join(__dirname, 'dump');
-    const archivePath = path.join(__dirname, `${dbName}-backup.zip`);
-
-    // Step 1: Run mongodump
-    exec(`mongodump --db=${dbName} --out=${dumpDir}`, (error, stdout, stderr) => {
-        if (error) {
-            console.error(`Backup error: ${stderr}`);
-            return res.status(500).send('Error creating backup');
-        }
-
-        // Step 2: Zip the dump folder
-        const output = fs.createWriteStream(archivePath);
-        const archive = archiver('zip', { zlib: { level: 9 } });
-
-        output.on('close', () => {
-            // Step 3: Send the ZIP file
-            res.download(archivePath, err => {
-                if (err) console.error(err);
-
-                // Optional cleanup
-                fs.rmSync(dumpDir, { recursive: true, force: true });
-                fs.unlinkSync(archivePath);
-            });
-        });
-
-        archive.on('error', err => {
-            throw err;
-        });
-
-        archive.pipe(output);
-        archive.directory(dumpDir, false);
-        archive.finalize();
-    });
-});
 
 
 router.get('/check-signature/:ownerId', (req, res) => {
@@ -132,39 +88,7 @@ router.get('/getallesigncustomerdata', async (req, res) => {
         res.status(500).json({ message: 'Internal server error' });
     }
 });
-router.get('/searchinvoices/:userid', async (req, res) => {
-    try {
-      const userid = req.params.userid;
-      const authtoken = req.headers.authorization;
-      const search = req.query.search || '';
-      const status = req.query.status;
-  
-      // Verify JWT token
-      const decodedToken = jwt.verify(authtoken, jwrsecret);
-  
-      let query = {
-        userid,
-        $or: [
-          { customername: { $regex: search, $options: 'i' } },
-          { job: { $regex: search, $options: 'i' } }
-        ]
-      };
-  
-      if (status && status !== 'All') {
-        query.status = status;
-      }
-  
-      const invoices = await Invoice.find(query).sort({ createdAt: -1 });
-  
-      res.json({ invoices });
-    } catch (error) {
-      console.error('Search error:', error);
-      if (error.name === 'JsonWebTokenErrord') {
-        return res.status(401).json({ message: 'Unauthorized: Invalid token' });
-      }
-      res.status(500).json({ message: 'Internal server error' });
-    }
-  });
+
 
 // Get all invoices grouped by financial year for a user
 router.get('/all-invoices-by-financial-year', async (req, res) => {
@@ -188,29 +112,25 @@ router.get('/all-invoices-by-financial-year', async (req, res) => {
             },
             {
                 $addFields: {
-                     financialYear: {
-    $toString: { $year: "$date" }
-  }
-
-                    // financialYear: {
-                    //     $cond: {
-                    //         if: { $gte: [{ $month: "$date" }, 4] },  // Assuming FY starts April 1st
-                    //         then: { 
-                    //             $concat: [
-                    //                 { $toString: { $year: "$date" } },
-                    //                 "-",
-                    //                 { $toString: { $add: [{ $year: "$date" }, 1] } }
-                    //             ]
-                    //         },
-                    //         else: { 
-                    //             $concat: [
-                    //                 { $toString: { $subtract: [{ $year: "$date" }, 1] } },
-                    //                 "-",
-                    //                 { $toString: { $year: "$date" } }
-                    //             ]
-                    //         }
-                    //     }
-                    // }
+                    financialYear: {
+                        $cond: {
+                            if: { $gte: [{ $month: "$date" }, 4] },  // Assuming FY starts April 1st
+                            then: { 
+                                $concat: [
+                                    { $toString: { $year: "$date" } },
+                                    "-",
+                                    { $toString: { $add: [{ $year: "$date" }, 1] } }
+                                ]
+                            },
+                            else: { 
+                                $concat: [
+                                    { $toString: { $subtract: [{ $year: "$date" }, 1] } },
+                                    "-",
+                                    { $toString: { $year: "$date" } }
+                                ]
+                            }
+                        }
+                    }
                 }
             },
             {
@@ -1994,10 +1914,95 @@ router.get('/allEntries', async (req, res) => {
     }
 });
 
+//   router.get('/allEntriesuserwise/:userid', async (req, res) => {
+//   try {
+//     const { userid } = req.params;
+//     const allEntries = await Timeschema.find({userid}).sort({ startTime: 1 });
+
+//     if (allEntries && allEntries.length > 0) {
+//       res.json({ allEntries });
+//     } else {
+//       res.status(404).json({ message: 'No entries found' });
+//     }
+//   } catch (error) {
+//     console.error(error);
+//     res.status(500).json({ message: 'Server error' });
+//   }
+// });
+
+// router.post("/addcustomer",
+//     [
+//         body('email').isEmail(),
+//         body('name').isLength({ min: 3 }),
+//         body('information').isLength(),
+//         body('number').isNumeric(),
+//         body('city').isLength(),
+//         body('state').isLength(),
+//         body('country').isLength(),
+//         body('post').isLength(),
+
+//         // body('address').isLength(),
+//     ]
+//     , async (req, res) => {
+//         const errors = validationResult(req);
+//         let authtoken = req.headers.authorization;
+//         try {
+//             // Verify JWT token
+//             const decodedToken = jwt.verify(authtoken, jwrsecret);
+//             console.log(decodedToken);
+
+//             if (!errors.isEmpty()) {
+//                 return res.status(400).json({ errors: errors.array() });
+//             }
+//             const email = req.body.email;
+//             const existingcustomer = await Customerlist.findOne({ email });
+
+//             if (existingcustomer) {
+//                 console.log('Email already registered:', email);
+//                 return res.status(400).json({
+//                     success: false,
+//                     message: "This Customer Email already exist!"
+//                 });
+//             } else {
+//                 Customerlist.create({
+//                     userid: req.body.userid,
+//                     name: req.body.name,
+//                     information: req.body.information,
+//                     email: req.body.email,
+//                     number: req.body.number,
+//                     country: req.body.country,
+//                     countryid: req.body.countryid,
+//                     city: req.body.city,
+//                     cityid: req.body.cityid,
+//                     state: req.body.state,
+//                     stateid: req.body.stateid,
+//                     countrydata: req.body.countrydata,
+//                     statedata: req.body.statedata,
+//                     citydata: req.body.citydata,
+//                     zip: req.body.zip,
+//                     address1: req.body.address1,
+//                     address2: req.body.address2,
+//                     post: req.body.post,
+//                 })
+//                 res.json({
+//                     Success: true,
+//                     message: "Congratulations! Your Customer has been successfully added! "
+//                 })
+//             }
+//         }
+//         catch (error) {
+//             console.error(error);
+//             // Handle token verification errors
+//             if (error.name === 'JsonWebTokenError') {
+//                 return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+//             }
+//             // Handle other errors
+//             res.status(500).json({ message: 'Internal server error' });
+//         }
+//     });
 
 router.post("/addcustomer", [
-    body('emails').isArray().withMessage('Emails must be an array'),
-body('emails.*').isEmail().withMessage('Each email must be valid'),
+    body('email').isEmail(),
     body('name').isLength({ min: 3 }),
     body('information').isLength(),
     body('number').isLength(), 
@@ -2019,7 +2024,7 @@ body('emails.*').isEmail().withMessage('Each email must be valid'),
         }
 
         const email = req.body.email;
-        const existingCustomer = await Customerlist.findOne({ emails: { $in: req.body.emails } });
+        const existingCustomer = await Customerlist.findOne({ email });
 
         if (existingCustomer) {
             console.log('Email already registered:', email);
@@ -2033,7 +2038,7 @@ body('emails.*').isEmail().withMessage('Each email must be valid'),
                 userid: req.body.userid,
                 name: req.body.name,
                 information: req.body.information,
-                  emails: req.body.emails,
+                email: req.body.email,
                 number: req.body.number,
                 country: req.body.country,
                 countryid: req.body.countryid,
@@ -2068,6 +2073,99 @@ body('emails.*').isEmail().withMessage('Each email must be valid'),
         res.status(500).json({ message: 'Internal server error' });
     }
 });
+
+
+// router.post(
+//         '/savecreateinvoice',
+//         [
+//           body('userid').isLength({ min: 3 }),
+//           body('invoiceData').isObject(),
+//           // Add validation for other fields if needed
+//         ],
+//         async (req, res) => {
+//           try {
+//             const errors = validationResult(req);
+//             if (!errors.isEmpty()) {
+//               return res.status(400).json({ errors: errors.array() });
+//             }
+
+//             const {
+//               userid,
+//               customername,
+//               itemname,
+//               customeremail,
+//               invoicenumber,
+//               purchaseorder,
+//               date,
+//               duedate,
+//               description,
+//               itemquantity,
+//               price,
+//               discount,
+//               amount,
+//               tax,
+//               subtotal,
+//               total,
+//               amountdue,
+//               information,
+//             } = req.body.invoiceData; // Destructure invoice data
+
+//             // Create the invoice in the database
+//             const newInvoice = new Invoice({
+//               userid,
+//               customername,
+//               itemname,
+//               customeremail,
+//               invoicenumber,
+//               purchaseorder,
+//               date,
+//               duedate,
+//               description,
+//               itemquantity,
+//               price,
+//               discount,
+//               amount,
+//               tax,
+//               subtotal,
+//               total,
+//               amountdue,
+//               information,
+//             });
+
+//             await newInvoice.save(); // Save the new invoice to the database
+
+//             res.json({
+//               success: true,
+//               message: 'Congratulations! Your Invoice has been successfully saved!',
+//             });
+//           } catch (error) {
+//             console.error('Error:', error);
+//             res.status(500).json({ success: false, message: 'Failed to save the invoice.' });
+//           }
+//         }
+//       );
+
+// router.post("/savecreateinvoice", [
+//     // Validate the incoming data (placeholders)
+//     body('userid').isLength({ min: 1 }),
+//     body('invoiceData').isObject(),
+// ], async (req, res) => {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//         return res.status(400).json({ errors: errors.array() });
+//     }
+
+//     try {
+//         // Save the invoice data to the database (placeholders)
+//         const { userid, invoiceData } = req.body;
+//         // Save the invoiceData to the database using Mongoose or other ORM
+
+//         res.json({ success: true, message: "Invoice saved successfully" });
+//     } catch (error) {
+//         console.error(error);
+//         return res.status(500).json({ success: false, message: "Internal Server Error" });
+//     }
+// });
 
 
 // Create a new invoice
@@ -2177,52 +2275,78 @@ router.post('/savecreateestimate', async (req, res) => {
 });
 
 router.get('/invoicedata/:userid', async (req, res) => {
-  try {
-    const userid = req.params.userid;
-    const rawToken = req.headers.authorization;
-    const page = parseInt(req.query.page) || 0;
-    const limit = parseInt(req.query.limit) || 20;
-    const status = req.query.status;
+    try {
+        const userid = req.params.userid;
+        const authtoken = req.headers.authorization;
+        const status = req.query.status;
+        const page = parseInt(req.query.page) || 0; // Default to page 0
+        const limit = parseInt(req.query.limit) || 20; // Default to 20 items
 
-    // ✅ Extract and verify JWT
-    if (!rawToken) {
-      return res.status(401).json({ message: 'Unauthorized: No token provided' });
+        // Verify JWT token
+        const decodedToken = jwt.verify(authtoken, jwrsecret);
+
+        // Build the query object
+        let query = { userid: userid };
+        if (status && status !== 'All') {
+            query.status = status;
+        }
+
+        // Get total count for pagination
+        const total = await Invoice.countDocuments(query);
+
+        // Find invoice data with pagination
+        const invoicedata = await Invoice.find(query)
+            .sort({ createdAt: -1 })
+            .skip(page * limit)
+            .limit(limit);
+
+        res.json({
+            invoices: invoicedata,
+            total: total,
+            currentPage: page,
+            totalPages: Math.ceil(total / limit)
+        });
+    } catch (error) {
+        console.error('Error fetching dashboard data:', error);
+        if (error.name === 'JsonWebTokenError') {
+            return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+        }
+        res.status(500).json({ message: 'Internal server error' });
     }
-
-    const token = rawToken.startsWith("Bearer ") ? rawToken.slice(7) : rawToken;
-    const decodedToken = jwt.verify(token, jwrsecret);
-    console.log("Decoded Token:", decodedToken);
-
-    // ✅ Build query
-    const query = { userid };
-    if (status && status !== 'All') {
-      query.status = status;
-    }
-
-    // ✅ Count total documents for pagination
-    const totalInvoices = await Invoice.countDocuments(query);
-
-    // ✅ Fetch paginated results
-    const invoices = await Invoice.find(query)
-      .sort({ createdAt: -1 })
-      .skip(page * limit)
-      .limit(limit);
-
-    // ✅ Return in expected structure
-    res.json({
-      invoices,
-      totalPages: Math.ceil(totalInvoices / limit),
-    });
-
-  } catch (error) {
-    console.error('Error fetching dashboard data:', error);
-    if (error.name === 'JsonWebTokenError') {
-      return res.status(401).json({ message: 'Unauthorized: Invalid token' });
-    }
-    res.status(500).json({ message: 'Internal server error' });
-  }
 });
-
+router.get('/searchinvoices/:userid', async (req, res) => {
+    try {
+      const userid = req.params.userid;
+      const authtoken = req.headers.authorization;
+      const search = req.query.search || '';
+      const status = req.query.status;
+  
+      // Verify JWT token
+      const decodedToken = jwt.verify(authtoken, jwrsecret);
+  
+      let query = {
+        userid,
+        $or: [
+          { customername: { $regex: search, $options: 'i' } },
+          { job: { $regex: search, $options: 'i' } }
+        ]
+      };
+  
+      if (status && status !== 'All') {
+        query.status = status;
+      }
+  
+      const invoices = await Invoice.find(query).sort({ createdAt: -1 });
+  
+      res.json({ invoices });
+    } catch (error) {
+      console.error('Search error:', error);
+      if (error.name === 'JsonWebTokenError') {
+        return res.status(401).json({ message: 'Unauthorized: Invalid token' });
+      }
+      res.status(500).json({ message: 'Internal server error' });
+    }
+  });
 
 router.get('/customerwisedata/:customeremail', async (req, res) => {
     try {
@@ -2843,16 +2967,16 @@ router.get('/getemailtransactiondata/:invoiceid', async (req, res) => {
 });
 
 // Fetch invoicedetail from a userid
-// router.get('/invoicedata/:userid', async (req, res) => {
-//     try {
-//         let userid = req.params.userid;
-//         const invoices = (await Invoice.find({ userid: userid }));
-//         res.json(invoices);
-//     } catch (error) {
-//         console.error(error);
-//         res.status(500).json({ message: 'Internal server error' });
-//     }
-// });
+router.get('/invoicedata/:userid', async (req, res) => {
+    try {
+        let userid = req.params.userid;
+        const invoices = (await Invoice.find({ userid: userid }));
+        res.json(invoices);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+});
 
 // Fetch invoicedetail from a userid
 router.get('/estimatedata/:userid', async (req, res) => {

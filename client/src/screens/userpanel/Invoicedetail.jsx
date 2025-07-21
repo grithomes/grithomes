@@ -56,9 +56,9 @@ export default function Invoicedetail() {
   const [ownerData, setOwnerData] = useState(null);
   const [signatureData, setsignatureData] = useState(null);
   // const [signatureData, setsignatureData] = useState(null);
-  const apiURL = 'https://grithomes.onrender.com/api/expense';
-  const expenseTypeURL = 'https://grithomes.onrender.com/api/expensetype';
-  const vendorURL = 'https://grithomes.onrender.com/api/vendor';
+  const apiURL = 'http://localhost:3001/api/expense';
+  const expenseTypeURL = 'http://localhost:3001/api/expensetype';
+  const vendorURL = 'http://localhost:3001/api/vendor';
 
 
   useEffect(() => {
@@ -163,7 +163,7 @@ export default function Invoicedetail() {
       };
 
       try {
-        const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
+        const response = await fetch('http://localhost:3001/api/addpayment', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -209,7 +209,7 @@ export default function Invoicedetail() {
 
 
               }; // Update emailsent status
-              await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+              await fetch(`http://localhost:3001/api/updateinvoicedata/${invoiceid}`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -261,7 +261,7 @@ export default function Invoicedetail() {
     try {
       if ((savedDepositData != null || savedDepositData != "") && savedDepositData._id != undefined) {
         // If savedDepositData exists and has an ID, update the existing record
-        const response = await fetch(`https://grithomes.onrender.com/api/updatedeposit/${savedDepositData._id}`, {
+        const response = await fetch(`http://localhost:3001/api/updatedeposit/${savedDepositData._id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -289,7 +289,7 @@ export default function Invoicedetail() {
 
           if (data.Success) {
             console.log('Deposit updated successfully:', data.deposit);
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`);
+            const savedDepositResponse = await fetch(`http://localhost:3001/api/deposit/${data.deposit._id}`);
             const savedDepositDatad = await savedDepositResponse.json();
             setsavedDepositData(savedDepositDatad.deposit);
             // You may update the state here if required
@@ -301,7 +301,7 @@ export default function Invoicedetail() {
 
       } else {
         // If savedDepositData is empty or does not have an ID, add a new record
-        const response = await fetch('https://grithomes.onrender.com/api/deposit', {
+        const response = await fetch('http://localhost:3001/api/deposit', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -327,7 +327,7 @@ export default function Invoicedetail() {
         else {
           const data = await response.json();
           if (data.success) {
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`, {
+            const savedDepositResponse = await fetch(`http://localhost:3001/api/deposit/${data.deposit._id}`, {
               headers: {
                 'Authorization': authToken,
               }
@@ -361,7 +361,7 @@ export default function Invoicedetail() {
     try {
       if ((savedDepositData != null || savedDepositData != "") && savedDepositData._id != undefined) {
         // If savedDepositData exists and has an ID, update the existing record
-        const response = await fetch(`https://grithomes.onrender.com/api/updatedeposit/${savedDepositData._id}`, {
+        const response = await fetch(`http://localhost:3001/api/updatedeposit/${savedDepositData._id}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -389,7 +389,7 @@ export default function Invoicedetail() {
 
           if (data.Success) {
             console.log('Deposit updated successfully:', data.deposit);
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`, {
+            const savedDepositResponse = await fetch(`http://localhost:3001/api/deposit/${data.deposit._id}`, {
               headers: {
                 'Authorization': authToken,
               }
@@ -412,7 +412,7 @@ export default function Invoicedetail() {
         }
       } else {
         // If savedDepositData is empty or does not have an ID, add a new record
-        const response = await fetch('https://grithomes.onrender.com/api/deposit', {
+        const response = await fetch('http://localhost:3001/api/deposit', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -437,7 +437,7 @@ export default function Invoicedetail() {
         else {
           const data = await response.json();
           if (data.success) {
-            const savedDepositResponse = await fetch(`https://grithomes.onrender.com/api/deposit/${data.deposit._id}`, {
+            const savedDepositResponse = await fetch(`http://localhost:3001/api/deposit/${data.deposit._id}`, {
               headers: {
                 'Authorization': authToken,
               }
@@ -482,7 +482,7 @@ export default function Invoicedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getinvoicedata/${invoiceid}`, {
+      const response = await fetch(`http://localhost:3001/api/getinvoicedata/${invoiceid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -525,7 +525,7 @@ export default function Invoicedetail() {
     }
 
     try {
-      const response = await fetch(`https://grithomes.onrender.com/api/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceIdpass)}`);
+      const response = await fetch(`http://localhost:3001/api/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceIdpass)}`);
       const json = await response.json();
       console.log('Customer signature response:', json);
       if (response.ok && json.hasSignature) {
@@ -542,7 +542,7 @@ export default function Invoicedetail() {
     try {
       const ownerId = localStorage.getItem('userid');
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getownerdata/${ownerId}`, {
+      const response = await fetch(`http://localhost:3001/api/getownerdata/${ownerId}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -567,7 +567,7 @@ export default function Invoicedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getdepositdata/${userid}/${invoiceid}`, {
+      const response = await fetch(`http://localhost:3001/api/getdepositdata/${userid}/${invoiceid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -594,7 +594,7 @@ export default function Invoicedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoiceid}`, {
+      const response = await fetch(`http://localhost:3001/api/gettransactiondata/${invoiceid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -631,7 +631,7 @@ export default function Invoicedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/expense/${invoiceid}`, {
+      const response = await fetch(`http://localhost:3001/api/expense/${invoiceid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -669,7 +669,7 @@ export default function Invoicedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+      const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -765,7 +765,7 @@ export default function Invoicedetail() {
       setexceedpaymenterror("");
     }
     try {
-      const response = await fetch('https://grithomes.onrender.com/api/addpayment', {
+      const response = await fetch('http://localhost:3001/api/addpayment', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -814,7 +814,7 @@ export default function Invoicedetail() {
 
 
             }; // Update emailsent status
-            await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+            await fetch(`http://localhost:3001/api/updateinvoicedata/${invoiceid}`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -823,7 +823,7 @@ export default function Invoicedetail() {
               body: JSON.stringify(updatedData),
             });
             // Add new expense
-            await fetch('https://grithomes.onrender.com/api/expense', {
+            await fetch('http://localhost:3001/api/expense', {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -1224,7 +1224,7 @@ thead{
   const handleDeleteTransClick = async (transactionid) => {
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/deltransaction/${transactionid}`, {
+      const response = await fetch(`http://localhost:3001/api/deltransaction/${transactionid}`, {
         method: 'GET',
         headers: {
           'Authorization': authToken,
@@ -1268,7 +1268,7 @@ thead{
       // If a signature exists, delete it
       if (signatureData) {
         const authToken = localStorage.getItem('authToken');
-        const deleteSignatureResponse = await fetch(`https://grithomes.onrender.com/api/delcustomersignature/${encodeURIComponent(invoiceIdpass)}`, {
+        const deleteSignatureResponse = await fetch(`http://localhost:3001/api/delcustomersignature/${encodeURIComponent(invoiceIdpass)}`, {
           method: 'DELETE',
           headers: {
             'Authorization': authToken,
@@ -1286,7 +1286,7 @@ thead{
 
       // Proceed with deleting the estimate data
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
+      const response = await fetch(`http://localhost:3001/api/deldata/${invoiceid}`, {
         method: 'GET',
         headers: {
           'Authorization': authToken,
@@ -1323,7 +1323,7 @@ thead{
   //     // If a signature exists, delete it
   //     if (signatureData) {
   //       const authToken = localStorage.getItem('authToken');
-  //       const deleteSignatureResponse = await fetch(`https://grithomes.onrender.com/api/delcustomersignature/${encodeURIComponent(invoiceIdpass)}`, {
+  //       const deleteSignatureResponse = await fetch(`http://localhost:3001/api/delcustomersignature/${encodeURIComponent(invoiceIdpass)}`, {
   //         method: 'DELETE',
   //         headers: {
   //           'Authorization': authToken,
@@ -1341,7 +1341,7 @@ thead{
 
   //     // Proceed with deleting the estimate data
   //     const authToken = localStorage.getItem('authToken');
-  //     const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
+  //     const response = await fetch(`http://localhost:3001/api/deldata/${invoiceid}`, {
   //       method: 'GET',
   //       headers: {
   //         'Authorization': authToken,
@@ -1373,7 +1373,7 @@ thead{
   // const handleRemove = async (invoiceid,invoiceIdpass) => {
   //   const authToken = localStorage.getItem('authToken');
   //   try {
-  //     const response = await fetch(`https://grithomes.onrender.com/api/deldata/${invoiceid}`, {
+  //     const response = await fetch(`http://localhost:3001/api/deldata/${invoiceid}`, {
   //       method: 'GET',
   //       headers: {
   //         'Authorization': authToken,
@@ -1444,7 +1444,7 @@ thead{
     const userid = invoiceData.userid;
     try {
       const finalContent = content.trim() || ``; // If content is empty, use default value
-      const response = await fetch('https://grithomes.onrender.com/api/send-invoice-email', {
+      const response = await fetch('http://localhost:3001/api/send-invoice-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1474,7 +1474,7 @@ thead{
 
         if (invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid') {
           const updatedData = { invoiceData }
-          await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+          await fetch(`http://localhost:3001/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1484,7 +1484,7 @@ thead{
           });
         } else {
           const updatedData = { ...invoiceData, status: 'Send', emailsent: 'yes' }
-          await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+          await fetch(`http://localhost:3001/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1494,12 +1494,12 @@ thead{
           });
         }
         // Check if customer signature already exists
-        const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceData._id)}`);
+        const checkResponse = await fetch(`http://localhost:3001/api/checkcustomersignatureusinginvoice/${encodeURIComponent(invoiceData._id)}`);
         const checkJson = await checkResponse.json();
 
         if (checkResponse.ok && !checkJson.hasSignature) {
           // Create new customer signature only if it doesn't exist
-          await fetch('https://grithomes.onrender.com/api/customersignature', {
+          await fetch('http://localhost:3001/api/customersignature', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1541,7 +1541,7 @@ thead{
       console.log(savedDepositData, "savedDepositData");
 
       const finalContent = content.trim() || ``; // If content is empty, use default value
-      const response = await fetch('https://grithomes.onrender.com/api/send-deposit-email', {
+      const response = await fetch('http://localhost:3001/api/send-deposit-email', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -1572,7 +1572,7 @@ thead{
         // Update the database with emailsent status
         if (invoiceData.status == 'Paid' || invoiceData.status == 'Partially Paid') {
           const updatedData = { invoiceData }
-          await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+          await fetch(`http://localhost:3001/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1582,7 +1582,7 @@ thead{
           });
         } else {
           const updatedData = { ...invoiceData, status: "Send", emailsent: 'yes' }
-          await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+          await fetch(`http://localhost:3001/api/updateinvoicedata/${invoiceid}`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -1592,7 +1592,7 @@ thead{
           });
         }
         // const updatedData = { ...invoiceData, emailsent: 'yes' }; // Update emailsent status
-        // await fetch(`https://grithomes.onrender.com/api/updateinvoicedata/${invoiceid}`, {
+        // await fetch(`http://localhost:3001/api/updateinvoicedata/${invoiceid}`, {
         //   method: 'POST',
         //   headers: {
         //     'Content-Type': 'application/json',
@@ -1904,8 +1904,8 @@ thead{
                                       </td>
                                       <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
                                       <td className="text-end d-none d-md-table-cell">{item.unit}</td>
-                                      <td className="text-end d-none d-md-table-cell">{roundOff(item.price)}</td>
-                                      <td className='text-end'>{roundOff(item.amount)}</td>
+                                      <td className="text-end d-none d-md-table-cell">{roundOff(item.price).toLocaleString('en-CA')}</td>
+                                      <td className='text-end'>{roundOff(item.amount).toLocaleString('en-CA')}</td>
                                     </tr>
                                   ))}
                                 </tbody>
@@ -1921,14 +1921,14 @@ thead{
                                     <tr>
                                       <td className='d-none d-md-table-cell' rowspan="10"></td>
                                       <td className='text-md-end' width="22%">Subtotal</td>
-                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.subtotal)}</td>
+                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.subtotal).toLocaleString('en-CA')}</td>
                                     </tr>
                                     {
                                       invoiceData.discountTotal > 0
                                         ?
                                         <tr>
                                           <td className='text-md-end' width="22%">Discount</td>
-                                          <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.discountTotal)}</td>
+                                          <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.discountTotal).toLocaleString('en-CA')}</td>
                                         </tr>
                                         :
                                         null
@@ -1946,7 +1946,7 @@ thead{
                                             {signupdata.TaxName} ({signupdata.taxPercentage}%)
 
                                           </td>
-                                          <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.tax)}</td>
+                                          <td className='text-end' width="22%"><CurrencySign />{roundOff(invoiceData.tax).toLocaleString('en-CA')}</td>
                                         </tr>
                                     }
 
@@ -1957,12 +1957,12 @@ thead{
                                     <tr>
 
                                       <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
-                                      <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{roundOff(invoiceData.total)}</td>
+                                      <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{roundOff(invoiceData.total).toLocaleString('en-CA')}</td>
                                     </tr>
                                     {transactions.map((transaction) => (
                                       <tr key={transaction._id}>
                                         <td className='text-md-end' width="22%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
-                                        <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount}</td>
+                                        <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount.toLocaleString('en-CA')}</td>
                                       </tr>
                                     ))}
                                   </tbody>
@@ -1979,7 +1979,7 @@ thead{
                             </div>
                             <div className='invoice-price-right'>
                               <small>Amount Due</small>
-                              <span class="f-w-600 mt-3"><CurrencySign />{roundOff(invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
+                              <span class="f-w-600 mt-3"><CurrencySign />{roundOff(invoiceData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0)).toLocaleString('en-CA')}</span>
                             </div>
                           </div>
 
@@ -2060,11 +2060,11 @@ thead{
                               <p>Paid</p>
                             </div>
                             <div className="col-6 text-end">
-                              <p><CurrencySign />{roundOff(invoiceData.total)}</p>
+                              <p><CurrencySign />{roundOff(invoiceData.total).toLocaleString('en-CA')}</p>
                               {console.log(transactions)}
 
 
-                              <p><CurrencySign />{roundOff(transactions.reduce((total, payment) => total + payment.paidamount, 0))}</p>
+                              <p><CurrencySign />{roundOff(transactions.reduce((total, payment) => total + payment.paidamount, 0)).toLocaleString('en-CA')}</p>
 
                             </div>
 

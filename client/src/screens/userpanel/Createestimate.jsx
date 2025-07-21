@@ -7,7 +7,10 @@ import Usernavbar from './Usernavbar';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import Select from 'react-select';
-
+// import 'react-select/dist/react-select.css'; 
+// import VirtualizedSelect from 'react-virtualized-select';
+// import 'react-virtualized-select/styles.css';
+// import 'react-virtualized/styles.css'
 import CurrencySign from '../../components/CurrencySign ';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
@@ -63,7 +66,7 @@ export default function Createestimate() {
     const [loading, setloading] = useState(true);
     const [customers, setcustomers] = useState([]);
     const [items, setitems] = useState([]);
-    const [searchcustomerResults, setsearchcustomerResults] = useState([]);
+    const [searchcustomerResults, setSearchcustomerResults] = useState([]);
     const [searchitemResults, setSearchitemResults] = useState([]);
     const [quantityMap, setQuantityMap] = useState({});
     const [discountMap, setDiscountMap] = useState({});
@@ -96,6 +99,8 @@ export default function Createestimate() {
     const [ownerId, setOwnerId] = useState('');
     const [isAddSignatureSwitchOn, setIsAddSignatureSwitchOn] = useState(false);
     const [isCustomerSignSwitchOn, setIsCustomerSignSwitchOn] = useState(false);
+const [emailOptions, setEmailOptions] = useState([]);
+const [showEmailModal, setShowEmailModal] = useState(false);
 
     const [credentials, setCredentials] = useState({
         name: '',
@@ -146,7 +151,7 @@ export default function Createestimate() {
         if (event.target.checked) {
             try {
                 const ownerId = localStorage.getItem('userid');
-                const response = await fetch(`https://grithomes.onrender.com/api/check-signature/${ownerId}`);
+                const response = await fetch(`http://localhost:3001/api/check-signature/${ownerId}`);
                 const data = await response.json();
                 setHasSignature(data.hasSignature);
 
@@ -184,7 +189,7 @@ export default function Createestimate() {
             const ownerId = localStorage.getItem('userid');
             const email = localStorage.getItem('userEmail');
             const companyname = localStorage.getItem('companyname');
-            await fetch('https://grithomes.onrender.com/api/ownersignature', {
+            await fetch('http://localhost:3001/api/ownersignature', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -206,7 +211,7 @@ export default function Createestimate() {
         try {
             const userid = localStorage.getItem('userid');
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/lastEstimateNumber/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -243,7 +248,7 @@ export default function Createestimate() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/customers/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -273,7 +278,7 @@ export default function Createestimate() {
         try {
           const userid = localStorage.getItem("userid");
           const authToken = localStorage.getItem('authToken');
-          const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+          const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
             headers: {
               'Authorization': authToken,
             }
@@ -305,7 +310,7 @@ export default function Createestimate() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+            const response = await fetch(`http://localhost:3001/api/itemdata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -395,19 +400,29 @@ export default function Createestimate() {
             setestimateData({
                 ...estimateData,
                 customername: selectedCustomer.name,
-                customeremail: selectedCustomer.email,
                 customerphone: selectedCustomer.number,
             });
 
-            setSelectedCustomerDetails({
-                name: selectedCustomer.name,
-                email: selectedCustomer.email,
-                number: selectedCustomer.number,
-            });
+           setSelectedCustomerDetails({
+  name: selectedCustomer.name,
+  email: selectedCustomer.emails?.[0] || '',
+  number: selectedCustomer.number
+});
+
+// Handle multiple emails
+if (selectedCustomer.emails?.length > 1) {
+  setEmailOptions(selectedCustomer.emails);
+  setShowEmailModal(true); // open modal
+} else {
+  setestimateData(prev => ({
+    ...prev,
+    customeremail: selectedCustomer.emails?.[0] || '',
+  }));
+}
             setIsCustomerSelected(true);
         }
 
-        setsearchcustomerResults([...searchcustomerResults, event]);
+        setSearchcustomerResults([...searchcustomerResults, event]);
     };
 
     const handleNameChange = (event) => {
@@ -629,7 +644,7 @@ export default function Createestimate() {
             console.log(data,"Data sdsdfsdsfsdf");
 
             // Sending estimate data to the backend API
-            const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
+            const response = await fetch('http://localhost:3001/api/savecreateestimate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -748,7 +763,7 @@ export default function Createestimate() {
         console.log(data, "Data to send");
 
         // Sending estimate data to the backend API
-        const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
+        const response = await fetch('http://localhost:3001/api/savecreateestimate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -859,7 +874,7 @@ export default function Createestimate() {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
         const authToken = localStorage.getItem('authToken');
-        const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
+        const response = await fetch('http://localhost:3001/api/addcustomer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -928,492 +943,752 @@ export default function Createestimate() {
 
 
     return (
-        <div className="bg">
-        {loading ? (
-          <div className="d-flex justify-content-center align-items-center vh-100">
-            <ColorRing loading={loading} aria-label="Loading Spinner" data-testid="loader" />
-          </div>
-        ) : (
-          <div className="container-fluid">
-            <div className="row">
-              <div className="col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none">
-                <Usernavbar />
-              </div>
-              <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                <div className="d-lg-none d-md-none d-block mt-2">
-                  <Usernav />
-                </div>
-                <div className="create-estimate-container mx-3 mx-md-4">
-                  <form onSubmit={handleSubmit}>
-                    <div className="invoice-header bg-light p-3 rounded-top shadow-sm mb-4">
-                      <div className="row align-items-center">
-                        <div className="col-lg-6 col-md-6 col-12">
-                          <h2 className="fs-3 fw-bold text-primary mb-1">Create Estimate</h2>
-                          <nav aria-label="breadcrumb">
-                            <ol className="breadcrumb mb-0">
-                              <li className="breadcrumb-item">
-                                <a href="/Userpanel/Userdashboard" className="text-decoration-none text-muted">Dashboard</a>
-                              </li>
-                              <li className="breadcrumb-item active" aria-current="page">Create Estimate</li>
-                            </ol>
-                          </nav>
-                        </div>
-                        <div className="col-lg-6 col-md-6 col-12 text-md-end mt-3 mt-md-0">
-                          <button className="btn btn-danger fw-bold" type="submit">
-                            <i className="fas fa-save me-2"></i> Save
-                          </button>
-                        </div>
-                      </div>
-                      {alertMessage && (
-                        <div className="mt-3">
-                          <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />
-                        </div>
-                      )}
-                    </div>
-  
-                    <div className="row g-4">
-                    <div className="col-lg-3 col-12">
-                        <div className="card shadow-sm p-4">
-                          <h5 className="fw-bold text-muted">Signature Options</h5>
-                          <div className="form-check form-switch mb-3">
-                            <input
-                              className="form-check-input"
-                              type="checkbox"
-                              id="signatureSwitch"
-                              onChange={handleSignatureSwitch}
-                              checked={hasSignature}
-                            />
-                            <label className="form-check-label" htmlFor="signatureSwitch">Enable Signature</label>
-                          </div>
-                          {hasSignature && (
-                            <>
-                              <div className="form-check form-switch mb-3">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="addSignatureSwitch"
-                                  checked={isAddSignatureSwitchOn}
-                                  onChange={handleAddSignatureSwitch}
-                                />
-                                <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
-                              </div>
-                              <div className="form-check form-switch">
-                                <input
-                                  className="form-check-input"
-                                  type="checkbox"
-                                  id="customerSignSwitch"
-                                  checked={isCustomerSignSwitchOn}
-                                  onChange={handleCustomerSignSwitch}
-                                />
-                                <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
-                              </div>
-                            </>
-                          )}
-                        </div>
-                        {isSignatureModalOpen && (
-                          <SignatureModal onSave={saveSignature} onClose={() => setIsSignatureModalOpen(false)} />
-                        )}
-                      </div> 
-                      <div className="col-lg-9 col-12">
-                        <div className="card shadow-sm p-4">
-                          <div className="row">
-                            <div className="col-md-6 col-12">
-                              {isCustomerSelected ? (
-                                <div className="p-3 bg-light rounded">
-                                  <h5 className="fw-bold text-dark">{selectedCustomerDetails.name}</h5>
-                                  <p className="text-muted mb-1">{selectedCustomerDetails.email}</p>
-                                  <p className="text-muted mb-2">{selectedCustomerDetails.number}</p>
-                                  <button className="btn btn-link text-primary p-0" data-bs-toggle="modal" data-bs-target="#exampleModal">
-                                    Edit
-                                  </button>
+        <div className='bg'>
+            {
+                loading ?
+                    <div className='row'>
+                        <ColorRing
+                            // width={200}
+                            loading={loading}
+                            // size={500}
+                            display="flex"
+                            justify-content="center"
+                            align-items="center"
+                            aria-label="Loading Spinner"
+                            data-testid="loader"
+                        />
+                    </div> :
+                    <div className='container-fluid'>
+                        <div className="row">
+                            <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
+                                <div  >
+                                    <Usernavbar />
                                 </div>
-                              ) : (
-                                <div>
-                                  <label className="form-label fw-bold">Select Customer</label>
-                                  <div className="input-group">
-                                    <Select
-                                      value={searchcustomerResults}
-                                      onChange={onChangecustomer}
-                                      options={customers.map(customer => ({ value: customer._id, label: customer.name }))}
-                                      placeholder="Choose a customer..."
-                                      className="flex-grow-1"
-                                      classNamePrefix="react-select"
-                                    />
-                                    <button type="button" className="btn btn-outline-primary ms-2" data-bs-toggle="modal" data-bs-target="#exampleModal1">
-                                      <i className="fas fa-plus"></i>
-                                    </button>
-                                  </div>
+                            </div>
+
+                            <div className="col-lg-10 col-md-9 col-12 mx-auto">
+                                <div className='d-lg-none d-md-none d-block mt-2'>
+                                    <Usernav />
                                 </div>
-                              )}
-                            </div>
-                            <div className="col-md-6 col-12 mt-3 mt-md-0">
-                              <div className="mb-3">
-                                <label className="form-label fw-bold">Estimate Number</label>
-                                <input
-                                  type="text"
-                                  name="EstimateNumber"
-                                  className="form-control"
-                                  value={estimateData.EstimateNumber}
-                                  onChange={onchange}
-                                  required
-                                />
-                              </div>
-                              <div className="mb-3">
-                                <label className="form-label fw-bold">Purchase Order (PO) #</label>
-                                <input
-                                  type="text"
-                                  name="purchaseorder"
-                                  className="form-control"
-                                  onChange={onchange}
-                                />
-                              </div>
-                              <div className="mb-3">
-                                <label className="form-label fw-bold">Date</label>
-                                <input
-                                  type="date"
-                                  name="date"
-                                  className="form-control"
-                                  value={estimateData.date}
-                                  onChange={onchange}
-                                  required
-                                />
-                              </div>
-                              <div className="mb-3">
-                                <label className="form-label fw-bold">Job</label>
-                                <input
-                                  type="text"
-                                  name="job"
-                                  className="form-control"
-                                  value={estimateData.job}
-                                  onChange={onchange}
-                                  required
-                                />
-                              </div>
-                            </div>
-                          </div>
-  
-                          <div className="mt-4">
-                            <div className="table-responsive">
-                              <table className="table table-hover">
-                                <thead className="table-light">
-                                  <tr>
-                                    <th>Item</th>
-                                    <th className="text-center">Quantity</th>
-                                    <th className="text-center">Unit</th>
-                                    <th className="text-end">Price</th>
-                                    <th className="text-end">Amount</th>
-                                  </tr>
-                                </thead>
-                                <tbody>
-                                  {searchitemResults.map((item) => {
-                                    const selectedItem = items.find((i) => i._id === item.value);
-                                    const itemPrice = selectedItem?.price || 0;
-                                    const itemId = item.value;
-                                    const quantity = quantityMap[itemId] || 1;
-                                    const discount = discountMap[itemId] || 0;
-                                    const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
-  
-                                    return (
-                                      <tr key={item.value}>
-                                        <td>
-                                          <div className="d-flex justify-content-between align-items-center">
-                                            <strong>{item.label}</strong>
-                                            <button
-                                              type="button"
-                                              className="btn btn-danger btn-sm"
-                                              onClick={() => onDeleteItem(item.value)}
-                                            >
-                                              <i className="fas fa-trash"></i>
-                                            </button>
-                                          </div>
-                                          <CKEditor
-                                            editor={ClassicEditor}
-                                            data={selectedItem?.description || ''}
-                                            onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
-                                          />
-                                        </td>
-                                        <td className="text-center">
-                                          <input
-                                            type="number"
-                                            className="form-control text-center"
-                                            value={quantity}
-                                            onChange={(event) => onChangeQuantity(event, itemId)}
-                                            min="1"
-                                          />
-                                        </td>
-                                        <td className="text-center">{selectedItem?.unit || '-'}</td>
-                                        <td className="text-end">
-                                          <input
-                                            type="text"
-                                            className="form-control text-end"
-                                            value={itemPrice}
-                                            onChange={(event) => onChangePrice(event, itemId)}
-                                          />
-                                        </td>
-                                        <td className="text-end">
-                                          <CurrencySign />{roundOff(discountedAmount)}
-                                        </td>
-                                      </tr>
-                                    );
-                                  })}
-                                </tbody>
-                              </table>
-                              {itemExistsMessage && (
-                                <div className="alert alert-warning mt-3" role="alert">
-                                  {itemExistsMessage}
+                                <div className='mx-4'>
+                                    <form onSubmit={handleSubmit}>
+                                        <div className='row py-4 px-2 breadcrumbclr'>
+                                            <div className="col-lg-4 col-md-6 col-sm-12 col-7 me-auto">
+                                                <p className='fs-35 fw-bold'>Estimate</p>
+                                                <nav aria-label="breadcrumb">
+                                                    <ol class="breadcrumb mb-0">
+                                                        <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
+                                                        <li class="breadcrumb-item active" aria-current="page">Estimate</li>
+                                                    </ol>
+                                                </nav>
+                                            </div>
+                                            <div className="col-lg-3 col-md-4 col-sm-12 col-5 text-right">
+                                                <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit">Save</button>
+                                            </div>
+                                            <div className='mt-4'>
+                                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                                            </div>
+                                        </div>
+                                        <div className="row">
+                                            
+                                        <div className="col-lg-3 col-12">
+                                                <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
+                                                    <div className="form-check form-switch">
+                                                        <div>
+                                                            <label className="form-check-label" htmlFor="signatureSwitch">Signature</label>
+                                                            <input
+                                                                className="form-check-input"
+                                                                type="checkbox"
+                                                                role="switch"
+                                                                id="signatureSwitch"
+                                                                onChange={handleSignatureSwitch}
+                                                                checked={hasSignature}
+                                                            />
+                                                        </div>
+                                                        {hasSignature && (
+                                                            <>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="addSignatureSwitch"
+                                                                        checked={isAddSignatureSwitchOn}
+                                                                        onChange={handleAddSignatureSwitch}
+                                                                    />
+                                                                </div>
+                                                                <div>
+                                                                    <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
+                                                                    <input
+                                                                        className="form-check-input"
+                                                                        type="checkbox"
+                                                                        role="switch"
+                                                                        id="customerSignSwitch"
+                                                                        checked={isCustomerSignSwitchOn}
+                                                                        onChange={handleCustomerSignSwitch}
+                                                                    />
+                                                                </div>
+                                                            </>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                {isSignatureModalOpen && (
+                                                    <SignatureModal
+                                                        onSave={saveSignature}
+                                                        onClose={() => setIsSignatureModalOpen(false)}
+                                                    />
+                                                )}
+                                            </div>
+                                            <div className="col-lg-12 col-12 order-2 order-lg-1"> 
+                                                <div className='box1 rounded adminborder p-4 m-2 mb-5'>
+                                                    <div className='row me-2'>
+                                                        <div className="col-md-6 col-lg-7 col-12">
+                                                            {isCustomerSelected ? (
+                                                                <div className="customerdetail p-3">
+                                                                    <ul>
+                                                                        <li className='fw-bold fs-4'>{selectedCustomerDetails.name}</li>
+                                                                        <li>
+                                                                            <a href="" className='text-decoration-none' data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a>
+                                                                        </li>
+                                                                    </ul>
+                                                                    <p>{selectedCustomerDetails.email}</p>
+                                                                    <p>{selectedCustomerDetails.number}</p>
+                                                                </div>
+                                                            ) : (
+                                                                <div className="search-container forms">
+                                                                    <p className='fs-20 mb-0'>Select Customers</p>
+                                                                    <div className="row">
+                                                                        <div className="col-8">
+                                                                            {/*<VirtualizedSelect
+                                                                                id="searchitems"
+                                                                                name="customername"
+                                                                                className="form-control zindex op pl-0"
+                                                                                placeholder=""
+                                                                                onChange={onChangecustomer}
+                                                                                required
+                                                                                options={customers.map((customer, index) =>
+                                                                                    ({ label: customer.name, value: customer._id })
+                                                                                )}
+                                                                            />*/}
+                                                                            <Select
+                                                                                value={searchcustomerResults}
+                                                                                onChange={onChangecustomer}
+                                                                                options={customers.map(customer => ({
+                                                                                    value: customer._id,
+                                                                                    label: customer.name,
+                                                                                }))}
+                                                                                placeholder=""
+                                                                                required
+                                                                            />
+                                                                        </div> 
+                                                                        <div className="col-3">
+                                                                            <a role='button' className="btn btn-success btn-sm me-2 text-white mt-1" data-bs-toggle="modal" data-bs-target="#exampleModal1">
+                                                                                <i class="fa-solid fa-plus"></i>
+                                                                            </a>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                        <div className="col-lg-5 col-md-6">
+                                                            <div className="row">
+                                                                {message == true ? (
+                                                                    <div className="alert alert-warning alert-dismissible fade show" role="alert">
+                                                                        <strong>{alertShow}</strong>
+                                                                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                                                    </div>
+                                                                ) : (
+                                                                    ""
+                                                                )}
+                                                                <div className="col-lg-12">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="estimatenumbr" className="form-label">
+                                                                            Estimate Number
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            name="EstimateNumber"
+                                                                            className="form-control"
+                                                                            value={estimateData.EstimateNumber}
+                                                                            onChange={onchange}
+                                                                            // placeholder="estimate Number"
+                                                                            id="estimatenumbr"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-12">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="purchaseoder" className="form-label">
+                                                                            Purchase Order (PO) #
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            name="purchaseorder"
+                                                                            className="form-control"
+                                                                            onChange={onchange}
+                                                                            id="purchaseoder"
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-12">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="Date" className="form-label">
+                                                                            Date
+                                                                        </label>
+                                                                        <input
+                                                                            type="date"
+                                                                            name="date"
+                                                                            className="form-control"
+                                                                            value={estimateData.date}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Date"
+                                                                            id="Date"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                                <div className="col-lg-12">
+                                                                    <div className="mb-3">
+                                                                        <label htmlFor="Job" className="form-label">
+                                                                            Job
+                                                                        </label>
+                                                                        <input
+                                                                            type="text"
+                                                                            name="job"
+                                                                            className="form-control"
+                                                                            value={estimateData.job}
+                                                                            onChange={onchange}
+                                                                            // placeholder="Date"
+                                                                            id="job"
+                                                                            required
+                                                                        />
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className='box1 rounded adminborder p-4 m-2'>
+                                                        <div className="table-responsive">
+                                                            <table className="table">
+                                                                <thead>
+                                                                    <tr>
+                                                                        <th scope="col">ITEM</th>
+                                                                        <th scope="col">QUANTITY</th>
+                                                                        <th scope="col">UNIT</th>
+                                                                        <th scope="col">PRICE</th>
+                                                                        <th scope="col">AMOUNT</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody>
+                                                                    {searchitemResults.map((item) => {
+                                                                        const selectedItem = items.find((i) => i._id === item.value);
+                                                                        const itemPrice = selectedItem?.price || 0;
+                                                                        const itemId = item.value;
+                                                                        const quantity = quantityMap[itemId] || 1;
+                                                                        const discount = discountMap[itemId] || 0;
+
+                                                                        const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+                                                                        const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        });
+
+                                                                        return (
+                                                                            <tr key={item.value}>
+                                                                                <td scope="col">
+                                                                                    <div className="mb-3 d-flex align-items-baseline justify-content-between">
+                                                                                        <p>{item.label}</p>
+                                                                                        <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
+                                                                                            <i className="fas fa-trash"></i>
+                                                                                        </button>
+                                                                                    </div>
+                                                                                    <div className="row">
+                                                                                        <div className="col">
+                                                                                            <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
+
+                                                                                            <CKEditor
+                                                                                                editor={ClassicEditor}
+                                                                                                data={selectedItem?.description || ''}
+                                                                                                name={`description-${itemId}`}
+                                                                                                onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
+                                                                                                onBlur={(event, editor) => {
+                                                                                                    console.log('Blur.', editor);
+                                                                                                }}
+                                                                                                onFocus={(event, editor) => {
+                                                                                                    console.log('Focus.', editor);
+                                                                                                }}
+                                                                                            />
+
+                                                                                        </div>
+
+                                                                                    </div>
+                                                                                </td>
+                                                                                <td>
+                                                                                    <input
+                                                                                        type="number"
+                                                                                        name={`quantity-${itemId}`}
+                                                                                        className="form-control"
+                                                                                        value={quantity}
+                                                                                        onChange={(event) => onChangeQuantity(event, itemId)}
+                                                                                        id={`quantity-${itemId}`}
+                                                                                        required
+                                                                                    />
+                                                                                </td>
+                                                                                <td>
+                                                                                {selectedItem?.unit}
+                                                                                </td>
+                                                                                <td>
+                                                                
+                                                                                    <input
+                                                                                        type="text"
+                                                                                        name={`price-${itemId}`}
+                                                                                        className="form-control"
+                                                                                        value={itemPrice}
+                                                                                        onChange={(event) => onChangePrice(event, itemId)}
+                                                                                        id={`price-${itemId}`}
+                                                                                        required
+                                                                                    />
+
+                                                                                </td>
+                                                                               
+                                                                                {/* <td className="text-center">
+                                                                                    <p><CurrencySign />{discountTotal.toFixed(2)}</p>
+                                                                                </td> */}
+                                                                                <td className="text-center">
+                                                                                    <p><CurrencySign />{formattedTotalAmount}</p>
+                                                                                </td>
+                                                                            </tr>
+                                                                        );
+                                                                    })}
+
+                                                                    {itemExistsMessage && (
+                                                                        <div className="alert alert-warning mt-3" role="alert">
+                                                                            {itemExistsMessage}
+                                                                        </div>
+                                                                    )}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+
+                                                        <div className="row pt-3">
+                                                            <div className="col-lg-6 col-md-12">
+                                                                <div className="search-container forms">
+                                                                    <p className='fs-20 mb-0'>Select Item</p>
+                                                                    {/* <VirtualizedSelect
+                                                                        id="searchitems"
+                                                                        name="itemname"
+                                                                        className="form-control zindex op pl-0"
+                                                                        placeholder=""
+                                                                        onChange={onChangeitem}
+                                                                        options={items.map((item, index) =>
+                                                                            ({ label: item.itemname, value: item._id })
+
+                                                                        )}
+
+                                                                    >
+                                                                    </VirtualizedSelect> */}
+                                                                    <Select
+                                                                        value={searchitemResults}
+                                                                        onChange={onChangeitem}
+                                                                        options={items.map(item => ({
+                                                                            value: item._id,
+                                                                            label: item.itemname,
+                                                                        }))}
+                                                                        placeholder=""
+                                                                    />
+                                                                </div>
+                                                            </div>
+                                                            <div className="col-lg-6 col-md-12">
+                                                                <div className="row">
+                                                                    <div className="col-6 col-md-3">
+                                                                        <p>Subtotal</p>
+                                                                        <p>Discount</p>
+                                                                        {/* <p>GST</p> */}
+                                                                        <p className='pt-3'>{signUpData.name} {signUpData.percentage}%</p>
+
+                                                                        <p>Total</p>
+                                                                    </div>
+                                                                    <div className="col-6 col-md-9">
+                                                                        <p className="mb-3"><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        })}</p>
+                                                                        <div className="mb-3">
+                                                                            <input
+                                                                                type="number"
+                                                                                name="totaldiscount"
+                                                                                className="form-control"
+                                                                                value={discountTotal}
+                                                                                onChange={handleDiscountChange} // Ensure proper event binding
+                                                                                placeholder="Enter Discount Total"
+                                                                                id="discountInput"
+                                                                                min="0"
+                                                                            />
+                                                                        </div>
+                                                                        {/* <div className="mb-3">
+                                                                            <input
+                                                                                type="number"
+                                                                                name="tax"
+                                                                                className="form-control"
+                                                                                value={taxPercentage}
+                                                                                onChange={handleTaxChange}
+                                                                                placeholder="Enter GST Percentage"
+                                                                                id="taxInput"
+                                                                                min="0"
+                                                                            />
+                                                                        </div> */}
+                                                                        <p><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        })}</p>
+
+                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        })}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <hr />
+                                                        <div className="row pt-3">
+                                                            <div className="col-lg-6 col-md-12"></div>
+                                                            <div className="col-lg-6 col-md-12">
+                                                                <div className="row">
+                                                                    <div className="col-6 col-md-3">
+                                                                        <p>Amount due</p>
+                                                                    </div>
+                                                                    <div className="col-6 col-md-9">
+                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
+                                                                            // style: 'currency',
+                                                                            // currency: 'INR',
+                                                                        })}</p>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className='box1 rounded adminborder m-2 mt-5'>
+                                                        <CKEditor
+                                                            editor={ClassicEditor}
+                                                            data={editorData}
+                                                            onChange={handleEditorChange}
+                                                            config={{
+                                                                extraPlugins: [MyCustomUploadAdapterPlugin],
+                                                            }}
+                                                            onBlur={(event, editor) => {
+                                                                console.log('Blur.', editor);
+                                                            }}
+                                                            onFocus={(event, editor) => {
+                                                                console.log('Focus.', editor);
+                                                            }}
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                         
+                                        </div>
+
+                                    </form>
                                 </div>
-                              )}
                             </div>
-  
-                            <div className="mt-3">
-                              <label className="form-label fw-bold">Select Item</label>
-                              <Select
-                                value={searchitemResults}
-                                onChange={onChangeitem}
-                                options={items.map(item => ({ value: item._id, label: item.itemname }))}
-                                placeholder="Add an item"
-                                className="w-100"
-                              />
-                            </div>
-  
-                            <hr />
-                            <div className="row mt-4">
-                              <div className="col-lg-6 col-12"></div>
-                              <div className="col-lg-6 col-12">
-                                <table className="table table-borderless">
-                                  <tbody>
-                                    <tr>
-                                      <td className="text-end fw-bold">Subtotal</td>
-                                      <td className="text-end"><CurrencySign />{roundOff(calculateSubtotal())}</td>
-                                    </tr>
-                                    <tr>
-                                      <td className="text-end fw-bold">Discount</td>
-                                      <td className="text-end">
-                                        <input
-                                          type="number"
-                                          className="form-control w-50 d-inline-block float-end"
-                                          value={discountTotal}
-                                          onChange={handleDiscountChange}
-                                          min="0"
-                                        />
-                                      </td>
-                                    </tr>
-                                    <tr>
-                                      <td className="text-end fw-bold">{signUpData.name} ({signUpData.percentage}%)</td>
-                                      <td className="text-end"><CurrencySign />{roundOff(calculateTaxAmount())}</td>
-                                    </tr>
-                                    <tr>
-                                      <td className="text-end fw-bold">Total</td>
-                                      <td className="text-end fw-bold"><CurrencySign />{roundOff(calculateTotal())}</td>
-                                    </tr>
-                                    <tr>
-                                      <td className="text-end fw-bold">Amount Due</td>
-                                      <td className="text-end"><CurrencySign />{roundOff(calculateTotal())}</td>
-                                    </tr>
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-  
-                            <div className="mt-4">
-                              <label className="form-label fw-bold">Additional Information</label>
-                              <CKEditor
-                                editor={ClassicEditor}
-                                data={editorData}
-                                onChange={handleEditorChange}
-                                config={{ extraPlugins: [MyCustomUploadAdapterPlugin] }}
-                              />
-                            </div>
-                          </div>
                         </div>
-                      </div>
-  
-                    
+
+                        <form action="">
+                            <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div className="modal-dialog modal-lg">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h1 className="modal-title fs-5" id="exampleModalLabel">Edit Customer</h1>
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div className="modal-body">
+                                            <div className="mb-3">
+                                                <label htmlFor="customerName" className="form-label">Name</label>
+                                                <select className="form-control" id="customerName" value={editedName} onChange={handleNameChange}>
+                                                    <option value="" disabled>Select Name</option>
+                                                    {customers.map(customer => (
+                                                        <option key={customer._id} value={customer.name}>{customer.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                            <div className="mb-3">
+                                                <label htmlFor="customerEmail" className="form-label">Email</label>
+                                                <input type="email" className="form-control" id="customerEmail" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} />
+                                            </div>
+                                        </div>
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleEditCustomer}>Save changes</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+
+                        {/* add customer */}
+
+                        <form action="">
+                            <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div className="modal-dialog modal-lg">
+                                    <div className="modal-content">
+                                        <div className="modal-header">
+                                            <h1 className="modal-title fs-5" id="exampleModalLabel">Add Customer</h1>
+                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div className="modal-body">
+                                            <div className="row">
+                                                <div className="col-12 col-sm-6 col-lg-4">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="exampleInputtext1" className="form-label">
+                                                            Customer Name
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="name"
+                                                            value={credentials.name}
+                                                            onChange={onchangeaddcustomer}
+                                                            placeholder="Customer Name"
+                                                            id="exampleInputtext1"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-4">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="exampleInputEmail1" className="form-label">
+                                                            Contact Email
+                                                        </label>
+                                                        <input
+                                                            type="email"
+                                                            className="form-control"
+                                                            name="email"
+                                                            value={credentials.email}
+                                                            onChange={onchangeaddcustomer}
+                                                            placeholder="Contact Email"
+                                                            id="email"
+                                                            aria-describedby="emailHelp"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-4">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="Number" className="form-label">
+                                                            Phone Number
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="number"
+                                                            className="form-control"
+                                                            onChange={onchangeaddcustomer}
+                                                            placeholder="Phone Number"
+                                                            id="phonenumber"
+                                                            required
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-12 col-lg-12">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="information" className="form-label">
+                                                            Additional Information
+                                                        </label>
+                                                        <textarea
+                                                            type="text"
+                                                            className="form-control"
+                                                            name="information"
+                                                            onChange={onchangeaddcustomer}
+                                                            placeholder="Information"
+                                                            id="information"
+
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="Address1" className="form-label">
+                                                            Address 1
+                                                        </label>
+                                                        <input
+                                                            type="message"
+                                                            name="address1"
+                                                            onChange={onchangeaddcustomer}
+                                                            className="form-control"
+                                                            placeholder="Address 1"
+                                                            id="Address1"
+
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="Address2" className="form-label">
+                                                            Address 2
+                                                        </label>
+                                                        <input
+                                                            type="message"
+                                                            name="address2"
+                                                            onChange={onchangeaddcustomer}
+                                                            className="form-control"
+                                                            placeholder="Address 2"
+                                                            id="Address2"
+
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="Country" className="form-label">
+                                                            Country
+                                                        </label>
+                                                        <CountrySelect
+                                                            name="country"
+                                                            value={credentials.countryid}
+                                                            onChange={(val) => {
+                                                                console.log(val);
+                                                                setcountryid(val.id);
+                                                                setcountry(val.name);
+                                                                // setCredentials({ ...credentials, country: val.name })
+                                                                // setCredentials({ ...credentials, countryid: val.id })
+                                                                setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
+
+                                                            }}
+                                                            valueType="short"
+                                                            class="form-control"
+                                                            placeHolder="Select Country"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="State" className="form-label">
+                                                            State
+                                                        </label>
+                                                        <StateSelect
+                                                            name="state"
+                                                            countryid={countryid} // Set the country selected in the CountryDropdown
+                                                            onChange={(val) => {
+                                                                console.log(val);
+                                                                setstateid(val.id);
+                                                                setstate(val.name);
+                                                                // setCredentials({ ...credentials, state: val.name })
+                                                                // setCredentials({ ...credentials, stateid: val.id })
+                                                                setCredentials({ ...credentials, statedata: JSON.stringify(val) })
+                                                            }}
+                                                            placeHolder="Select State"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="City" className="form-label">
+                                                            City
+                                                        </label>
+                                                        <CitySelect
+                                                            countryid={countryid}
+                                                            stateid={stateid}
+                                                            onChange={(val) => {
+                                                                console.log(val);
+                                                                setcityid(val.id);
+                                                                setcity(val.name);
+                                                                // setCredentials({ ...credentials, city: val.name })
+                                                                // setCredentials({ ...credentials, cityid: val.id })
+                                                                setCredentials({ ...credentials, citydata: JSON.stringify(val) })
+                                                            }}
+                                                            placeHolder="Select City"
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                <div className="col-12 col-sm-6 col-lg-6">
+                                                    <div className="mb-3">
+                                                        <label htmlFor="post" className="form-label">
+                                                            Post Code
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            name="post"
+                                                            onChange={onchangeaddcustomer}
+                                                            className="form-control"
+                                                            placeholder="Post Code"
+                                                            id="post"
+
+                                                        />
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="modal-footer">
+                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                            <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
                     </div>
-                  </form>
-  
-                  {/* Edit Customer Modal */}
-                  <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-lg">
-                      <div className="modal-content">
-                        <div className="modal-header">
-                          <h5 className="modal-title fw-bold" id="exampleModalLabel">Edit Customer</h5>
-                          <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div className="modal-body">
-                          <div className="mb-3">
-                            <label className="form-label fw-bold">Name</label>
-                            <select className="form-select" value={editedName} onChange={handleNameChange}>
-                              <option value="" disabled>Select Name</option>
-                              {customers.map(customer => (
-                                <option key={customer._id} value={customer.name}>{customer.name}</option>
-                              ))}
-                            </select>
-                          </div>
-                          <div className="mb-3">
-                            <label className="form-label fw-bold">Email</label>
-                            <input
-                              type="email"
-                              className="form-control"
-                              value={editedEmail}
-                              onChange={(e) => setEditedEmail(e.target.value)}
-                            />
-                          </div>
-                          <div className="mb-3">
-                            <label className="form-label fw-bold">Phone Number</label>
-                            <input
-                              type="text"
-                              className="form-control"
-                              value={editedNumber}
-                              onChange={(e) => setEditedNumber(e.target.value)}
-                            />
-                          </div>
-                        </div>
-                        <div className="modal-footer">
-                          <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                          <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleEditCustomer}>Save changes</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-  
-                  {/* Add Customer Modal */}
-                  <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel1" aria-hidden="true">
-                    <div className="modal-dialog modal-lg">
-                      <div className="modal-content">
-                        <div className="modal-header">
-                          <h5 className="modal-title fw-bold" id="exampleModalLabel1">Add Customer</h5>
-                          <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div className="modal-body">
-                          <div className="row g-3">
-                            <div className="col-md-6">
-                              <label className="form-label fw-bold">Customer Name</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                name="name"
-                                value={credentials.name}
-                                onChange={onchangeaddcustomer}
-                                placeholder="Customer Name"
-                                required
-                              />
-                            </div>
-                            <div className="col-md-6">
-                              <label className="form-label fw-bold">Contact Email</label>
-                              <input
-                                type="email"
-                                className="form-control"
-                                name="email"
-                                value={credentials.email}
-                                onChange={onchangeaddcustomer}
-                                placeholder="Contact Email"
-                                required
-                              />
-                            </div>
-                            <div className="col-md-6">
-                              <label className="form-label fw-bold">Phone Number</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                name="number"
-                                value={credentials.number}
-                                onChange={onchangeaddcustomer}
-                                placeholder="Phone Number"
-                                required
-                              />
-                            </div>
-                            <div className="col-12">
-                              <label className="form-label fw-bold">Additional Information</label>
-                              <textarea
-                                className="form-control"
-                                name="information"
-                                onChange={onchangeaddcustomer}
-                                placeholder="Information"
-                              />
-                            </div>
-                            <div className="col-md-6">
-                              <label className="form-label fw-bold">Address 1</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                name="address1"
-                                onChange={onchangeaddcustomer}
-                                placeholder="Address 1"
-                              />
-                            </div>
-                            <div className="col-md-6">
-                              <label className="form-label fw-bold">Address 2</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                name="address2"
-                                onChange={onchangeaddcustomer}
-                                placeholder="Address 2"
-                              />
-                            </div>
-                            <div className="col-md-6">
-                              <label className="form-label fw-bold">Country</label>
-                              <CountrySelect
-                                value={credentials.countryid}
-                                onChange={(val) => {
-                                  setCountryId(val.id);
-                                  setCountry(val.name);
-                                  setCredentials({ ...credentials, countrydata: JSON.stringify(val) });
-                                }}
-                                valueType="short"
-                                placeHolder="Select Country"
-                              />
-                            </div>
-                            <div className="col-md-6">
-                              <label className="form-label fw-bold">State</label>
-                              <StateSelect
-                                countryid={countryid}
-                                onChange={(val) => {
-                                  setStateId(val.id);
-                                  setState(val.name);
-                                  setCredentials({ ...credentials, statedata: JSON.stringify(val) });
-                                }}
-                                placeHolder="Select State"
-                              />
-                            </div>
-                            <div className="col-md-6">
-                              <label className="form-label fw-bold">City</label>
-                              <CitySelect
-                                countryid={countryid}
-                                stateid={stateid}
-                                onChange={(val) => {
-                                  setCityId(val.id);
-                                  setCity(val.name);
-                                  setCredentials({ ...credentials, citydata: JSON.stringify(val) });
-                                }}
-                                placeHolder="Select City"
-                              />
-                            </div>
-                            <div className="col-md-6">
-                              <label className="form-label fw-bold">Post Code</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                name="post"
-                                onChange={onchangeaddcustomer}
-                                placeholder="Post Code"
-                              />
-                            </div>
-                          </div>
-                        </div>
-                        <div className="modal-footer">
-                          <button type="button" className="btn btn-outline-secondary" data-bs-dismiss="modal">Close</button>
-                          <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
+
+            }
+            {showEmailModal && (
+  <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+    <div className="modal-dialog">
+      <div className="modal-content">
+        <div className="modal-header">
+          <h5 className="modal-title">Select an Email for Estimate</h5>
+          <button
+            type="button"
+            className="btn-close"
+            onClick={() => setShowEmailModal(false)}
+          ></button>
+        </div>
+        <div className="modal-body">
+          <p>This customer has multiple emails. Please select one:</p>
+          {emailOptions.map((email, index) => (
+            <div className="form-check" key={index}>
+              <input
+                className="form-check-input"
+                type="radio"
+                name="selectedEmail"
+                id={`email-${index}`}
+                value={email}
+                onChange={() => {
+                  setestimateData(prev => ({
+                    ...prev,
+                    customeremail: email,
+                  }));
+
+                  setSelectedCustomerDetails(prev => ({
+                    ...prev,
+                    email: email,
+                  }));
+
+                  setShowEmailModal(false);
+                }}
+              />
+              <label className="form-check-label" htmlFor={`email-${index}`}>
+                {email}
+              </label>
             </div>
-          </div>
-        )}
+          ))}
+        </div>
       </div>
+    </div>
+  </div>
+)}
+        </div>
     )
 }
