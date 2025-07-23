@@ -640,3 +640,143 @@ width: 6%;
   color: #856404;
   border: 1px solid #dcc374 !important;
 }
+.user-navbar {
+  height: 100vh;
+  position: sticky;
+  top: 0;
+}
+
+.sidebar {
+  width: 250px;
+  height: 100%;
+  background-color: #fff;
+  box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease-in-out;
+  overflow-y: auto;
+}
+
+.sidebar-content {
+  padding-bottom: 20px;
+}
+
+.nav-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  padding: 12px 20px;
+  color: #333;
+  text-decoration: none;
+  font-size: 1rem;
+  transition: background-color 0.2s, color 0.2s;
+}
+
+.nav-link:hover {
+  background-color: #f5f5f5;
+  color: #007bff;
+}
+
+.nav-link.active {
+  background-color: #007bff;
+  color: #fff;
+}
+
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  margin-right: 10px;
+  flex-shrink: 0;
+}
+
+.nav-section {
+  margin: 15px 0 5px;
+}
+
+.nav-section-title {
+  padding: 10px 20px;
+  color: #6c757d;
+  font-size: 0.9rem;
+  font-weight: 500;
+  text-transform: uppercase;
+}
+
+.dropdown-toggle {
+  cursor: pointer;
+}
+
+.dropdown-menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  background-color: #f8f9fa;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  padding: 10px 40px;
+  color: #333;
+  text-decoration: none;
+  font-size: 0.95rem;
+}
+
+.dropdown-item:hover {
+  background-color: #e9ecef;
+}
+
+.clrblue {
+  color: #007bff;
+}
+
+/* Mobile Styles */
+.mobile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #fff;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.hamburger-btn {
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  color: #333;
+  padding: 10px;
+}
+
+.mobile-title {
+  font-size: 1.5rem;
+}
+
+@media (max-width: 991px) {
+  .sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    transform: translateX(-100%);
+    z-index: 1000;
+  }
+
+  .sidebar.open {
+    transform: translateX(0);
+  }
+
+  .user-navbar {
+    height: auto;
+  }
+}
+
+@media (min-width: 992px) {
+  .mobile-header {
+    display: none;
+  }
+
+  .sidebar {
+    transform: translateX(0);
+  }
+}
