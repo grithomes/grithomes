@@ -65,7 +65,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -88,7 +88,7 @@ export default function Dashboard() {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
       const response = await fetch(
-        `http://localhost:3001/api/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`,
+        `https://grithomes.onrender.com/api/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`,
         { headers: { 'Authorization': authToken } }
       );
 
@@ -105,7 +105,7 @@ export default function Dashboard() {
       setTotalPages(json.totalPages);
 
       const transactionPromises = json.invoices.map(async (invoice) => {
-        const response = await fetch(`http://localhost:3001/api/gettransactiondata/${invoice._id}`, {
+        const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
           headers: { 'Authorization': authToken }
         });
         if (response.status === 401) {
@@ -130,7 +130,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/currentMonthReceivedAmount/${userid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/currentMonthReceivedAmount/${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -153,7 +153,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userId = localStorage.getItem('userid');
-      const response = await fetch(`http://localhost:3001/api/totalPaymentReceived/${userId}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/totalPaymentReceived/${userId}`, {
         headers: { Authorization: authToken }
       });
       if (response.status === 401) {
@@ -174,7 +174,7 @@ export default function Dashboard() {
   const fetchTotalExpense = async () => {
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/expense`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/expense`, {
         headers: { Authorization: authToken }
       });
       if (response.status === 401) {
@@ -197,7 +197,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userid = localStorage.getItem('userid');
-      const response = await fetch(`http://localhost:3001/api/overdueInvoices/${userid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/overdueInvoices/${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -218,7 +218,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`http://localhost:3001/api/all-invoices-by-financial-year?userid=${userid}`, {
+      const response = await fetch(`https://grithomes.onrender.com/api/all-invoices-by-financial-year?userid=${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {

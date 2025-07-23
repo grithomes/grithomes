@@ -67,7 +67,7 @@ export default function Addcustomer() {
     const authToken = localStorage.getItem('authToken');
 
     try {
-      const response = await fetch('http://localhost:3001/api/addcustomer', {
+      const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',

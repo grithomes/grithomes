@@ -43,8 +43,8 @@ export default function Invoice() {
       const userid = localStorage.getItem("userid");
       
       const endpoint = searchQuery.trim()
-      ? `http://localhost:3001/api/searchinvoices/${userid}?search=${encodeURIComponent(searchQuery)}&status=${filterStatus}`
-      : `http://localhost:3001/api/invoicedata/${userid}/?page=${currentPage}&limit=${limit}&status=${filterStatus}`;
+      ? `https://grithomes.onrender.com/api/searchinvoices/${userid}?search=${encodeURIComponent(searchQuery)}&status=${filterStatus}`
+      : `https://grithomes.onrender.com/api/invoicedata/${userid}/?page=${currentPage}&limit=${limit}&status=${filterStatus}`;
       
       const authToken = localStorage.getItem('authToken');
       console.log(authToken,"authToken");
@@ -78,7 +78,7 @@ setTotalPages(json.totalPages);
       }
 
       const transactionPromises = invoicesList.map(async (invoice) => {
-        const response = await fetch(`http://localhost:3001/api/gettransactiondata/${invoice._id}`, {
+        const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
         headers: { 'Authorization': authToken }
         });
         if (response.status === 401) {

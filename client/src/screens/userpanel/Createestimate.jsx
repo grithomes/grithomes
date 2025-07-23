@@ -151,7 +151,7 @@ const [showEmailModal, setShowEmailModal] = useState(false);
         if (event.target.checked) {
             try {
                 const ownerId = localStorage.getItem('userid');
-                const response = await fetch(`http://localhost:3001/api/check-signature/${ownerId}`);
+                const response = await fetch(`https://grithomes.onrender.com/api/check-signature/${ownerId}`);
                 const data = await response.json();
                 setHasSignature(data.hasSignature);
 
@@ -189,7 +189,7 @@ const [showEmailModal, setShowEmailModal] = useState(false);
             const ownerId = localStorage.getItem('userid');
             const email = localStorage.getItem('userEmail');
             const companyname = localStorage.getItem('companyname');
-            await fetch('http://localhost:3001/api/ownersignature', {
+            await fetch('https://grithomes.onrender.com/api/ownersignature', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -211,7 +211,7 @@ const [showEmailModal, setShowEmailModal] = useState(false);
         try {
             const userid = localStorage.getItem('userid');
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`http://localhost:3001/api/lastEstimateNumber/${userid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -248,7 +248,7 @@ const [showEmailModal, setShowEmailModal] = useState(false);
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`http://localhost:3001/api/customers/${userid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -278,7 +278,7 @@ const [showEmailModal, setShowEmailModal] = useState(false);
         try {
           const userid = localStorage.getItem("userid");
           const authToken = localStorage.getItem('authToken');
-          const response = await fetch(`http://localhost:3001/api/getsignupdata/${userid}`, {
+          const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
             headers: {
               'Authorization': authToken,
             }
@@ -310,7 +310,7 @@ const [showEmailModal, setShowEmailModal] = useState(false);
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`http://localhost:3001/api/itemdata/${userid}`, {
+            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -644,7 +644,7 @@ if (selectedCustomer.emails?.length > 1) {
             console.log(data,"Data sdsdfsdsfsdf");
 
             // Sending estimate data to the backend API
-            const response = await fetch('http://localhost:3001/api/savecreateestimate', {
+            const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -763,7 +763,7 @@ if (selectedCustomer.emails?.length > 1) {
         console.log(data, "Data to send");
 
         // Sending estimate data to the backend API
-        const response = await fetch('http://localhost:3001/api/savecreateestimate', {
+        const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -874,7 +874,7 @@ if (selectedCustomer.emails?.length > 1) {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
         const authToken = localStorage.getItem('authToken');
-        const response = await fetch('http://localhost:3001/api/addcustomer', {
+        const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
