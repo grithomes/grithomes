@@ -98,7 +98,7 @@ export default function Createinvoice() {
     const [showEmailModal, setShowEmailModal] = useState(false);
     const [credentials, setCredentials] = useState({
         name: '',
-        email: '',
+        emails: [''],
         number: '',
         citydata: '',
         statedata: '',
@@ -109,7 +109,22 @@ export default function Createinvoice() {
         post: '',
     });
 
+    const handleEmailChange = (index, value) => {
+        const newEmails = [...credentials.emails];
+        newEmails[index] = value;
+        setCredentials({ ...credentials, emails: newEmails });
+    };
 
+    const addEmailField = () => {
+        setCredentials({ ...credentials, emails: [...credentials.emails, ''] });
+    };
+
+    const removeEmailField = (index) => {
+        if (credentials.emails.length > 1) {
+            const newEmails = credentials.emails.filter((_, i) => i !== index);
+            setCredentials({ ...credentials, emails: newEmails });
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -771,7 +786,7 @@ export default function Createinvoice() {
             body: JSON.stringify({
                 userid: userid,
                 name: credentials.name,
-                email: credentials.email,
+                emails: credentials.emails,
                 information: credentials.information,
                 number: credentials.number,
                 city: city,
@@ -789,6 +804,8 @@ export default function Createinvoice() {
             }),
         });
 
+        console.log(response, "response");
+
         if (response.status === 401) {
             const json = await response.json();
             setAlertMessage(json.message);
@@ -803,7 +820,7 @@ export default function Createinvoice() {
             if (json.success) {
                 setCredentials({
                     name: '',
-                    email: '',
+                    emails: [''],
                     number: '',
                     citydata: '',
                     statedata: '',
@@ -820,7 +837,8 @@ export default function Createinvoice() {
                 //   navigate('/userpanel/Customerlist');
             }
             else {
-                alert("This Customer Email already exist")
+
+                alert("This Customer Email already exist 3232")
             }
         }
     };
@@ -1341,22 +1359,22 @@ export default function Createinvoice() {
                                         ))}
                                     </select>
                                 </div>
-                               <div className="mb-3">
-  <label htmlFor="customerEmail" className="form-label">Select Email</label>
-  <select
-    className="form-control"
-    id="customerEmail"
-    value={editedEmail}
-    onChange={(e) => setEditedEmail(e.target.value)}
-  >
-    <option value="">-- Select an email --</option>
-    {customers.find(c => c.name === editedName)?.emails?.map((email, index) => (
-      <option key={index} value={email}>
-        {email}
-      </option>
-    ))}
-  </select>
-</div>
+                                <div className="mb-3">
+                                    <label htmlFor="customerEmail" className="form-label">Select Email</label>
+                                    <select
+                                        className="form-control"
+                                        id="customerEmail"
+                                        value={editedEmail}
+                                        onChange={(e) => setEditedEmail(e.target.value)}
+                                    >
+                                        <option value="">-- Select an email --</option>
+                                        {customers.find(c => c.name === editedName)?.emails?.map((email, index) => (
+                                            <option key={index} value={email}>
+                                                {email}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </div>
 
                                 <div className="mb-3">
                                     <label htmlFor="customerPhone" className="form-label">Phone Number</label>
@@ -1374,7 +1392,7 @@ export default function Createinvoice() {
 
             {/* add customer */}
 
-            <form action="">
+            <form onSubmit={(e) => e.preventDefault()}>
                 <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                     <div className="modal-dialog modal-lg">
                         <div className="modal-content">
@@ -1384,203 +1402,184 @@ export default function Createinvoice() {
                             </div>
                             <div className="modal-body">
                                 <div className="row">
-                                    <div className="col-12 col-sm-6 col-lg-4">
-                                        <div className="mb-3">
-                                            <label htmlFor="exampleInputtext1" className="form-label">
-                                                Customer Name
-                                            </label>
-                                            <input
-                                                type="text"
-                                                className="form-control"
-                                                name="name"
-                                                value={credentials.name}
-                                                onChange={onchangeaddcustomer}
-                                                placeholder="Customer Name"
-                                                id="exampleInputtext1"
-                                                required
-                                            />
-                                        </div>
+
+                                    {/* Customer Name */}
+                                    <div className="col-12 col-sm-6 col-lg-4 mb-3">
+                                        <label className="form-label">Customer Name</label>
+                                        <input
+                                            type="text"
+                                            className="form-control"
+                                            name="name"
+                                            value={credentials.name}
+                                            onChange={onchangeaddcustomer}
+                                            placeholder="Customer Name"
+                                            required
+                                        />
                                     </div>
 
-                                    <div className="col-12 col-sm-6 col-lg-4">
-                                        <div className="mb-3">
-                                            <label htmlFor="exampleInputEmail1" className="form-label">
-                                                Contact Email
-                                            </label>
-                                            <input
-                                                type="email"
-                                                className="form-control"
-                                                name="email"
-                                                value={credentials.email}
-                                                onChange={onchangeaddcustomer}
-                                                placeholder="Contact Email"
-                                                id="email"
-                                                aria-describedby="emailHelp"
-                                                required
-                                            />
-                                        </div>
+                                    {/* Emails */}
+                                    <div className="col-12 col-sm-6 col-lg-8 mb-3">
+                                        <label className="form-label">Contact Emails</label>
+                                        {credentials.emails.map((email, index) => (
+                                            <div className="input-group mb-2" key={index}>
+                                                <input
+                                                    type="email"
+                                                    className="form-control"
+                                                    value={email}
+                                                    onChange={(e) => handleEmailChange(index, e.target.value)}
+                                                    placeholder={`Contact Email #${index + 1}`}
+                                                    required
+                                                />
+                                                <button
+                                                    type="button"
+                                                    className="btn btn-outline-danger"
+                                                    onClick={() => removeEmailField(index)}
+                                                    disabled={credentials.emails.length === 1}
+                                                >
+                                                    -
+                                                </button>
+                                                {index === credentials.emails.length - 1 && (
+                                                    <button
+                                                        type="button"
+                                                        className="btn btn-outline-primary"
+                                                        onClick={addEmailField}
+                                                    >
+                                                        +
+                                                    </button>
+                                                )}
+                                            </div>
+                                        ))}
                                     </div>
 
-                                    <div className="col-12 col-sm-6 col-lg-4">
-                                        <div className="mb-3">
-                                            <label htmlFor="Number" className="form-label">
-                                                Phone Number
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="number"
-                                                className="form-control"
-                                                onChange={onchangeaddcustomer}
-                                                placeholder="Phone Number"
-                                                id="phonenumber"
-                                                required
-                                            />
-                                        </div>
+                                    {/* Phone Number */}
+                                    <div className="col-12 col-sm-6 col-lg-4 mb-3">
+                                        <label className="form-label">Phone Number</label>
+                                        <input
+                                            type="text"
+                                            name="number"
+                                            value={credentials.number}
+                                            onChange={onchangeaddcustomer}
+                                            className="form-control"
+                                            placeholder="Phone Number"
+                                        />
                                     </div>
 
-                                    <div className="col-12 col-sm-12 col-lg-12">
-                                        <div className="mb-3">
-                                            <label htmlFor="information" className="form-label">
-                                                Additional Information
-                                            </label>
-                                            <textarea
-                                                type="text"
-                                                className="form-control"
-                                                name="information"
-                                                onChange={onchangeaddcustomer}
-                                                placeholder="Information"
-                                                id="information"
-
-                                            />
-                                        </div>
+                                    {/* Additional Information */}
+                                    <div className="col-12 mb-3">
+                                        <label className="form-label">Additional Information</label>
+                                        <textarea
+                                            name="information"
+                                            value={credentials.information}
+                                            onChange={onchangeaddcustomer}
+                                            className="form-control"
+                                            placeholder="Information"
+                                        />
                                     </div>
 
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="Address1" className="form-label">
-                                                Address 1
-                                            </label>
-                                            <input
-                                                type="message"
-                                                name="address1"
-                                                onChange={onchangeaddcustomer}
-                                                className="form-control"
-                                                placeholder="Address 1"
-                                                id="Address1"
-
-                                            />
-                                        </div>
+                                    {/* Address 1 & 2 */}
+                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
+                                        <label className="form-label">Address 1</label>
+                                        <input
+                                            type="text"
+                                            name="address1"
+                                            value={credentials.address1}
+                                            onChange={onchangeaddcustomer}
+                                            className="form-control"
+                                            placeholder="Address 1"
+                                        />
                                     </div>
 
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="Address2" className="form-label">
-                                                Address 2
-                                            </label>
-                                            <input
-                                                type="message"
-                                                name="address2"
-                                                onChange={onchangeaddcustomer}
-                                                className="form-control"
-                                                placeholder="Address 2"
-                                                id="Address2"
-
-                                            />
-                                        </div>
+                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
+                                        <label className="form-label">Address 2</label>
+                                        <input
+                                            type="text"
+                                            name="address2"
+                                            value={credentials.address2}
+                                            onChange={onchangeaddcustomer}
+                                            className="form-control"
+                                            placeholder="Address 2"
+                                        />
                                     </div>
 
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="Country" className="form-label">
-                                                Country
-                                            </label>
-                                            <CountrySelect
-                                                name="country"
-                                                value={credentials.countryid}
-                                                onChange={(val) => {
-                                                    console.log(val);
-                                                    setcountryid(val.id);
-                                                    setcountry(val.name);
-                                                    // setCredentials({ ...credentials, country: val.name })
-                                                    // setCredentials({ ...credentials, countryid: val.id })
-                                                    setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
-
-                                                }}
-                                                valueType="short"
-                                                class="form-control"
-                                                placeHolder="Select Country"
-                                            />
-                                        </div>
+                                    {/* Country */}
+                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
+                                        <label className="form-label">Country</label>
+                                        <CountrySelect
+                                            name="country"
+                                            value={credentials.countryid}
+                                            onChange={(val) => {
+                                                setcountryid(val.id);
+                                                setcountry(val.name);
+                                                setCredentials({ ...credentials, countrydata: JSON.stringify(val) });
+                                            }}
+                                            valueType="short"
+                                            className="form-control"
+                                            placeHolder="Select Country"
+                                        />
                                     </div>
 
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="State" className="form-label">
-                                                State
-                                            </label>
-                                            <StateSelect
-                                                name="state"
-                                                countryid={countryid} // Set the country selected in the CountryDropdown
-                                                onChange={(val) => {
-                                                    console.log(val);
-                                                    setstateid(val.id);
-                                                    setstate(val.name);
-                                                    // setCredentials({ ...credentials, state: val.name })
-                                                    // setCredentials({ ...credentials, stateid: val.id })
-                                                    setCredentials({ ...credentials, statedata: JSON.stringify(val) })
-                                                }}
-                                                placeHolder="Select State"
-                                            />
-                                        </div>
+                                    {/* State */}
+                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
+                                        <label className="form-label">State</label>
+                                        <StateSelect
+                                            name="state"
+                                            countryid={countryid}
+                                            onChange={(val) => {
+                                                setstateid(val.id);
+                                                setstate(val.name);
+                                                setCredentials({ ...credentials, statedata: JSON.stringify(val) });
+                                            }}
+                                            placeHolder="Select State"
+                                        />
                                     </div>
 
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="City" className="form-label">
-                                                City
-                                            </label>
-                                            <CitySelect
-                                                countryid={countryid}
-                                                stateid={stateid}
-                                                onChange={(val) => {
-                                                    console.log(val);
-                                                    setcityid(val.id);
-                                                    setcity(val.name);
-                                                    // setCredentials({ ...credentials, city: val.name })
-                                                    // setCredentials({ ...credentials, cityid: val.id })
-                                                    setCredentials({ ...credentials, citydata: JSON.stringify(val) })
-                                                }}
-                                                placeHolder="Select City"
-                                            />
-                                        </div>
+                                    {/* City */}
+                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
+                                        <label className="form-label">City</label>
+                                        <CitySelect
+                                            countryid={countryid}
+                                            stateid={stateid}
+                                            onChange={(val) => {
+                                                setcityid(val.id);
+                                                setcity(val.name);
+                                                setCredentials({ ...credentials, citydata: JSON.stringify(val) });
+                                            }}
+                                            placeHolder="Select City"
+                                        />
                                     </div>
 
-                                    <div className="col-12 col-sm-6 col-lg-6">
-                                        <div className="mb-3">
-                                            <label htmlFor="post" className="form-label">
-                                                Post Code
-                                            </label>
-                                            <input
-                                                type="text"
-                                                name="post"
-                                                onChange={onchangeaddcustomer}
-                                                className="form-control"
-                                                placeholder="Post Code"
-                                                id="post"
-
-                                            />
-                                        </div>
+                                    {/* Post Code */}
+                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
+                                        <label className="form-label">Post Code</label>
+                                        <input
+                                            type="text"
+                                            name="post"
+                                            value={credentials.post}
+                                            onChange={onchangeaddcustomer}
+                                            className="form-control"
+                                            placeholder="Post Code"
+                                        />
                                     </div>
+
                                 </div>
                             </div>
+
                             <div className="modal-footer">
                                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleAddCustomer}>Add Customer</button>
+                                <button
+                                    type="button"
+                                    className="btn btn-primary"
+                                    onClick={handleAddCustomer}
+                                    data-bs-dismiss="modal"
+                                >
+                                    Add Customer
+                                </button>
                             </div>
                         </div>
                     </div>
                 </div>
             </form>
+
             {showEmailModal && (
                 <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
                     <div className="modal-dialog">
@@ -1605,9 +1604,9 @@ export default function Createinvoice() {
                                                     customeremail: email,
                                                 }));
                                                 setSelectedCustomerDetails(prev => ({
-    ...prev,
-    email: email,
-  }));
+                                                    ...prev,
+                                                    email: email,
+                                                }));
                                                 setShowEmailModal(false);
                                             }}
                                         />

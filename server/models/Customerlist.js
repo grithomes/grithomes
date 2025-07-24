@@ -1,68 +1,69 @@
 const mongoose = require('mongoose');
-const {Schema} = mongoose;
+const { Schema } = mongoose;
 
 const CustomerSchema = new Schema({
-    name:{
+    name: {
         type: String,
     },
-    email:{
+    emails: {
+        type: [String],
+        required: true
+    },
+    number: {
         type: String,
     },
-    number:{
+    information: {
         type: String,
     },
-    information:{
+    address1: {
         type: String,
     },
-    address1:{
+    address2: {
         type: String,
     },
-    address2:{
-        type: String,
-    },
-    country:{
-        type: String,
-        required: false
-    },
-    state:{
+    country: {
         type: String,
         required: false
     },
-    city:{
+    state: {
+        type: String,
+        required: false
+    },
+    city: {
         type: String,
         // required: true
     },
-    countryid:{
+    countryid: {
         type: Number,
         required: false
     },
-    stateid:{
+    stateid: {
         type: Number,
         // required: true
     },
-    cityid:{
+    cityid: {
         type: Number,
         // required: true
     },
-    countrydata:{
+    countrydata: {
         type: String,
     },
-    statedata:{
+    statedata: {
         type: String,
     },
-    citydata:{
+    citydata: {
         type: String,
     },
-    userid:{
+    userid: {
         type: String,
     },
-    post:{
+    post: {
         type: String,
     },
-    createdAt:{
+    createdAt: {
         type: Date,
         default: Date.now
     }
 });
 
-module.exports = mongoose.model('Customerlist',CustomerSchema)
+module.exports = mongoose.model('Customerlist', CustomerSchema)
