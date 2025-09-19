@@ -709,7 +709,7 @@ export default function Invoicedetail() {
     return date.toLocaleDateString('en-US', options);
   };
 
- const handleAddPayment = async () => {
+  const handleAddPayment = async () => {
     if (isSubmitting) return; // Prevent multiple clicks
     setIsSubmitting(true); // Set loading state
 
@@ -754,7 +754,7 @@ export default function Invoicedetail() {
     const dueAmount = roundOff(invoiceData.total - totalPaidAmount);
     const paymentAmount = parseFloat(transactionData.paidamount);
     console.log(dueAmount, paymentAmount, "paymentAmountpaymentAmount");
-    
+
 
     if (paymentAmount > dueAmount) {
       console.error('Payment amount exceeds the due amount.');
@@ -1255,7 +1255,7 @@ thead{
 
   const handleRemove = async (invoiceid, invoiceIdpass) => {
     const confirmDelete = window.confirm('Are you sure you want to delete this invoice?');
-  
+
     // If the user cancels, stop execution
     if (!confirmDelete) {
       console.log('Invoice deletion cancelled by the user.');
@@ -1772,9 +1772,215 @@ thead{
                       </>
                     )}
 
+                    <div className="page" style={{ display: 'none' }} id="invoiceContent">
+                      <div className="header ps pt-5">
+                        {signupdata.companyImageUrl
+                          ? <img src={signupdata.companyImageUrl} style={{ height: 130 }} className="logoimage" alt="" />
+                          : <p className="h4 fw-bold">{signupdata.companyname}</p>
+                        }
+
+                        <div className="company-info fs12">
+                          <h1 className="m-0" style={{ fontSize: 26 }}>Invoice</h1>
+                          <p className="m-0"><strong>{signupdata.companyname}</strong></p>
+                          <address className='m-t-5 m-b-5'>
+                            <div className='mb-2'>
+                              <div className=''>{signupdata.address} </div>
+                              {signupdata.city ? JSON.parse(signupdata.city).name + ',' : ' '}
+                              {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
+                              {/* <div className=''>{JSON.parse(signupdata.city).name}, {JSON.parse(signupdata.state).name}</div>
+                                    <div className=''>{JSON.parse(signupdata.country).emoji}</div> */}
+                            </div>
+
+                            <div>
+                            <a className="text-decoration-none" href={`mailto:${signupdata.email}`}>{signupdata.email}</a>
+                            
+                          </div>
+
+                            {signupdata.website && (
+                            <div>
+                              <a className="text-decoration-none" href={signupdata.website}>{signupdata.website}</a>
+                            </div>
+                          )}
+                            <div>
+                              {signupdata.gstNumber == ''
+                                ?
+                                ""
+                                :
+                                `${signupdata.TaxName} ${signupdata.gstNumber}`
+                              }
+
+
+                            </div>
+
+                          </address>
+
+                          
+
+                         
+
+                         
+
+                          {/* (Optional) remove duplicate GST line below if you don't want it twice */}
+                          {/* {signupdata.gstNumber ? <div>{signupdata.TaxName} {signupdata.gstNumber}</div> : null} */}
+                        </div>
+                      </div>
+
+                      <div className="invoice-details fs12 ps py-2 bg-light">
+                        <div>
+                          <p className="m-0 text-green"><strong>Bill To:</strong></p>
+                          <p className="m-0">{invoiceData.customername}</p>
+                          <p className="m-0">{invoiceData.job || ''}</p>
+                          <p className="m-0">{invoiceData.customeremail}</p>
+                          <p className="m-0">{invoiceData.customerphone || ''}</p>
+                        </div>
+
+                        <div>
+                          <p className="m-0"><strong className="text-green">Invoice #:</strong> {invoiceData.InvoiceNumber}</p>
+                          <p className="m-0"><strong className="text-green">Date:</strong> {formatCustomDate(invoiceData.date)}</p>
+                          <p className="m-0"><strong className="text-green">Due date:</strong> {formatCustomDate(invoiceData.duedate)}</p>
+                          {/* {invoiceData.job ? <p className="m-0"><strong className="text-green">Job:</strong> {invoiceData.job}</p> : null} */}
+                        </div>
+                      </div>
+
+                      <div className="ps pb-0">
+                        <table className="fs12 table invoice-table">
+                          <thead className="border-bottom">
+                            <tr className="text-green">
+                              <th className="text-left">Item</th>
+                              <th className="text-end">Quantity</th>
+                              {/* <th className="text-left">Unit</th> */}
+                              <th className="text-end">Price</th>
+                              <th className="text-end">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {items.map((item) => (
+                              <tr className="border-bottom" key={item._id}>
+                                <td>
+                                  <div>
+                                    <span><strong>{item.itemname}</strong></span>
+                                    <div dangerouslySetInnerHTML={{ __html: item.description }} />
+                                  </div>
+                                </td>
+                                <td className="text-end">{item.itemquantity}</td>
+                                {/* <td>{item.unit}</td> */}
+                                <td className="text-end"><CurrencySign />{roundOff(item.price)}</td>
+                                <td className="text-end"><CurrencySign />{roundOff(item.amount)}</td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="totals ps">
+                        <table className="fs12 table totals-table">
+                          <tbody>
+                            <tr>
+                              <td className="text-end w-75">Gross Invoice Amount:</td>
+                              <td className="text-end w-25"><CurrencySign />{roundOff(invoiceData.subtotal)}</td>
+                            </tr>
+
+                            {transactions.map((transaction, index) => {
+                              const deducted = Number(roundOff(transaction.deductedamount || 0));
+                              if (deducted === 0) return null; // hide if 0
+
+                              // calculate % based on invoice total
+                              const tdsPercent = Math.round((deducted / invoiceData.total) * 100);
+
+                              // map TDS % to IT rule section
+                              let tdsSection = "";
+                              if (tdsPercent === 2) {
+                                tdsSection = "Sec 194C – Contract";
+                              } else if (tdsPercent === 10) {
+                                tdsSection = "Sec 194J – Professional";
+                              } else {
+                                tdsSection = "as per IT rules"; // fallback if not 2% or 10%
+                              }
+
+                              return (
+                                <tr key={index}>
+                                  <td className="text-md-end pb-2" width="22%">
+                                    Less: TDS @ {tdsPercent}% ({tdsSection})
+                                  </td>
+                                  <td className="text-end pb-2" width="22%">
+                                    <CurrencySign />{roundOff(deducted)}
+                                  </td>
+                                </tr>
+                              );
+                            })}
+
+
+                            {invoiceData.discountTotal > 0 && (
+                              <tr>
+                                <td className="text-end">Discount</td>
+                                <td className="text-end"><CurrencySign />{roundOff(invoiceData.discountTotal)}</td>
+                              </tr>
+                            )}
+
+                            {Number(signupdata.taxPercentage) > 0 && (
+                              <tr>
+                                <td className="text-end">
+                                  {signupdata.TaxName} ({signupdata.taxPercentage}%)
+                                </td>
+                                <td className="text-end"><CurrencySign />{roundOff(invoiceData.tax)}</td>
+                              </tr>
+                            )}
+
+                            <tr>
+                              <td className="text-end">Net Payment Received</td>
+                              <td className="text-end"><CurrencySign />
+                                {roundOff(
+                                  transactions.reduce((total, t) => total + parseFloat(t.paidamount || 0), 0)
+                                )}</td>
+                            </tr>
+
+                            {transactions.map((t) => (
+                              <tr className="border-bottom" key={t._id}>
+                                <td className="text-md-end">
+                                  {t.method === 'deposit' ? 'Deposit' : 'Paid'} on {formatCustomDate(t.paiddate)}
+                                </td>
+                                <td className="text-end" style={{ borderBottom: '1px solid #ddd' }}>
+                                  <CurrencySign />{roundOff(t.paidamount)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+
+                      <div className="ps">
+                        <p className="text-end">
+                          <span className="p-3 invoice-price-right">
+                            <span className="text-green">Amount Due:</span>{' '}
+                            <strong>
+                              <CurrencySign />
+                              {roundOff(
+                                invoiceData.total -
+                                transactions.reduce(
+                                  (total, p) =>
+                                    total +
+                                    parseFloat(p.paidamount || 0) +
+                                    parseFloat(p.deductedamount || 0),
+                                  0
+                                )
+                              )}
+                            </strong>
+                          </span>
+                        </p>
+                      </div>
+
+                      <div className="invoice-body invoice-body-text">
+                        <div className="mt-1">
+                          <span>{invoiceData.information ? 'Note:' : ''}</span>
+                          <div className="information-content" dangerouslySetInnerHTML={{ __html: invoiceData.information }} />
+                        </div>
+                      </div>
+                    </div>
+
+
                     <div className="row">
                       <div className="col-12 col-sm-12 col-md-12 col-lg-8" id="">
-                        <div className='print' id='invoiceContent'>
+                        <div className='print' id='invoiceContent1'>
 
                           <div className="invoice-body">
                             <div className='row'>
@@ -2146,12 +2352,12 @@ thead{
               <div class="modal-footer">
                 <a data-bs-dismiss="modal" className='pointer text-decoration-none text-dark'>Close</a>
                 <a
-    className={`greenclr ms-2 text-decoration-none pointer ${isSubmitting ? 'disabled' : ''}`}
-    onClick={!isSubmitting ? handleAddPayment : null}
->
-    {isSubmitting ? 'Processing...' : 'Add Payment'}
-</a>
-                
+                  className={`greenclr ms-2 text-decoration-none pointer ${isSubmitting ? 'disabled' : ''}`}
+                  onClick={!isSubmitting ? handleAddPayment : null}
+                >
+                  {isSubmitting ? 'Processing...' : 'Add Payment'}
+                </a>
+
               </div>
             </div>
           </div>
@@ -2296,10 +2502,10 @@ thead{
                       <strong>
                         <CurrencySign />
                         {
-          // Filter transactions with "Expense" type and sum their amounts
-          expenseTransactions.filter(transaction => transaction.transactionType === 'Expense')
-            .reduce((sum, transaction) => sum + transaction.amount, 0)
-        }
+                          // Filter transactions with "Expense" type and sum their amounts
+                          expenseTransactions.filter(transaction => transaction.transactionType === 'Expense')
+                            .reduce((sum, transaction) => sum + transaction.amount, 0)
+                        }
                       </strong>
                     </td>
 
@@ -2315,13 +2521,13 @@ thead{
                       <strong>
                         <CurrencySign />
                         {
-          // Subtract the sum of "Expense" transactions from the total invoice amount
-          roundOff(
-            invoiceData.total -
-            expenseTransactions.filter(transaction => transaction.transactionType === 'Expense')
-              .reduce((sum, transaction) => sum + transaction.amount, 0)
-          )
-        }
+                          // Subtract the sum of "Expense" transactions from the total invoice amount
+                          roundOff(
+                            invoiceData.total -
+                            expenseTransactions.filter(transaction => transaction.transactionType === 'Expense')
+                              .reduce((sum, transaction) => sum + transaction.amount, 0)
+                          )
+                        }
                       </strong>
                     </td>
 
