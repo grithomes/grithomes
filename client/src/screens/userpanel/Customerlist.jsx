@@ -170,11 +170,17 @@ const handleEntriesChange = (e) => {
     }
   };
 
-  const handleViewClick = (customer) => {
-    let customerid = customer._id;
-    let customerEmail = customer.email;
-    navigate('/userpanel/Customerwiseinvoice', { state: { customerid, customerEmail } });
-  };
+const handleViewClick = (customer) => {
+  console.log(customer, "customers ....");
+
+  const customerid = customer._id;
+  const customerEmails = customer.emails || [];
+  const primaryEmail = customerEmails[0] || null;
+
+  navigate('/userpanel/Customerwiseinvoice', {
+    state: { customerid, customerEmails, customerEmail: primaryEmail },
+  });
+};
 
   return (
     <div className='bg'>
