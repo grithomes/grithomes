@@ -58,23 +58,49 @@ export default function Reports() {
         }
     }, [navigate]);
 
-    const fetchTotalReceivedAmount = async () => {
-        try {
-            setLoading(true);
-            const userid = localStorage.getItem('userid');
-            const response = await fetch(`https://grithomes.onrender.com/api/currentMonthReceivedAmount2/${userid}?startOfMonth=${moment(startDate).format('YYYY-MM-DD')}&endOfMonth=${moment(endDate).format('YYYY-MM-DD')}`);
-            const data = await response.json();
-            console.log('Received Data:', data);
-            const totalAmount = data.reduce((acc, curr) => acc + curr.totalReceivedAmount, 0);
-            setTotalReceivedAmount(totalAmount);
-            setReceivedData(data);
-            prepareChartData(data);
-        } catch (error) {
-            console.error('Error fetching total received amount:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
+const fetchTotalReceivedAmount = async () => {
+    try {
+        setLoading(true);
+        const userid = localStorage.getItem('userid');
+        const response = await fetch(
+            `https://grithomes.onrender.com/api/currentMonthReceivedAmount2/${userid}?startOfMonth=${moment(startDate).format('YYYY-MM-DD')}&endOfMonth=${moment(endDate).format('YYYY-MM-DD')}`
+        );
+        const data = await response.json();
+        console.log('Received Data:', data);
+
+        // If backend returns array of transactions with invoiceDetails
+        const totalAmount = data.reduce((acc, curr) => acc + (curr.paidamount || 0), 0);
+
+        setTotalReceivedAmount(totalAmount);
+        setReceivedData(data);
+
+        // Prepare chart data by date
+        const groupedByDate = {};
+        data.forEach(item => {
+            if (!groupedByDate[item.paiddate]) groupedByDate[item.paiddate] = 0;
+            groupedByDate[item.paiddate] += item.paidamount || 0;
+        });
+
+        const labels = Object.keys(groupedByDate).sort();
+        const amounts = Object.values(groupedByDate);
+
+        setChartData({
+            labels,
+            datasets: [
+                {
+                    label: 'Payments Received by Date',
+                    data: amounts,
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                },
+            ],
+        });
+
+    } catch (error) {
+        console.error('Error fetching total received amount:', error);
+    } finally {
+        setLoading(false);
+    }
+};
 
     const prepareChartData = (data) => {
         const labels = data.map(entry => moment(entry._id).format('YYYY-MM'));
@@ -280,23 +306,55 @@ export default function Reports() {
                                 </div>
                                 <div className='row py-2'>
                                     <div className='col-lg-12'>
-                                        <h4>Data Details</h4>
+                                        <h4>Received Payments (With Invoice Details)</h4>
                                         <table className='table table-striped'>
-                                            <thead>
-                                                <tr>
-                                                    <th className='ps-4'>Date</th>
-                                                    <th className='text-end pe-4'>Amount</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {receivedData.map((entry, index) => (
-                                                    <tr key={index}>
-                                                        <td className='ps-4'>{moment(entry._id).format('YYYY-MM-DD')}</td>
-                                                        <td className='text-end pe-4'><CurrencySign />{entry.totalReceivedAmount}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>Invoice #</th>
+            <th>Customer</th>
+            <th>Job</th>
+            <th>Invoice Total</th>
+            <th>Paid Amount</th>
+            <th>Payment Method</th>
+            <th>Status</th>
+            <th>View</th>
+        </tr>
+    </thead>
+    <tbody>
+        {receivedData.length === 0 ? (
+            <tr>
+                <td colSpan="9" className="text-center">No transactions found</td>
+            </tr>
+        ) : (
+            receivedData.map((entry, index) => (
+                <tr key={index}>
+                    <td>{moment(entry.paiddate).format('YYYY-MM-DD')}</td>
+                    <td>{entry.invoiceDetails?.InvoiceNumber || '-'}</td>
+                    <td>{entry.invoiceDetails?.customername || '-'}</td>
+                    <td>{entry.invoiceDetails?.job || '-'}</td>
+                    <td><CurrencySign />{entry.invoiceDetails?.total?.toLocaleString() || '0'}</td>
+                    <td><CurrencySign />{entry.paidamount?.toLocaleString() || '0'}</td>
+                    <td>{entry.method || '-'}</td>
+                    <td>{entry.invoiceDetails?.status || '-'}</td>
+                    <td className='text-center'>
+                        {entry.invoiceDetails ? (
+                            <a
+                                role='button'
+                                className='text-black text-center'
+                                onClick={() => handleViewClick(entry.invoiceDetails)}
+                            >
+                                <i className='fa-solid fa-eye'></i>
+                            </a>
+                        ) : (
+                            '-'
+                        )}
+                    </td>
+                </tr>
+            ))
+        )}
+    </tbody>
+</table>
                                     </div>
                                 </div>
 

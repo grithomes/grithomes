@@ -768,28 +768,52 @@ router.get('/currentMonthReceivedAmount2/:userid', async (req, res) => {
         const formattedStartDate = moment(startOfMonth).format('YYYY-MM-DD');
         const formattedEndDate = moment(endOfMonth).format('YYYY-MM-DD');
 
-        const result = await Transactions.aggregate([
-            {
-                $match: {
-                    userid: userid,
-                    paiddate: {
-                        $gte: formattedStartDate,
-                        $lte: formattedEndDate
-                    }
-                }
-            },
-            {
-                $group: {
-                    _id: "$paiddate",
-                    totalReceivedAmount: { $sum: "$paidamount" }
-                }
-            },
-            {
-                $sort: { _id: 1 }
+        // Fetch all transactions within date range
+        const transactions = await Transactions.find({
+            userid: userid,
+            paiddate: {
+                $gte: formattedStartDate,
+                $lte: formattedEndDate
             }
-        ]);
+        });
 
+        // Build the combined result
+        const result = [];
+
+        for (const txn of transactions) {
+            // Fetch related invoice details
+            const invoice = await Invoice.findById(txn.invoiceid).select(
+                'InvoiceNumber customername job total amountdue status date duedate'
+            );
+
+            // Combine both transaction + selected invoice fields
+            result.push({
+                transactionId: txn._id,
+                invoiceId: txn.invoiceid,
+                paidamount: txn.paidamount,
+                paiddate: txn.paiddate,
+                method: txn.method,
+                note: txn.note,
+                userid: txn.userid,
+                createdAt: txn.createdAt,
+
+                // Include selected invoice details
+                invoiceDetails: invoice ? {
+                    InvoiceNumber: invoice.InvoiceNumber,
+                    customername: invoice.customername,
+                    job: invoice.job,
+                    total: invoice.total,
+                    amountdue: invoice.amountdue,
+                    status: invoice.status,
+                    date: invoice.date,
+                    duedate: invoice.duedate
+                } : null
+            });
+        }
+
+        console.log("Merged Transactions with Invoices:", result);
         res.json(result);
+
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: 'Server error' });
@@ -812,15 +836,7 @@ router.post('/send-invoice-email', async (req, res) => {
         currencyType,
         amountdue1
     } = req.body;
-    // const transporter = nodemailer.createTransport({
-    //     host: 'smtp.hostinger.com', // Replace with your hosting provider's SMTP server
-    //     port: 465, // Replace with the appropriate port
-    //     secure: true, // true for 465, false for other ports
-    //     auth: {
-    //       user: 'grithomesltd@gmail.com',
-    //       pass: 'lpctmxmuoudgnopd'
-    //     }
-    //   });
+   
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
