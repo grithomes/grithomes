@@ -4649,5 +4649,65 @@ router.get('/allEntries', async (req, res) => {
     }
 });
 
+router.post('/send-email', async (req, res) => {
+    try {
+
+        const {
+            smtpHost,
+            smtpPort,
+            smtpUser,
+            smtpPass,
+            from,
+            to,
+            subject,
+            html,
+            text
+        } = req.body;
+
+        if (!smtpHost || !smtpPort || !smtpUser || !smtpPass) {
+            return res.status(400).json({ message: "SMTP details missing" });
+        }
+
+        if (!to || !subject) {
+            return res.status(400).json({ message: "Email details missing" });
+        }
+
+        // Create transporter dynamically
+        const transporter = nodemailer.createTransport({
+            host: smtpHost,
+            port: smtpPort,
+            secure: smtpPort == 465, 
+            auth: {
+                user: smtpUser,
+                pass: smtpPass
+            }
+        });
+
+        const mailOptions = {
+            from: from || smtpUser,
+            to: to,
+            subject: subject,
+            text: text || "",
+            html: html || ""
+        };
+
+        const info = await transporter.sendMail(mailOptions);
+
+        res.json({
+            success: true,
+            message: "Email sent successfully",
+            messageId: info.messageId
+        });
+
+    } catch (error) {
+        console.error("Email error:", error);
+        res.status(500).json({
+            success: false,
+            message: "Email sending failed",
+            error: error.message
+        });
+    }
+});
+
 
 module.exports = router;
