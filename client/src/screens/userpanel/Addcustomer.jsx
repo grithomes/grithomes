@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import Usernavbar from './Usernavbar';
+import Sidebar from './Sidebar';
 import { useNavigate } from 'react-router-dom';
-// import Usernavbar from './Usernavbar';
+// import Sidebar from './Sidebar';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
 import Alertauthtoken from '../../components/Alertauthtoken';
-import Usernav from './Usernav';
+
 import { ColorRing } from 'react-loader-spinner'
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
@@ -67,7 +67,7 @@ export default function Addcustomer() {
     const authToken = localStorage.getItem('authToken');
 
     try {
-      const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/addcustomer`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -141,7 +141,7 @@ export default function Addcustomer() {
     <div className="bg">
       {
         loading ?
-          <div className='row'>
+          <div className="flex flex-col md:flex-row">
             <ColorRing
               // width={200}
               loading={loading}
@@ -153,26 +153,19 @@ export default function Addcustomer() {
               data-testid="loader"
             />
           </div> :
-          <div className="container-fluid">
-            <div className="row">
-              <div className="col-lg-2 col-md-3 b-shadow bg-white d-lg-block d-md-block d-none">
-                <div>
-                  <Usernavbar />
-                </div>
-              </div>
+          <div className="w-full ">
+            <div className="flex flex-col md:flex-row">
+                            <Sidebar />
+                            <div className="flex-1 w-full mx-auto px-4">
 
-              <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                <div className="d-lg-none d-md-none d-block mt-2">
-                  <Usernav />
-                </div>
-                <div className='mt-4 mx-4'>
+                <div className='mt-6 mx-4'>
                   {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                   {alertmessageShow == true ?
-                    <div class="alert alert-warning d-flex justify-content-between" role="alert">
+                    <div className="alert alert-warning flex justify-between" role="alert">
                       <div>
                         {alertmessageShow}
                       </div>
-                      <button type="button" class="btn-close" onClick={() => {
+                      <button type="button" className="btn-close" onClick={() => {
                         setAlertmessageShow("");
                       }}>
                       </button>
@@ -180,245 +173,242 @@ export default function Addcustomer() {
                     : ''
                   }
                 </div>
+                
                 <form onSubmit={handleSubmit}>
-                  <div className="bg-white my-5 p-4 box mx-4">
-                    <div className="row">
-                      <p className="h5 fw-bold">Customer</p>
+                  <div className='flex flex-wrap items-center justify-between py-6 px-4 mb-6 bg-white shadow-sm rounded-xl border border-gray-100 mx-4'>
+                    <div>
+                      <p className='text-3xl font-bold text-gray-800'>Add Customer</p>
                       <nav aria-label="breadcrumb">
-                        <ol className="breadcrumb mb-0">
-                          <li className="breadcrumb-item">
-                            <a href="/userpanel/Userdashboard" className="txtclr text-decoration-none">
-                              Dashboard
-                            </a>
-                          </li>
-                          <li className="breadcrumb-item active" aria-current="page">
-                            Add a new Customer
-                          </li>
+                        <ol className="flex text-sm text-gray-500 mt-2 space-x-2">
+                          <li><a href="/userpanel/Userdashboard" className='hover:text-primary transition-colors text-decoration-none'>Dashboard</a></li>
+                          <li><span className="mx-2">/</span></li>
+                          <li><a href="/userpanel/Customerlist" className='hover:text-primary transition-colors text-decoration-none'>Customers</a></li>
+                          <li><span className="mx-2">/</span></li>
+                          <li className="text-gray-800 font-semibold" aria-current="page">Add Customer</li>
                         </ol>
                       </nav>
                     </div>
-                    <hr />
-                    <div className="row">
-                      <div className="">
-                        {/* <div className="col-11 m-auto box shadow"> */}
-                        <div className="p-3">
-                          {/* <p className="h5">Customer details</p> */}
-                          {/* <hr /> */}
-                          <div className="row">
-                            <div className="col-12 col-sm-6 col-lg-4">
-                              <div className="mb-3">
-                                <label htmlFor="exampleInputtext1" className="form-label">
-                                  Customer Name
-                                </label>
+                    <div className="mt-4 md:mt-0">
+                      <button className='btn-primary' type="submit">Save Customer</button>
+                    </div>
+                  </div>
+
+                  <div className="card-standard p-6 mx-4 mb-8">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      
+                      {/* Customer Name */}
+                      <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                        <div className="mb-4">
+                          <label htmlFor="exampleInputtext1" className="block text-sm font-medium text-gray-700 mb-1">
+                            Customer Name
+                          </label>
+                          <input
+                            type="text"
+                            className="input-standard"
+                            name="name"
+                            value={credentials.name}
+                            onChange={onchange}
+                            placeholder="Customer Name"
+                            id="exampleInputtext1"
+                            required
+                          />
+                        </div>
+                      </div>
+
+                      {/* Phone Number */}
+                      <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                        <div className="mb-4">
+                          <label htmlFor="Number" className="block text-sm font-medium text-gray-700 mb-1">
+                            Phone Number
+                          </label>
+                          <input
+                            type="text"
+                            name="number"
+                            className="input-standard"
+                            onChange={onchange}
+                            placeholder="Phone Number"
+                            id="phonenumber"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Contact Emails - Spans full width potentially or half */}
+                      <div className="col-span-1 md:col-span-2">
+                        <div className="mb-4">
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Contact Emails</label>
+                          <div className="space-y-3">
+                            {credentials.emails.map((email, index) => (
+                              <div className="flex items-center gap-2" key={index}>
                                 <input
-                                  type="text"
-                                  className="form-control"
-                                  name="name"
-                                  value={credentials.name}
-                                  onChange={onchange}
-                                  placeholder="Customer Name"
-                                  id="exampleInputtext1"
+                                  type="email"
+                                  className="input-standard flex-1"
+                                  name="emails"
+                                  value={email}
+                                  onChange={(e) => handleEmailChange(index, e.target.value)}
+                                  placeholder={`Contact Email #${index + 1}`}
                                   required
                                 />
+                                <button
+                                  type="button"
+                                  className="px-3 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-md border border-red-200 transition-colors disabled:opacity-50"
+                                  onClick={() => removeEmailField(index)}
+                                  disabled={credentials.emails.length === 1}
+                                  title="Remove Email"
+                                >
+                                  <i className="fa-solid fa-minus"></i>
+                                </button>
+                                {index === credentials.emails.length - 1 && (
+                                  <button
+                                    type="button"
+                                    className="px-3 py-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-md border border-green-200 transition-colors"
+                                    onClick={addEmailField}
+                                    title="Add Another Email"
+                                  >
+                                    <i className="fa-solid fa-plus"></i>
+                                  </button>
+                                )}
                               </div>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-4">
-                              <div className="mb-3">
-                                <label className="form-label">Contact Emails</label>
-                                {credentials.emails.map((email, index) => (
-                                  <div className="input-group mb-2" key={index}>
-                                    <input
-                                      type="email"
-                                      className="form-control"
-                                      name="emails"
-                                      value={email}
-                                      onChange={(e) => handleEmailChange(index, e.target.value)}
-                                      placeholder={`Contact Email #${index + 1}`}
-                                      required
-                                    />
-                                    <button
-                                      type="button"
-                                      className="btn btn-outline-danger"
-                                      onClick={() => removeEmailField(index)}
-                                      disabled={credentials.emails.length === 1}
-                                    >
-                                      -
-                                    </button>
-                                    {index === credentials.emails.length - 1 && (
-                                      <button
-                                        type="button"
-                                        className="btn btn-outline-primary"
-                                        onClick={addEmailField}
-                                      >
-                                        +
-                                      </button>
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-4">
-                              <div className="mb-3">
-                                <label htmlFor="Number" className="form-label">
-                                  Phone Number
-                                </label>
-                                <input
-                                  type="text"
-                                  name="number"
-                                  className="form-control"
-                                  onChange={onchange}
-                                  placeholder="Phone Number"
-                                  id="phonenumber"
-
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-sm-12 col-lg-12">
-                              <div className="mb-3">
-                                <label htmlFor="information" className="form-label">
-                                  Additional Information
-                                </label>
-                                <textarea
-                                  type="text"
-                                  className="form-control"
-                                  name="information"
-                                  onChange={onchange}
-                                  placeholder="Information"
-                                  id="information"
-
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-6">
-                              <div className="mb-3">
-                                <label htmlFor="Address1" className="form-label">
-                                  Address 1
-                                </label>
-                                <input
-                                  type="message"
-                                  name="address1"
-                                  onChange={onchange}
-                                  className="form-control"
-                                  placeholder="Address 1"
-                                  id="Address1"
-
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-6">
-                              <div className="mb-3">
-                                <label htmlFor="Address2" className="form-label">
-                                  Address 2
-                                </label>
-                                <input
-                                  type="message"
-                                  name="address2"
-                                  onChange={onchange}
-                                  className="form-control"
-                                  placeholder="Address 2"
-                                  id="Address2"
-
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-6">
-                              <div className="mb-3">
-                                <label htmlFor="Country" className="form-label">
-                                  Country
-                                </label>
-                                <CountrySelect
-                                  name="country"
-                                  value={credentials.countryid}
-                                  onChange={(val) => {
-                                    console.log(val);
-                                    setcountryid(val.id);
-                                    setcountry(val.name);
-                                    // setCredentials({ ...credentials, country: val.name })
-                                    // setCredentials({ ...credentials, countryid: val.id })
-                                    setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
-
-                                  }}
-                                  valueType="short"
-                                  class="form-control"
-                                  placeHolder="Select Country"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-6">
-                              <div className="mb-3">
-                                <label htmlFor="State" className="form-label">
-                                  State
-                                </label>
-                                <StateSelect
-                                  name="state"
-                                  countryid={countryid} // Set the country selected in the CountryDropdown
-                                  onChange={(val) => {
-                                    console.log(val);
-                                    setstateid(val.id);
-                                    setstate(val.name);
-                                    // setCredentials({ ...credentials, state: val.name })
-                                    // setCredentials({ ...credentials, stateid: val.id })
-                                    setCredentials({ ...credentials, statedata: JSON.stringify(val) })
-                                  }}
-                                  placeHolder="Select State"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-6">
-                              <div className="mb-3">
-                                <label htmlFor="City" className="form-label">
-                                  City
-                                </label>
-                                <CitySelect
-                                  countryid={countryid}
-                                  stateid={stateid}
-                                  onChange={(val) => {
-                                    console.log(val);
-                                    setcityid(val.id);
-                                    setcity(val.name);
-                                    // setCredentials({ ...credentials, city: val.name })
-                                    // setCredentials({ ...credentials, cityid: val.id })
-                                    setCredentials({ ...credentials, citydata: JSON.stringify(val) })
-                                  }}
-                                  placeHolder="Select City"
-                                />
-                              </div>
-                            </div>
-
-                            <div className="col-12 col-sm-6 col-lg-6">
-                              <div className="mb-3">
-                                <label htmlFor="post" className="form-label">
-                                  Post Code
-                                </label>
-                                <input
-                                  type="text"
-                                  name="post"
-                                  onChange={onchange}
-                                  className="form-control"
-                                  placeholder="Post Code"
-                                  id="post"
-
-                                />
-                              </div>
-                            </div>
+                            ))}
                           </div>
                         </div>
                       </div>
-                    </div>
-                    {/* <p>{alertmessageShow}</p> */}
-                    <div className="row pt-4 pe-2">
-                      <div className="col-3 me-auto"></div>
-                      <div className="col-4 col-sm-2">
-                        <button className="btn btnclr text-white">Add</button>
+
+                      <div className="col-span-1 md:col-span-2 border-t border-gray-100 pt-6 mt-2">
+                        <h3 className="text-lg font-bold text-gray-800 mb-4">Location Details</h3>
                       </div>
+
+                      {/* Address 1 */}
+                      <div className="col-span-1">
+                        <div className="mb-4">
+                          <label htmlFor="Address1" className="block text-sm font-medium text-gray-700 mb-1">
+                            Address 1
+                          </label>
+                          <input
+                            type="text"
+                            name="address1"
+                            onChange={onchange}
+                            className="input-standard"
+                            placeholder="Address 1"
+                            id="Address1"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Address 2 */}
+                      <div className="col-span-1">
+                        <div className="mb-4">
+                          <label htmlFor="Address2" className="block text-sm font-medium text-gray-700 mb-1">
+                            Address 2
+                          </label>
+                          <input
+                            type="text"
+                            name="address2"
+                            onChange={onchange}
+                            className="input-standard"
+                            placeholder="Address 2"
+                            id="Address2"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Country */}
+                      <div className="col-span-1">
+                        <div className="mb-4 country-select-container">
+                          <label htmlFor="Country" className="block text-sm font-medium text-gray-700 mb-1">
+                            Country
+                          </label>
+                          <CountrySelect
+                            name="country"
+                            value={credentials.countryid}
+                            onChange={(val) => {
+                              console.log(val);
+                              setcountryid(val.id);
+                              setcountry(val.name);
+                              setCredentials({ ...credentials, countrydata: JSON.stringify(val) })
+                            }}
+                            valueType="short"
+                            className="w-full"
+                            placeHolder="Select Country"
+                          />
+                        </div>
+                      </div>
+
+                      {/* State */}
+                      <div className="col-span-1">
+                        <div className="mb-4 country-select-container">
+                          <label htmlFor="State" className="block text-sm font-medium text-gray-700 mb-1">
+                            State
+                          </label>
+                          <StateSelect
+                            name="state"
+                            countryid={countryid}
+                            onChange={(val) => {
+                              console.log(val);
+                              setstateid(val.id);
+                              setstate(val.name);
+                              setCredentials({ ...credentials, statedata: JSON.stringify(val) })
+                            }}
+                            className="w-full"
+                            placeHolder="Select State"
+                          />
+                        </div>
+                      </div>
+
+                      {/* City */}
+                      <div className="col-span-1">
+                        <div className="mb-4 country-select-container">
+                          <label htmlFor="City" className="block text-sm font-medium text-gray-700 mb-1">
+                            City
+                          </label>
+                          <CitySelect
+                            countryid={countryid}
+                            stateid={stateid}
+                            onChange={(val) => {
+                              console.log(val);
+                              setcityid(val.id);
+                              setcity(val.name);
+                              setCredentials({ ...credentials, citydata: JSON.stringify(val) })
+                            }}
+                            className="w-full"
+                            placeHolder="Select City"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Post Code */}
+                      <div className="col-span-1">
+                        <div className="mb-4">
+                          <label htmlFor="post" className="block text-sm font-medium text-gray-700 mb-1">
+                            Post Code
+                          </label>
+                          <input
+                            type="text"
+                            name="post"
+                            onChange={onchange}
+                            className="input-standard"
+                            placeholder="Post Code"
+                            id="post"
+                          />
+                        </div>
+                      </div>
+
+                      {/* Additional Information */}
+                      <div className="col-span-1 md:col-span-2">
+                        <div className="mb-4">
+                          <label htmlFor="information" className="block text-sm font-medium text-gray-700 mb-1">
+                            Additional Information
+                          </label>
+                          <textarea
+                            className="input-standard"
+                            name="information"
+                            onChange={onchange}
+                            placeholder="Information"
+                            id="information"
+                            rows="4"
+                          />
+                        </div>
+                      </div>
+
                     </div>
                   </div>
                 </form>

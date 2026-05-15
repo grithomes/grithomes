@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
-import Usernavbar from './Usernavbar';
-import Usernav from './Usernav';
+import Sidebar from './Sidebar';
+
 import SignatureCanvas from 'react-signature-canvas';
 import { useNavigate } from 'react-router-dom';
 
@@ -10,19 +10,19 @@ export default function Signature() {
     const [signatureData, setSignatureData] = useState('');
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [signupdata, setsignupdata] = useState({
-      Businesstype:"",
-      CurrencyType:"",
-      FirstName:"",
-      LastName:"",
-      TaxName:"",
-      address:"",
-      city:"",
-      companyImageUrl:"",
-      companyname:"",
-      country:"",
-      email:"",
-      state:"",
-      taxPercentage:"",
+        Businesstype: "",
+        CurrencyType: "",
+        FirstName: "",
+        LastName: "",
+        TaxName: "",
+        address: "",
+        city: "",
+        companyImageUrl: "",
+        companyname: "",
+        country: "",
+        email: "",
+        state: "",
+        taxPercentage: "",
     });
     const navigate = useNavigate();
 
@@ -35,39 +35,39 @@ export default function Signature() {
 
     const fetchsignupdata = async () => {
         try {
-          const userid =   localStorage.getItem("userid");
-          const authToken = localStorage.getItem('authToken');
-          const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
-            headers: {
-              'Authorization': authToken,
+            const userid = localStorage.getItem("userid");
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getsignupdata/${userid}`, {
+                headers: {
+                    'Authorization': authToken,
+                }
+            });
+
+            if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0, 0);
+                return; // Stop further execution
             }
-          });
-    
-          if (response.status === 401) {
-            const json = await response.json();
-            setAlertMessage(json.message);
-            setloading(false);
-            window.scrollTo(0, 0);
-            return; // Stop further execution
-          }
-          else {
-            const json = await response.json();
-            if(json != null){
-            setsignupdata(json);
+            else {
+                const json = await response.json();
+                if (json != null) {
+                    setsignupdata(json);
+                }
             }
-          }
         } catch (error) {
-          console.error('Error fetching data:', error);
-          setloading(false);
+            console.error('Error fetching data:', error);
+            setloading(false);
         }
-      }
+    }
 
     const fetchSignatureData = async () => {
         try {
             const ownerId = localStorage.getItem('userid'); // Retrieve the ownerId
             const authToken = localStorage.getItem('authToken'); // Retrieve the auth token
 
-            const response = await fetch(`https://grithomes.onrender.com/api/check-signature/${ownerId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/check-signature/${ownerId}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -114,37 +114,37 @@ export default function Signature() {
     const saveSignature = async () => {
         if (!sigCanvas.current.isEmpty()) {
             setIsSubmitting(true);
-    
+
             const signature = sigCanvas.current.toDataURL(); // Get signature data URL
             const ownerId = localStorage.getItem('userid');
             const email = localStorage.getItem('userEmail'); // Assuming email is stored in localStorage
             // const companyname = localStorage.getItem('companyName'); // Assuming company name is stored in localStorage
-    
+
             try {
-                const response = await fetch(`https://grithomes.onrender.com/api/check-signature/${ownerId}`, {
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/check-signature/${ownerId}`, {
                     headers: {
                         'Authorization': localStorage.getItem('authToken'),
                     },
                 });
-    
+
                 const json = await response.json();
-    
+
                 if (json.hasSignature) {
                     // If signature exists, update it
-                    const updateResponse = await fetch('https://grithomes.onrender.com/api/update-ownersignature', {
+                    const updateResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/update-ownersignature`, {
                         method: 'PUT',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': localStorage.getItem('authToken'),
                         },
-                        body: JSON.stringify({ 
-                            signature, 
-                            ownerId, 
-                            email, 
+                        body: JSON.stringify({
+                            signature,
+                            ownerId,
+                            email,
                             companyname: signupdata.companyname
                         }),
                     });
-    
+
                     const updateJson = await updateResponse.json();
                     if (updateResponse.ok) {
                         console.log('Signature updated:', updateJson);
@@ -153,20 +153,20 @@ export default function Signature() {
                     }
                 } else {
                     // If no signature exists, create a new one
-                    const createResponse = await fetch('https://grithomes.onrender.com/api/ownersignature', {
+                    const createResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/ownersignature`, {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                             'Authorization': localStorage.getItem('authToken'),
                         },
-                        body: JSON.stringify({ 
+                        body: JSON.stringify({
                             signature,
-                            ownerId, 
-                            email, 
+                            ownerId,
+                            email,
                             companyname: signupdata?.companyname || '',
-                            }),
+                        }),
                     });
-    
+
                     const createJson = await createResponse.json();
                     if (createResponse.ok) {
                         console.log('Signature saved:', createJson);
@@ -183,51 +183,50 @@ export default function Signature() {
             console.log('Signature is empty');
         }
     };
-       
+
 
     return (
         <div className="bg">
-            <div className="container-fluid">
-                <div className="row">
-                    <div className="col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none">
-                        <div>
-                            <Usernavbar />
-                        </div>
-                    </div>
-                    <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                        <div className="d-lg-none d-md-none d-block mt-2">
-                            <Usernav />
-                        </div>
-                        <div className="bg-white my-5 p-4 box mx-4">
-                            <div className="row py-2">
-                                <div className="col-lg-4 col-md-6 col-sm-6 col-7 me-auto">
-                                    <p className="h5 fw-bold">E-Sign</p>
-                                    <nav aria-label="breadcrumb">
-                                        <ol className="breadcrumb mb-0">
-                                            <li className="breadcrumb-item">
-                                                <a href="/Userpanel/Userdashboard" className="txtclr text-decoration-none">
-                                                    Dashboard
-                                                </a>
-                                            </li>
-                                            <li className="breadcrumb-item active" aria-current="page">
-                                                E-Sign
-                                            </li>
-                                        </ol>
-                                    </nav>
-                                </div>
+            <div className="w-full ">
+                <div className="flex flex-col md:flex-row">
+                            <Sidebar />
+                            <div className="flex-1 w-full mx-auto px-4">
+
+                        <div className='flex flex-wrap items-center justify-between py-6 px-4 mb-6 bg-white shadow-sm rounded-xl border border-gray-100 mx-4 mt-6'>
+                            <div>
+                                <p className='text-3xl font-bold text-gray-800'>E-Sign Settings</p>
+                                <nav aria-label="breadcrumb">
+                                    <ol className="flex text-sm text-gray-500 mt-2 space-x-2">
+                                        <li><a href="/Userpanel/Userdashboard" className='hover:text-primary transition-colors text-decoration-none'>Dashboard</a></li>
+                                        <li><span className="mx-2">/</span></li>
+                                        <li className="text-gray-800 font-semibold" aria-current="page">E-Sign</li>
+                                    </ol>
+                                </nav>
                             </div>
-                            <hr />
-                            <div className="row my-2">
-                                <div>
+                        </div>
+
+                        <div className="card-standard p-6 mx-4 mb-8 max-w-3xl">
+                            <h5 className="text-xl font-semibold text-gray-800 mb-6">Your Signature</h5>
+                            <div className="mb-6">
+                                <p className="text-sm text-gray-600 mb-4">Draw your signature below. This will be used on all your generated invoices and estimates.</p>
+                                <div className="border-2 border-dashed border-gray-300 rounded-xl bg-gray-50 overflow-hidden flex justify-center">
                                     <SignatureCanvas
                                         ref={sigCanvas}
-                                        canvasProps={{ width: 500, height: 200, className: 'sigCanvassig' }}
-                                    /><br />
-                                    <button onClick={clear} className='btn btn-light'>Clear</button>
-                                    <button className='btn btn-light mx-2 text-primary' onClick={saveSignature} disabled={isSubmitting}>
-                                        {isSubmitting ? 'Saving...' : 'Save'}
-                                    </button>
+                                        canvasProps={{ width: 500, height: 200, className: 'sigCanvassig bg-transparent cursor-crosshair' }}
+                                    />
                                 </div>
+                            </div>
+                            <div className="flex gap-3 pt-4 border-t border-gray-100">
+                                <button onClick={clear} className='px-4 py-2 border border-gray-300 rounded-lg text-gray-700 bg-white hover:bg-gray-50 transition-colors'>
+                                    <i className="fa-solid fa-eraser mr-2"></i>Clear Canvas
+                                </button>
+                                <button className='btn-primary flex items-center' onClick={saveSignature} disabled={isSubmitting}>
+                                    {isSubmitting ? (
+                                        <><i className="fa-solid fa-spinner fa-spin mr-2"></i>Saving...</>
+                                    ) : (
+                                        <><i className="fa-solid fa-check mr-2"></i>Save Signature</>
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>

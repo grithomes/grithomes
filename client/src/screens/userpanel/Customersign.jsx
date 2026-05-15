@@ -288,7 +288,7 @@ const Customersign = () => {
           display: block;
           font-weight: 400;
         }
-        .invoice-price .invoice-price-right small {
+        .invoice-price .invoice-price-right text-sm {
           display: block;
           opacity: .7;
           position: absolute;
@@ -433,7 +433,7 @@ thead{
         </style>
       </head>
       <body>
-        <div class="print-page">
+        <div className="print-page">
           ${content}
         </div>
       </body>
@@ -451,7 +451,7 @@ thead{
     try {
       // const userid = localStorage.getItem("userid");
       // const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getemailestimatedata/${estimateId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getemailestimatedata/${estimateId}`, {
         // headers: {
         //   'Authorization': authToken,
         // }
@@ -496,7 +496,7 @@ thead{
       const userId = estimateData.userid;  // localStorage.getItem("userid");
       // const userid =   localStorage.getItem("userid");
       // const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getemailsignupdata/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getemailsignupdata/${userId}`, {
         // headers: {
         //   'Authorization': authToken,
         // }
@@ -525,7 +525,7 @@ thead{
     try {
       // const userid = localStorage.getItem("userid");
       // const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getemailtransactiondata/${estimateId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getemailtransactiondata/${estimateId}`, {
         // headers: {
         //   'Authorization': authToken,
         // }
@@ -562,7 +562,7 @@ thead{
       const ownerId = estimateData.userid;
       // const ownerId = localStorage.getItem('userid');
       // const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getemailownerdata/${ownerId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getemailownerdata/${ownerId}`, {
         // headers: {
         //   'Authorization': authToken,
         // }
@@ -591,7 +591,7 @@ thead{
     }
 
     try {
-      const response = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
       const json = await response.json();
       console.log('Customer signature response:', json);
       console.log('Customer signature response:', response.ok);
@@ -611,12 +611,12 @@ thead{
 
     try {
       // Check if customer signature already exists
-      const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
+      const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
       const checkJson = await checkResponse.json();
 
       if (checkJson.hasSignature) {
         // Update the existing customer signature
-        const updateResponse = await fetch(`https://grithomes.onrender.com/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
+        const updateResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
           method: 'PUT',
           headers: {
             'Content-Type': 'application/json',
@@ -652,12 +652,12 @@ thead{
 
     try {
       // Check if customer signature already exists
-      const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
+      const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
       const checkJson = await checkResponse.json();
 
       // if (checkJson.ok) {
       // Update the existing customer signature
-      const updateResponse = await fetch(`https://grithomes.onrender.com/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
+      const updateResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -751,7 +751,7 @@ thead{
       }
 
       // Send email request to backend
-      const emailResponse = await fetch('https://grithomes.onrender.com/api/send-estimate-signed-email', {
+      const emailResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/send-estimate-signed-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -771,7 +771,7 @@ thead{
       }
 
       console.log('Email sent successfully');// Update customer signature
-      const updateResponse = await fetch(`https://grithomes.onrender.com/api/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
+      const updateResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/updatecustomersignature/${encodeURIComponent(estimateData._id)}`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -804,10 +804,10 @@ thead{
 
   return (
 
-    <div className='bg'>
+    <div className='min-h-screen bg-gray-50/50 py-8'>
       {
         loading ?
-          <div className='row position-relative'>
+          <div className='flex justify-center items-center min-h-[400px]'>
             <ColorRing
               loading={loading}
               display="flex"
@@ -817,252 +817,232 @@ thead{
               data-testid="loader"
             />
           </div> :
-          <div className='container-fluid'>
-            <div className="row">
-              <div className='m-auto'>
-                <div className='text-center pt-5'>
-                  <button className='pdfbtn text-center' onClick={handlePrintContent}><i class="fa-solid fa-print mx-2"></i>Pdf</button>
+          <div className='max-w-5xl mx-auto px-4'>
+            <div className="flex flex-col">
+              <div className='flex justify-between items-center mb-6 bg-white p-4 rounded-xl shadow-sm border border-gray-100'>
+                <div>
+                  <h1 className="text-2xl font-bold text-gray-800">Review Document</h1>
+                  <p className="text-sm text-gray-500 mt-1">Please review and sign the document below</p>
                 </div>
+                <div className='flex gap-3'>
+                  <button className='flex items-center gap-2 px-4 py-2 bg-white border border-gray-200 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors font-medium text-sm shadow-sm' onClick={handlePrintContent}>
+                    <i className="fa-solid fa-print"></i>
+                    <span>Print PDF</span>
+                  </button>
+                  {signatureData != null && signatureData.completeButtonVisible ? (
+                    <button className="flex items-center gap-2 px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-colors font-medium shadow-sm" onClick={handleDocumentComplete}>
+                      <i className="fa-solid fa-check"></i>
+                      Complete
+                    </button>
+                  ) : null}
+                </div>
+              </div>
 
-                <div className="row py-4 px-2">
-                  <div className="col-12 col-sm-12 col-md-12 col-lg-12" id="">
-                    <div className='print' id='invoiceContent'>
-                      <div className="invoice-body">
-                        <div className='row'>
-                          <div className='col-sm-12 col-md-6 mb-3 mb-md-0 pt-3'>
-                            {signupdata != null ? signupdata.companyImageUrl != "" && signupdata.companyImageUrl != undefined && signupdata.companyImageUrl != null ?
-                              <img src={signupdata.companyImageUrl} className='w-50 logoimage' alt="testing imahe" /> :
-                              <p className='h4 fw-bold'>{signupdata.companyname}</p>
-                              : ""
-                            }
-
-                          </div>
-                          <div className='col-sm-12 col-md-6 text-md-end'>
-                            <h2>Estimate</h2>
-                            {console.log(signupdata, "signupdata")
-                            }
-                            <div className='text-inverse mb-1'>
-                              <strong>{signupdata != null ? signupdata.companyname : ""}</strong>
-                            </div>
-                            <address className='m-t-5 m-b-5'>
+              <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-2 md:p-8 overflow-hidden mb-8">
+                <div className="w-full overflow-x-auto">
+                  <div className='print min-w-[800px]' id='invoiceContent'>
+                    <div className="invoice-body">
+                      <div className="flex flex-col md:flex-row justify-between">
+                        <div className='w-full md:w-1/2 mb-6 md:mb-0 pt-4'>
+                          {signupdata != null ? signupdata.companyImageUrl != "" && signupdata.companyImageUrl != undefined && signupdata.companyImageUrl != null ?
+                            <img src={signupdata.companyImageUrl} className='w-1/2 max-w-[200px] object-contain' alt="Company Logo" /> :
+                            <p className='text-2xl font-bold text-gray-800'>{signupdata.companyname}</p>
+                            : ""
+                          }
+                        </div>
+                        <div className='w-full md:w-1/2 text-left md:text-right'>
+                          <h2 className="text-3xl font-bold text-gray-900 mb-2 tracking-tight">ESTIMATE</h2>
+                          <div className='text-gray-700'>
+                            <strong className="text-gray-900 block text-lg mb-2">{signupdata != null ? signupdata.companyname : ""}</strong>
+                            <address className='not-italic text-sm leading-relaxed'>
                               <div className='mb-2'>
-                                <div className=''>{signupdata.address} </div>
-                                {signupdata.city ? JSON.parse(signupdata.city).name + ',' : ' '}
-                                {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
+                                <div>{signupdata.address}</div>
+                                {signupdata.city ? JSON.parse(signupdata.city).name + ', ' : ''}
+                                {signupdata.state ? JSON.parse(signupdata.state).name : ''}
                               </div>
                               <div>{signupdata.email}</div>
-                              <div>{signupdata.website} </div>
-                              <div>
-                                {signupdata.gstNumber == ''
-                                  ?
-                                  ""
-                                  :
-                                  `${signupdata.TaxName} ${signupdata.gstNumber}`
-                                }
-
-                              </div>
-
+                              <div>{signupdata.website}</div>
+                              {signupdata.gstNumber && (
+                                <div className="mt-1 font-medium">
+                                  {`${signupdata.TaxName} ${signupdata.gstNumber}`}
+                                </div>
+                              )}
                             </address>
                           </div>
-
                         </div>
-                        <div class="clr"></div>
                       </div>
-                      <div className='invoice-header'>
-                        <div className='row'>
-                          <div className='invoice-to col-sm-12 col-md-6'>
-                            <strong>Bill To</strong>
-                            <div className='text-inverse mb-1'>
-                              {estimateData?.customername || ''}
-                            </div>
-                            <address className='m-t-5 m-b-5'>
-                              <div>{estimateData?.customeremail || ''}</div>
-                              <div>{estimateData?.customerphone || ''}</div>
+                      <div className="clr"></div>
+                    </div>
 
-                            </address>
+                    <div className='invoice-header !bg-gray-50 border-y border-gray-100'>
+                      <div className="flex flex-col md:flex-row justify-between">
+                        <div className='invoice-to w-full md:w-1/2 mb-4 md:mb-0'>
+                          <strong className="text-gray-500 text-xs uppercase tracking-wider mb-2 block">Bill To</strong>
+                          <div className='text-lg font-bold text-gray-900 mb-1'>
+                            {estimateData?.customername || ''}
                           </div>
-                          <div className='invoice-date col-sm-12 col-md-6'>
-                            <div className='row text-md-end'>
-                              <div className='col-6 col-md'>
-                                <strong>Estimate #</strong>
-                              </div>
-                              <div className='col-6 col-md invoice-detail-right'>{estimateData?.EstimateNumber || ''}</div>
-                            </div>
-                            <div className='row text-md-end'>
-                              <div className='col-6 col-md'>
-                                <strong>Date</strong>
-                              </div>
-                              <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData?.date || '')}</div>
-                            </div>
-                            <div className='row text-md-end'>
-                              <div className='col-6 col-md'>
-                                <strong>Job</strong>
-                              </div>
-                              <div className='col-6 col-md invoice-detail-right'>{estimateData?.job || ''}</div>
-                            </div>
+                          <address className='not-italic text-sm text-gray-600 leading-relaxed'>
+                            <div>{estimateData?.customeremail || ''}</div>
+                            <div>{estimateData?.customerphone || ''}</div>
+                          </address>
+                        </div>
+                        <div className='invoice-date w-full md:w-1/2 text-left md:text-right'>
+                          <div className='grid grid-cols-2 gap-x-4 gap-y-2 max-w-[300px] md:ml-auto'>
+                            <div className='text-gray-500 text-sm font-medium'>Estimate #</div>
+                            <div className='text-gray-900 font-bold'>{estimateData?.EstimateNumber || ''}</div>
+
+                            <div className='text-gray-500 text-sm font-medium'>Date</div>
+                            <div className='text-gray-900 font-medium'>{formatCustomDate(estimateData?.date || '')}</div>
+
+                            {estimateData?.job && (
+                              <>
+                                <div className='text-gray-500 text-sm font-medium'>Job</div>
+                                <div className='text-gray-900 font-medium'>{estimateData.job}</div>
+                              </>
+                            )}
                           </div>
                         </div>
-                        <div class="clr"></div>
                       </div>
+                      <div className="clr"></div>
+                    </div>
 
-                      <div className='invoice-table'>
-                        <div className='table-responsive'>
-                          <table className='table table-invoice'>
-                            <thead>
-                              <tr className='table table-invoice'>
-                                <th className='text-start'>Item</th>
-                                <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
-                                <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
-                                <th className='text-end' width="15%"> Amount</th>
+                    <div className='invoice-table'>
+                      <div className='table-responsive'>
+                        <table className='w-full text-left border-collapse'>
+                          <thead>
+                            <tr className='border-b-2 border-gray-200'>
+                              <th className='py-4 font-bold text-gray-700'>Item</th>
+                              <th className='py-4 font-bold text-gray-700 text-center d-none d-md-table-cell' width="15%">Qty</th>
+                              <th className='py-4 font-bold text-gray-700 text-right d-none d-md-table-cell' width="15%">Price</th>
+                              <th className='py-4 font-bold text-gray-700 text-right' width="15%">Amount</th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-100">
+                            {items.map((item) => (
+                              <tr key={item._id} className="group">
+                                <td className="py-4">
+                                  <div>
+                                    <span className="font-semibold text-gray-900 block mb-1">{item.itemname}</span>
+                                    <div className="text-sm text-gray-500 prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: item.description }} />
+                                  </div>
+                                </td>
+                                <td className="py-4 text-center text-gray-700 d-none d-md-table-cell">{item.itemquantity}</td>
+                                <td className="py-4 text-right text-gray-700 d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
+                                <td className='py-4 text-right font-medium text-gray-900'><CurrencySign />{roundOff(item.amount)}</td>
                               </tr>
-                            </thead>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
 
+                      <div className="flex flex-col md:flex-row mt-6">
+                        <div className='w-full'>
+                          <table className='w-full md:w-1/2 ml-auto text-sm'>
                             <tbody>
-                              {items.map((item) => (
-                                <tr key={item._id}>
-                                  <td>
-                                    <div>
-                                      <span><strong>{item.itemname}</strong></span>
-                                      <div dangerouslySetInnerHTML={{ __html: item.description }} />
-                                    </div>
+                              <tr>
+                                <td className='py-2 text-gray-600 text-right pr-4'>Subtotal</td>
+                                <td className='py-2 text-right font-medium text-gray-900' width="120px"><CurrencySign />{roundOff(estimateData?.subtotal || '')}</td>
+                              </tr>
+
+                              {estimateData.tax > 0 && (
+                                <tr>
+                                  <td className='py-2 text-gray-600 text-right pr-4'>{signupdata.TaxName} ({signupdata.taxPercentage}%)</td>
+                                  <td className='py-2 text-right font-medium text-gray-900'><CurrencySign />{roundOff(estimateData.tax)}</td>
+                                </tr>
+                              )}
+
+                              {estimateData.discountTotal > 0 && (
+                                <tr>
+                                  <td className='py-2 text-gray-600 text-right pr-4'>Discount</td>
+                                  <td className='py-2 text-right font-medium text-green-600'>-<CurrencySign />{roundOff(estimateData.discountTotal)}</td>
+                                </tr>
+                              )}
+
+                              <tr className="border-t border-b border-gray-200">
+                                <td className='py-3 text-gray-900 font-bold text-right pr-4 text-base'>Total</td>
+                                <td className='py-3 text-right font-bold text-gray-900 text-base'><CurrencySign />{roundOff(estimateData.total)}</td>
+                              </tr>
+
+                              {transactions.map((transaction) => (
+                                <tr key={transaction._id}>
+                                  <td className='py-2 text-gray-500 text-right pr-4 italic text-xs'>
+                                    {transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}
                                   </td>
-                                  <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
-                                  <td className="text-end d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
-                                  <td className='text-end'><CurrencySign />{roundOff(item.amount)}</td>
+                                  <td className='py-2 text-right font-medium text-gray-500'>-<CurrencySign />{transaction.paidamount}</td>
                                 </tr>
                               ))}
                             </tbody>
                           </table>
                         </div>
-                        <hr />
-                        <div className='row'>
-                          <div className='col-12'>
-                            <table className='table table-borderless table-small'>
-                              <tbody>
-                                <tr>
-                                  <td className='d-none d-md-table-cell' rowspan="5"></td>
-                                  <td className='text-md-end' width="22%">Subtotal</td>
-                                  <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData?.subtotal || '')}</td>
-                                </tr>
-                                {
-                                  estimateData.tax > 0
-                                    ?
-                                    <tr>
-                                      <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%) </td>
-                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.tax)}</td>
-                                    </tr>
-                                    :
-                                    null
-                                }
-
-
-
-                                {estimateData.discountTotal != null && estimateData.discountTotal != undefined && estimateData.discountTotal != '' ?
-
-                                  estimateData.discountTotal > 0
-                                    ?
-                                    <tr>
-                                      <td className='text-md-end' width="22%">Discount</td>
-                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.discountTotal)}</td>
-                                    </tr>
-                                    :
-                                    null
-                                  : ''
-                                }
-
-                                <tr>
-
-
-                                  <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
-                                  <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{roundOff(estimateData.total)}</td>
-                                </tr>
-
-                                <tr>
-                                </tr>
-                                {transactions.map((transaction) => (
-                                  <tr key={transaction._id}>
-                                    <td className='text-md-end' width="22%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
-                                    <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount}</td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
-                          </div>
-                        </div>
-                        <div class="clr"></div>
                       </div>
+                      <div className="clr"></div>
+                    </div>
 
-                      <div className='invoice-price page-not-break'>
-                        <div className='invoice-price-left text-end'>
-                          <div className='d-none d-md-block'></div>
-                        </div>
-                        <div className='invoice-price-right'>
-                          <small>Amount Due</small>
-                          <span class="f-w-600 mt-3"><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
-                        </div>
+                    <div className='invoice-price page-not-break !bg-gray-800 text-white p-6 mt-4 rounded-lg flex items-center justify-between'>
+                      <div className='invoice-price-left'>
+                        <span className="text-gray-300 text-sm uppercase tracking-wider block mb-1">Amount Due</span>
                       </div>
-                      {estimateData.isAddSignature || estimateData.isCustomerSign ?
-                        <div className="invoice-body margin-top-sign">
-                          <p>By signing this document, the customer agrees to the services and conditions described in this document.</p>
-                          <div className="row ">
-                            <div className="col-6">
-                              {ownerData && (
-                                <div className="my-2">
-                                  <div>
-                                    <p className='text-center fw-bold fs-5 margin-top-sign txt-center center'>{ownerData.companyname}</p>
-                                    <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr />
-                                    <p className='text-center txt-center center'>{formatCustomDate(estimateData.createdAt)}</p>
-                                  </div>
-                                </div>
-                              )}
-                            </div>
-                            <div className="col-6">
-                              <div className="my-2">
-                                <div className='text-center txt-center center'>
-                                  <p className='fw-bold fs-5 margin-top-sign txt-center center'>{estimateData.customername}</p>
-                                  {console.log(signatureData, "signatureData ==========")}
-                                  {signatureData != null ?
-                                    signatureData.customersign == '' ? (
-                                      <button className="signbtn" ref={signatureButtonRef} onClick={() => handleSignatureClick()}>Signature</button>
-                                    ) : (
-                                      <div className="signature-section">
-                                        <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr />
-                                        <p className='text-center txt-center center'>{formatCustomDate(signatureData.createdAt)}</p>
-                                      </div>
-                                    )
-                                    : (
-                                      ''
-                                    )
-                                  }
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                        </div> : ''
-                      }
-                      {isSignatureModalOpen.toString() == "true" && (
-                        <SignatureModal
-                          onSave={handleSaveSignature}
-                          onClose={() => setIsSignatureModalOpen(false)}
-                        />
-                      )}
-                      <div className='invoice-body invoice-body-text'>
-                        <div className='mt-1'>
-                          <span>{estimateData.information == '' ? '' : 'Note:'}</span>
-                          <div className='information-content' dangerouslySetInnerHTML={{ __html: estimateData.information }} />
-                        </div>
+                      <div className='invoice-price-right'>
+                        <span className="text-3xl font-bold"><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
                       </div>
                     </div>
+
+                    {estimateData.isAddSignature || estimateData.isCustomerSign ?
+                      <div className="invoice-body margin-top-sign pt-8 border-t border-gray-100 mt-8">
+                        <p className="text-sm text-gray-500 italic text-center mb-8 bg-gray-50 py-3 rounded-lg">By signing this document, the customer agrees to the services and conditions described in this document.</p>
+                        <div className="flex flex-wrap -mx-4">
+                          <div className="w-1/2 px-4 border-r border-gray-100">
+                            {ownerData && (
+                              <div className="text-center px-4">
+                                <p className='font-bold text-gray-800 mb-4 text-lg'>{ownerData.companyname}</p>
+                                <div className="h-24 flex items-center justify-center mb-2 border-b-2 border-gray-300 relative">
+                                  <img src={ownerData.data} alt="Saved Signature" className="max-h-full max-w-full object-contain mix-blend-multiply" />
+                                </div>
+                                <p className='text-gray-500 text-sm font-medium'>{formatCustomDate(estimateData.createdAt)}</p>
+                              </div>
+                            )}
+                          </div>
+                          <div className="w-1/2 px-4">
+                            <div className="text-center px-4">
+                              <p className='font-bold text-gray-800 mb-4 text-lg'>{estimateData.customername}</p>
+                              {signatureData != null ?
+                                signatureData.customersign == '' ? (
+                                  <div className="h-24 flex items-end justify-center mb-2 border-b-2 border-gray-300 pb-2">
+                                    <button className="px-6 py-2 bg-primary/10 text-primary hover:bg-primary hover:text-white transition-colors rounded-lg font-medium shadow-sm" ref={signatureButtonRef} onClick={() => handleSignatureClick()}>
+                                      <i className="fa-solid fa-pen-nib mr-2"></i>Click to Sign
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <div className="signature-section">
+                                    <div className="h-24 flex items-center justify-center mb-2 border-b-2 border-gray-300 relative">
+                                      <img src={`${signatureData.customersign}`} alt="Customer Signature" className="max-h-full max-w-full object-contain mix-blend-multiply" />
+                                    </div>
+                                    <p className='text-gray-500 text-sm font-medium'>{formatCustomDate(signatureData.createdAt)}</p>
+                                  </div>
+                                )
+                                : (
+                                  <div className="h-24 flex items-end justify-center mb-2 border-b-2 border-gray-300 pb-2"></div>
+                                )
+                              }
+                            </div>
+                          </div>
+                        </div>
+                      </div> : ''
+                    }
+                    {isSignatureModalOpen.toString() == "true" && (
+                      <SignatureModal
+                        onSave={handleSaveSignature}
+                        onClose={() => setIsSignatureModalOpen(false)}
+                      />
+                    )}
+
+                    {estimateData.information && (
+                      <div className='mt-8 pt-6 border-t border-gray-100'>
+                        <span className="block text-sm font-bold text-gray-700 uppercase tracking-wider mb-2">Note:</span>
+                        <div className='prose prose-sm max-w-none text-gray-600' dangerouslySetInnerHTML={{ __html: estimateData.information }} />
+                      </div>
+                    )}
                   </div>
-                </div>
-                <div className='text-center mb-4'>
-                  {signatureData != null ?
-                    (signatureData.completeButtonVisible != "" && signatureData.completeButtonVisible != undefined && signatureData.completeButtonVisible != null ?
-                      <button className="btn btn-primary" onClick={handleDocumentComplete}>
-                        Complete
-                      </button>
-                      : '')
-                    : ('')}
                 </div>
               </div>
             </div>

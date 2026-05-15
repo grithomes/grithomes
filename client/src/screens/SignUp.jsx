@@ -85,7 +85,7 @@ export default function SignUp() {
         console.log("imgurl: ", companyFormData);
 
 
-        // const companyUploadResponse = await fetch("https://grithomes.onrender.com/api/upload-image", {
+        // const companyUploadResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/upload-image`, {
         // method: 'POST',
         // body: companyFormData,
         // });
@@ -93,7 +93,7 @@ export default function SignUp() {
         // console.log('Uploaded company image:', uploadedCompanyImage);
         // const companyImageUrl = uploadedCompanyImage.companyImageUrl || '';
     
-        const response = await fetch("https://grithomes.onrender.com/api/createuser", {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/createuser`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json'
@@ -152,17 +152,17 @@ export default function SignUp() {
     };
 
   return (
-    <div className='container py-4'>
-        <h1 className='text-center mb-5 fw-bold'>IN<span className='clrblue'>VOICE</span></h1>
-      <section className='d-flex justify-content-center align-items-center'>
+    <div className='container mx-auto px-6 py-6'>
+        <h1 className='text-center mb-8 font-semibold'>IN<span className='clrblue'>VOICE</span></h1>
+      <section className='flex justify-center items-center'>
         
-        <form class="signup-form signupbox" onSubmit={handleSubmit}>
-            <div className=' p-5 pb-4 mt-3'>
-                <p className='h4 fw-bold'>Sign Up</p>
+        <form className="signup-form signupbox" onSubmit={handleSubmit}>
+            <div className=' p-8 pb-4 mt-6'>
+                <p className='text-xl font-semibold font-semibold'>Sign Up</p>
 
-                <div className="row">
-                    <div className="col-12 col-md-6 col-sm-6 col-lg-6">
-                        <div className='mb-3'>
+                <div className="flex flex-wrap -mx-2">
+                    <div className="w-full px-2 w-full md:w-1/2 px-2 col-sm-6 w-full lg:w-1/2 px-2">
+                        <div className='mb-6'>
                         <label className='form-label'>Choose Company Image</label>
                         <input 
                         type="file" 
@@ -171,18 +171,18 @@ export default function SignUp() {
                         />
                         </div>
                     </div>
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                        <div class="form-group pt-3">
-                            <label class="label py-2" for="company_name">Company name</label>
-                            <input type="text" class="form-control" name="companyname" onChange={onchange} value={credentails.companyname} placeholder="Company name" required />
+                    <div className="w-full px-2 w-full px-2 w-full md:w-1/2 px-2 w-full lg:w-1/2 px-2">
+                        <div className="form-group pt-4">
+                            <label className="label py-2" for="company_name">Company name</label>
+                            <input type="text" className="form-control" name="companyname" onChange={onchange} value={credentails.companyname} placeholder="Company name" required />
                         </div>
                     </div>
 
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                        <div className="form-group pt-3">
+                    <div className="w-full px-2 w-full px-2 w-full md:w-1/2 px-2 w-full lg:w-1/2 px-2">
+                        <div className="form-group pt-4">
                             <label htmlFor="exampleInputtext2" className="form-label py-1">Business Type</label>
                             <select
-                              className="form-select"
+                              className="input-standard"
                               name="Businesstype"
                               value={credentails.Businesstype}
                               onChange={onchange}
@@ -199,11 +199,11 @@ export default function SignUp() {
                         </div>
                     </div>
 
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                        <div className="form-group pt-3">
+                    <div className="w-full px-2 w-full px-2 w-full md:w-1/2 px-2 w-full lg:w-1/2 px-2">
+                        <div className="form-group pt-4">
                             <label htmlFor="exampleInputtext3" className="form-label py-1">Currency Type</label>
                             <select
-                              className="form-select"
+                              className="input-standard"
                               name="CurrencyType"
                               value={credentails.CurrencyType}
                               onChange={onchange}
@@ -218,60 +218,60 @@ export default function SignUp() {
                         </div>
                     </div>
                     
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                        <div class="form-group pt-3">
-                            <label class="label py-2" for="First_Name">First Name</label>
-                            <input type="text" class="form-control" name="FirstName" value={credentails.FirstName} onChange={onchange} placeholder="First Name" required />
+                    <div className="w-full px-2 w-full px-2 w-full md:w-1/2 px-2 w-full lg:w-1/2 px-2">
+                        <div className="form-group pt-4">
+                            <label className="label py-2" for="First_Name">First Name</label>
+                            <input type="text" className="form-control" name="FirstName" value={credentails.FirstName} onChange={onchange} placeholder="First Name" required />
                         </div>
                     </div>
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                        <div class="form-group pt-3">
-                            <label class="label py-2" for="Last_Name">Last Name</label>
-                            <input type="text" class="form-control" name="LastName" value={credentails.LastName} onChange={onchange} placeholder="Last Name"  />
+                    <div className="w-full px-2 w-full px-2 w-full md:w-1/2 px-2 w-full lg:w-1/2 px-2">
+                        <div className="form-group pt-4">
+                            <label className="label py-2" for="Last_Name">Last Name</label>
+                            <input type="text" className="form-control" name="LastName" value={credentails.LastName} onChange={onchange} placeholder="Last Name"  />
                         </div>
                     </div>
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                        <div class="form-group mb-3 pt-3">
-                            <label class="label py-2" for="email">Email</label>
-                            <input type="text" class="form-control" name="email" value={credentails.email} onChange={onchange} placeholder="Email" required />
+                    <div className="w-full px-2 w-full px-2 w-full md:w-1/2 px-2 w-full lg:w-1/2 px-2">
+                        <div className="form-group mb-6 pt-4">
+                            <label className="label py-2" for="email">Email</label>
+                            <input type="text" className="form-control" name="email" value={credentails.email} onChange={onchange} placeholder="Email" required />
                         </div>
                     </div>
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                        <div className="form-group mb-3 pt-3">
+                    <div className="w-full px-2 w-full px-2 w-full md:w-1/2 px-2 w-full lg:w-1/2 px-2">
+                        <div className="form-group mb-6 pt-4">
                             <label htmlFor="password" className="form-label">Password</label>
-                            <input type="password" className="form-control" name="password" value={credentails.password} onChange={onchange} placeholder="Password" id="exampleInputPassword1" required />
+                            <input type="password" className="input-standard" name="password" value={credentails.password} onChange={onchange} placeholder="Password" id="exampleInputPassword1" required />
                         </div>
                     </div>
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                        <div className="form-group mb-3 pt-3">
+                    <div className="w-full px-2 w-full px-2 w-full md:w-1/2 px-2 w-full lg:w-1/2 px-2">
+                        <div className="form-group mb-6 pt-4">
                             <label htmlFor="address" className="form-label">Address</label>
-                            <textarea type="message" className="form-control" name="address" value={credentails.address} onChange={onchange} placeholder="Address" id="exampleInputaddress" required />
+                            <textarea type="message" className="input-standard" name="address" value={credentails.address} onChange={onchange} placeholder="Address" id="exampleInputaddress" required />
                         </div>
                     </div>
-                    <div className="col-12 col-sm-12 col-md-6 col-lg-6">
-                        <div className="form-group mb-3 pt-3">
+                    <div className="w-full px-2 w-full px-2 w-full md:w-1/2 px-2 w-full lg:w-1/2 px-2">
+                        <div className="form-group mb-6 pt-4">
                             <label htmlFor="gstNumber" className="form-label">Abn</label>
-                            <input type="text" className="form-control" name="gstNumber" value={credentails.gstNumber} onChange={onchange} placeholder="Abn" />                        
+                            <input type="text" className="input-standard" name="gstNumber" value={credentails.gstNumber} onChange={onchange} placeholder="Abn" />                        
                         </div>
                     </div>
                 </div>
-                <div class="form-group mb-3 ">
+                <div className="form-group mb-6 ">
                     {message == true ? 
-                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <div className="alert alert-warning alert-dismissible fade show" role="alert">
                         <strong>{alertshow}</strong> 
-                          <button type="button" class="btn-close" onClick={()=>{
+                          <button type="button" className="btn-close" onClick={()=>{
                             setmessage(false);
                             setalertshow("");
                           }}></button>
-                          {/* <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> */}
+                          {/* <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> */}
 
                         </div>
                         : 
 
                     ""}
                 </div>
-                <div class="form-group d-flex justify-content-center mt-3">
-                    <button type="submit" class="form-control w-75 btn btnblur text-white mb-1">Sign Up</button>
+                <div className="form-group flex justify-center mt-6">
+                    <button type="submit" className="form-control w-75 btn btnblur text-white mb-1">Sign Up</button>
                 </div>
             </div>
         </form>

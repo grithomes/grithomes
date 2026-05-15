@@ -2,8 +2,8 @@ import React, { useState, useEffect, useRef } from 'react'
 import { format, addDays } from 'date-fns';
 import { useNavigate } from 'react-router-dom'
 import { ColorRing } from 'react-loader-spinner'
-import Usernav from './Usernav';
-import Usernavbar from './Usernavbar';
+
+import Sidebar from './Sidebar';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import Select from 'react-select';
@@ -164,7 +164,7 @@ export default function Createinvoice() {
         if (event.target.checked) {
             try {
                 const ownerId = localStorage.getItem('userid');
-                const response = await fetch(`https://grithomes.onrender.com/api/check-signature/${ownerId}`);
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/check-signature/${ownerId}`);
                 const data = await response.json();
                 setHasSignature(data.hasSignature);
 
@@ -202,7 +202,7 @@ export default function Createinvoice() {
             const ownerId = localStorage.getItem('userid');
             const email = localStorage.getItem('userEmail');
             const companyname = localStorage.getItem('companyname');
-            await fetch('https://grithomes.onrender.com/api/ownersignature', {
+            await fetch(`${import.meta.env.VITE_API_BASE_URL}/ownersignature`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -223,7 +223,7 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem('userid');
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/lastinvoicenumber/${userid}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lastinvoicenumber/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -260,7 +260,7 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getsignupdata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -293,7 +293,7 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/customers/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -324,7 +324,7 @@ export default function Createinvoice() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/itemdata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -639,7 +639,7 @@ export default function Createinvoice() {
             console.log(data, "Invoice Data ====");
 
             // Sending invoice data to the backend API
-            const response = await fetch('https://grithomes.onrender.com/api/savecreateinvoice', {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/savecreateinvoice`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -777,7 +777,7 @@ export default function Createinvoice() {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
         const authToken = localStorage.getItem('authToken');
-        const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/addcustomer`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -849,661 +849,562 @@ export default function Createinvoice() {
 
 
     return (
-        <div className='bg'>
-            {
-                loading ?
-                    <div className='row'>
-                        <ColorRing
-                            // width={200}
-                            loading={loading}
-                            // size={500}
-                            display="flex"
-                            justify-content="center"
-                            align-items="center"
-                            aria-label="Loading Spinner"
-                            data-testid="loader"
-                        />
-                    </div> :
-                    <div className='container-fluid'>
-                        <div className="row">
-                            <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
-                                <div  >
-                                    <Usernavbar />
+        <div className='min-h-screen bg-background'>
+            {loading ? (
+                <div className="flex h-screen items-center justify-center">
+                    <ColorRing
+                        loading={loading}
+                        display="flex"
+                        aria-label="Loading Spinner"
+                        data-testid="loader"
+                    />
+                </div>
+            ) : (
+                <div className="flex flex-col md:flex-row">
+                    <Sidebar />
+                    <main className="flex-1 w-full max-w-7xl mx-auto px-4 md:px-8 py-6">
+                        <form onSubmit={handleSubmit}>
+                            {/* Modern Header Section */}
+                            <header className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
+                                <div>
+                                    <h1 className="text-3xl font-bold text-textMain tracking-tight mb-1">Create Invoice</h1>
+                                    <nav aria-label="breadcrumb">
+                                        <ol className="flex items-center space-x-2 text-sm text-textMuted">
+                                            <li><a href="/Userpanel/Userdashboard" className="hover:text-primary transition-colors">Dashboard</a></li>
+                                            <li className="before:content-['/'] before:mr-2">Invoice</li>
+                                        </ol>
+                                    </nav>
                                 </div>
-                            </div>
-
-                            <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                                <div className='d-lg-none d-md-none d-block mt-2'>
-                                    <Usernav />
+                                <div className="flex items-center gap-3">
+                                    <button 
+                                        type="submit" 
+                                        className="btn-primary px-8 py-2.5 rounded-std font-bold shadow-soft transition-all hover:-translate-y-0.5"
+                                    >
+                                        Save Invoice
+                                    </button>
                                 </div>
-                                <div className='mx-4'>
-                                    <form onSubmit={handleSubmit}>
-                                        <div className='row py-4 px-2 breadcrumbclr'>
-                                            <div className="col-lg-4 col-md-6 col-sm-12 col-7 me-auto">
-                                                <p className='fs-35 fw-bold'>Invoice</p>
-                                                <nav aria-label="breadcrumb">
-                                                    <ol class="breadcrumb mb-0">
-                                                        <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
-                                                        <li class="breadcrumb-item active" aria-current="page">Invoice</li>
-                                                    </ol>
-                                                </nav>
-                                            </div>
-                                            <div className="col-lg-3 col-md-4 col-sm-12 col-5 text-right">
-                                                <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit">Save</button>
-                                            </div>
+                            </header>
 
-                                            <div className='mt-4'>
-                                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
-                                            </div>
-                                        </div>
+                            {alertMessage && (
+                                <div className="mb-6 animate-in fade-in slide-in-from-top-4 duration-300">
+                                    <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />
+                                </div>
+                            )}
 
-                                        <div className="row">
-                                            <div className="col-lg-3 col-12">
-                                                <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
-                                                    <div className="form-check form-switch">
-                                                        <div>
-                                                            <label className="form-check-label" htmlFor="signatureSwitch">Signature</label>
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                role="switch"
-                                                                id="signatureSwitch"
-                                                                onChange={handleSignatureSwitch}
-                                                                checked={hasSignature}
-                                                            />
-                                                        </div>
-                                                        {hasSignature && (
-                                                            <>
-                                                                <div>
-                                                                    <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        role="switch"
-                                                                        id="addSignatureSwitch"
-                                                                        checked={isAddSignatureSwitchOn}
-                                                                        onChange={handleAddSignatureSwitch}
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        role="switch"
-                                                                        id="customerSignSwitch"
-                                                                        checked={isCustomerSignSwitchOn}
-                                                                        onChange={handleCustomerSignSwitch}
-                                                                    />
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                {isSignatureModalOpen && (
-                                                    <SignatureModal
-                                                        onSave={saveSignature}
-                                                        onClose={() => setIsSignatureModalOpen(false)}
+                            {/* Top Info Grid */}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+                                {/* Left Section: Customer Info */}
+                                <div className="lg:col-span-4 flex flex-col gap-6">
+                                    <div className="card-standard p-6 flex flex-col h-full justify-between">
+                                        <div>
+                                            <div className="flex items-center justify-between mb-4">
+                                                <h3 className="font-bold text-gray-800 text-lg uppercase tracking-wider">Customer</h3>
+                                                <div className="form-check form-switch flex items-center gap-2">
+                                                    <label className="text-xs text-textMuted" htmlFor="signatureSwitch">Enable Signatures</label>
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        role="switch"
+                                                        id="signatureSwitch"
+                                                        onChange={handleSignatureSwitch}
+                                                        checked={hasSignature}
                                                     />
-                                                )}
-                                            </div>
-                                            <div className="col-lg-12 col-12 order-2 order-lg-1">
-                                                <div className='box1 rounded adminborder p-4 m-2 mb-5'>
-                                                    <div className='row me-2'>
-                                                        <div className="col-md-6 col-lg-5 col-12">
-                                                            {isCustomerSelected ? (
-                                                                <div className="customerdetail p-3">
-                                                                    <ul>
-                                                                        <li className='fw-bold fs-4'>{selectedCustomerDetails.name}</li>
-                                                                        <li>
-                                                                            <a href="" className='text-decoration-none' data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a>
-                                                                        </li>
-                                                                    </ul>
-                                                                    <p className='m-0'>{selectedCustomerDetails.email}</p>
-                                                                    <p>{selectedCustomerDetails.number}</p>
-                                                                </div>
-                                                            ) : (
-                                                                <div className="search-container forms">
-                                                                    <p className='fs-20 mb-0'>Select Customers</p>
-                                                                    <div className="row">
-                                                                        <div className="col-6">
-                                                                            {/* <VirtualizedSelect
-                                                                                id="searchitems"
-                                                                                name="customername"
-                                                                                className="form-control zindex op pl-0"
-                                                                                placeholder=""
-                                                                                onChange={onChangecustomer}
-                                                                                required
-                                                                                options={customers.map((customer, index) =>
-                                                                                    ({ label: customer.name, value: customer._id })
-
-                                                                                )}
-                                                                            /> */}
-                                                                            <Select
-                                                                                value={searchcustomerResults}
-                                                                                onChange={onChangecustomer}
-                                                                                options={customers.map(customer => ({
-                                                                                    value: customer._id,
-                                                                                    label: customer.name,
-                                                                                }))}
-                                                                                placeholder=""
-                                                                                required
-                                                                            />
-
-                                                                        </div>
-                                                                        <div className="col-3">
-                                                                            <a role='button' className="btn btn-success btn-sm me-2 text-white mt-2" data-bs-toggle="modal" data-bs-target="#exampleModal1">
-                                                                                <i class="fa-solid fa-plus"></i>
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-
-                                                        </div>
-                                                        <div className="col-lg-7 col-md-6">
-                                                            <div className="row">
-                                                                {message == true ? (
-                                                                    <div className="alert alert-warning alert-dismissible fade show" role="alert">
-                                                                        <strong>{alertShow}</strong>
-                                                                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                                                    </div>
-                                                                ) : (
-                                                                    ""
-                                                                )}
-                                                                <div className="col-lg-6">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor="invoicenumbr" className="form-label">
-                                                                            Invoice Number
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            name="InvoiceNumber"
-                                                                            className="form-control"
-                                                                            value={invoiceData.InvoiceNumber}
-                                                                            onChange={onchange}
-                                                                            // placeholder="Invoice Number"
-                                                                            id="invoicenumbr"
-                                                                            required
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-6">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor="purchaseoder" className="form-label">
-                                                                            Purchase Order (PO) #
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            name="purchaseorder"
-                                                                            className="form-control"
-                                                                            onChange={onchange}
-                                                                            id="purchaseoder"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-6">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor="Date" className="form-label">
-                                                                            Date
-                                                                        </label>
-                                                                        <input
-                                                                            type="date"
-                                                                            name="date"
-                                                                            className="form-control"
-                                                                            value={invoiceData.date}
-                                                                            onChange={onchange}
-                                                                            // placeholder="Date"
-                                                                            id="Date"
-                                                                            required
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-6">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor="Job" className="form-label">
-                                                                            Job
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            name="job"
-                                                                            className="form-control"
-                                                                            value={invoiceData.job}
-                                                                            onChange={onchange}
-                                                                            // placeholder="Date"
-                                                                            id="job"
-                                                                            required
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-6">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor="duedate" className="form-label">
-                                                                            Due Date
-                                                                        </label>
-                                                                        <input
-                                                                            type="date"
-                                                                            name="duedate"
-                                                                            className="form-control"
-                                                                            value={invoiceData.duedate}
-                                                                            onChange={onchange}
-                                                                            // placeholder="Due Date"
-                                                                            id="duedate"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div className='box1 rounded adminborder p-4 m-2'>
-                                                        <div className="table-responsive">
-                                                            <table className="table">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th scope="col">ITEM</th>
-                                                                        <th scope="col">QUANTITY</th>
-                                                                        <th scope="col">UNIT</th>
-                                                                        <th scope="col">PRICE</th>
-                                                                        <th scope="col">AMOUNT</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {searchitemResults.map((item) => {
-                                                                        const selectedItem = items.find((i) => i._id === item.value);
-                                                                        console.log(selectedItem, "sle");
-
-                                                                        const itemPrice = selectedItem?.price || 0;
-                                                                        const itemId = item.value;
-                                                                        const quantity = quantityMap[itemId] || 1;
-                                                                        const discount = discountMap[itemId] || 0;
-
-                                                                        const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
-                                                                        const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
-                                                                            // style: 'currency',
-                                                                            // currency: 'INR',
-                                                                        });
-
-                                                                        return (
-                                                                            <tr key={item.value}>
-                                                                                <td >
-                                                                                    <div className="mb-3 d-flex align-items-baseline justify-content-between">
-                                                                                        <p>{item.label}</p>
-                                                                                        <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
-                                                                                            <i className="fas fa-trash"></i>
-                                                                                        </button>
-                                                                                    </div>
-                                                                                    <div className="row">
-                                                                                        <div className="col" >
-                                                                                            <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
-
-                                                                                            <CKEditor
-                                                                                                editor={ClassicEditor}
-                                                                                                data={selectedItem?.description || ''}
-                                                                                                name={`description-${itemId}`}
-                                                                                                onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
-                                                                                                onBlur={(event, editor) => {
-                                                                                                    console.log('Blur.', editor);
-                                                                                                }}
-                                                                                                onFocus={(event, editor) => {
-                                                                                                    console.log('Focus.', editor);
-                                                                                                }}
-                                                                                            />
-                                                                                        </div>
-
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <input
-                                                                                        type="number"
-                                                                                        name={`quantity-${itemId}`}
-                                                                                        className="form-control"
-                                                                                        value={quantity}
-                                                                                        onChange={(event) => onChangeQuantity(event, itemId)}
-                                                                                        id={`quantity-${itemId}`}
-                                                                                        required
-                                                                                    />
-                                                                                </td>
-                                                                                <td>
-                                                                                    {selectedItem?.unit}
-                                                                                    {/* <input
-                                                                                        type="text"
-                                                                                        name={`unit-${itemId}`}
-                                                                                        className="form-control"
-                                                                                        value={selectedItem?.unit || ''}
-                                                                                        onChange={(event) => onChangePrice(event, itemId)}
-                                                                                        id={`unit-${itemId}`}
-                                                                                        required
-                                                                                    /> */}
-                                                                                </td>
-
-                                                                                <td>
-                                                                                    <input
-                                                                                        type="text"
-                                                                                        name={`price-${itemId}`}
-                                                                                        className="form-control"
-                                                                                        value={itemPrice}
-                                                                                        onChange={(event) => onChangePrice(event, itemId)}
-                                                                                        id={`price-${itemId}`}
-                                                                                        required
-                                                                                    />
-                                                                                </td>
-
-
-                                                                                <td className="text-center">
-                                                                                    <p><CurrencySign />{formattedTotalAmount}</p>
-                                                                                </td>
-                                                                            </tr>
-
-                                                                        );
-
-                                                                    })}
-
-                                                                    {itemExistsMessage && (
-                                                                        <div className="alert alert-warning mt-3" role="alert">
-                                                                            {itemExistsMessage}
-                                                                        </div>
-                                                                    )}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-
-                                                        <div className="row pt-3">
-                                                            <div className="col-lg-6 col-md-12">
-                                                                <div className="search-container forms">
-                                                                    <p className='fs-20 mb-0'>Select Item</p>
-                                                                    {/* <VirtualizedSelect
-                                                                        id="searchitems"
-                                                                        name="itemname"
-                                                                        className="form-control zindex op pl-0"
-                                                                        placeholder=""
-                                                                        onChange={onChangeitem}
-                                                                        options={items.map((item, index) =>
-                                                                            ({ label: item.itemname, value: item._id })
-
-                                                                        )}
-                                                                    >
-                                                                    </VirtualizedSelect> */}
-                                                                    <Select
-                                                                        value={searchitemResults}
-                                                                        onChange={onChangeitem}
-                                                                        options={items.map(item => ({
-                                                                            value: item._id,
-                                                                            label: item.itemname,
-                                                                        }))}
-                                                                        placeholder=""
-                                                                    />
-
-                                                                </div>
-                                                            </div>
-                                                            <div className="col-lg-6 col-md-12">
-                                                                <div className="row">
-                                                                    <div className="col-6 col-md-3">
-                                                                        <p>Subtotal</p>
-                                                                        <p>Discount</p>
-                                                                        {console.log(signUpData, "====signUpData")}
-                                                                        {/* <p>GST</p> */}
-                                                                        <p className='pt-3'>{signUpData.name} {signUpData.percentage}%</p>
-
-                                                                        <p>Total</p>
-                                                                    </div>
-                                                                    <div className="col-6 col-md-9">
-                                                                        <p><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
-
-                                                                        })}</p>
-                                                                        <div className="mb-3">
-                                                                            <input
-                                                                                type="number"
-                                                                                name="totaldiscount"
-                                                                                className="form-control"
-                                                                                value={discountTotal}
-                                                                                onChange={handleDiscountChange} // Ensure proper event binding
-                                                                                placeholder="Enter Discount Total"
-                                                                                id="discountInput"
-                                                                                min="0"
-                                                                            />
-                                                                        </div>
-
-
-                                                                        <p>{console.log("check Tax Amount", calculateTaxAmount())}<CurrencySign />{
-
-                                                                            calculateTaxAmount().toLocaleString('en-IN', {
-                                                                                // style: 'currency',
-                                                                                // currency: 'INR',
-                                                                            })}</p>
-
-                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
-                                                                            // style: 'currency',
-                                                                            // currency: 'INR',
-                                                                        })}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                        <hr />
-                                                        <div className="row pt-3">
-                                                            <div className="col-lg-6 col-md-12"></div>
-                                                            <div className="col-lg-6 col-md-12">
-                                                                <div className="row">
-                                                                    <div className="col-6 col-md-3">
-                                                                        <p>Amount due</p>
-                                                                    </div>
-                                                                    <div className="col-6 col-md-9">
-                                                                        {/* <p><CurrencySign /> {calculateTotal().toLocaleString}</p> */}
-                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
-                                                                            // style: 'currency',
-                                                                            // currency: 'INR',
-                                                                        })}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <label htmlFor="" className='fs-4 ms-2 mt-5'>Note</label>
-                                                    <div className='box1 rounded adminborder m-2'>
-                                                        <CKEditor
-                                                            editor={ClassicEditor}
-                                                            data={editorData}
-                                                            // onReady={ editor => {
-                                                            //     console.log( 'Editor is ready to use!', editor );
-                                                            // } }
-
-                                                            onChange={handleEditorChange}
-                                                            config={{
-                                                                extraPlugins: [MyCustomUploadAdapterPlugin],
-                                                            }}
-                                                            onBlur={(event, editor) => {
-                                                                console.log('Blur.', editor);
-                                                            }}
-                                                            onFocus={(event, editor) => {
-                                                                console.log('Focus.', editor);
-                                                            }}
-                                                        />
-                                                    </div>
                                                 </div>
                                             </div>
 
-
+                                            {isCustomerSelected ? (
+                                                <div className="space-y-4">
+                                                    <div className="flex items-start justify-between">
+                                                        <div>
+                                                            <p className="text-2xl font-bold text-textMain leading-tight">{selectedCustomerDetails.name}</p>
+                                                            <p className="text-textMuted text-sm font-medium mt-1">{selectedCustomerDetails.email}</p>
+                                                            <p className="text-textMuted text-sm">{selectedCustomerDetails.number}</p>
+                                                        </div>
+                                                        <button 
+                                                            type="button"
+                                                            data-bs-toggle="modal" 
+                                                            data-bs-target="#exampleModal"
+                                                            className="text-primary hover:text-blue-700 font-bold text-sm bg-blue-50 px-3 py-1 rounded-full transition-colors"
+                                                        >
+                                                            Edit
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ) : (
+                                                <div className="space-y-4">
+                                                    <div className="relative">
+                                                        <label className="text-sm text-textMuted mb-1 block">Select Customer</label>
+                                                        <div className="flex gap-2">
+                                                            <div className="flex-1">
+                                                                <Select
+                                                                    value={searchcustomerResults}
+                                                                    onChange={onChangecustomer}
+                                                                    options={customers.map(customer => ({
+                                                                        value: customer._id,
+                                                                        label: customer.name,
+                                                                    }))}
+                                                                    placeholder="Search customers..."
+                                                                    className="react-select-container"
+                                                                    classNamePrefix="react-select"
+                                                                    required
+                                                                />
+                                                            </div>
+                                                            <button 
+                                                                type="button" 
+                                                                className="btn font-bold text-white bg-green-500 hover:bg-green-600 rounded-std px-3 transition-colors"
+                                                                data-bs-toggle="modal" 
+                                                                data-bs-target="#exampleModal1"
+                                                            >
+                                                                <i className="fas fa-plus"></i>
+                                                            </button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            )}
                                         </div>
 
+                                        {hasSignature && (
+                                            <div className="mt-6 pt-6 border-t border-borderLight flex flex-col space-y-3">
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-sm font-medium text-textMuted" htmlFor="addSignatureSwitch">My Signature</label>
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        role="switch"
+                                                        id="addSignatureSwitch"
+                                                        checked={isAddSignatureSwitchOn}
+                                                        onChange={handleAddSignatureSwitch}
+                                                    />
+                                                </div>
+                                                <div className="flex items-center justify-between">
+                                                    <label className="text-sm font-medium text-textMuted" htmlFor="customerSignSwitch">Customer to Sign</label>
+                                                    <input
+                                                        className="form-check-input"
+                                                        type="checkbox"
+                                                        role="switch"
+                                                        id="customerSignSwitch"
+                                                        checked={isCustomerSignSwitchOn}
+                                                        onChange={handleCustomerSignSwitch}
+                                                    />
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {isSignatureModalOpen && (
+                                        <SignatureModal
+                                            onSave={saveSignature}
+                                            onClose={() => setIsSignatureModalOpen(false)}
+                                        />
+                                    )}
+                                </div>
 
-                                    </form>
+                                {/* Right Section: Invoice Metadata */}
+                                <div className="lg:col-span-8">
+                                    <div className="card-standard p-6 h-full">
+                                        <h3 className="font-bold text-gray-800 text-lg uppercase tracking-wider mb-6">Invoice Details</h3>
+                                        
+                                        {message === true && (
+                                            <div className="alert alert-warning alert-dismissible fade show mb-6 rounded-std border-yellow-200" role="alert">
+                                                <i className="fas fa-exclamation-triangle mr-2"></i>
+                                                <strong>{alertShow}</strong>
+                                                <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                                            </div>
+                                        )}
+
+                                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-6 gap-y-4">
+                                            <div className="space-y-1">
+                                                <label htmlFor="invoicenumbr" className="text-xs font-bold text-textMuted uppercase tracking-tight">Invoice Number</label>
+                                                <input
+                                                    type="text"
+                                                    name="InvoiceNumber"
+                                                    className="input-standard"
+                                                    value={invoiceData.InvoiceNumber}
+                                                    onChange={onchange}
+                                                    id="invoicenumbr"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label htmlFor="purchaseoder" className="text-xs font-bold text-textMuted uppercase tracking-tight">PO Number #</label>
+                                                <input
+                                                    type="text"
+                                                    name="purchaseorder"
+                                                    className="input-standard"
+                                                    onChange={onchange}
+                                                    id="purchaseoder"
+                                                    placeholder="Optional"
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label htmlFor="Date" className="text-xs font-bold text-textMuted uppercase tracking-tight">Invoice Date</label>
+                                                <input
+                                                    type="date"
+                                                    name="date"
+                                                    className="input-standard"
+                                                    value={invoiceData.date}
+                                                    onChange={onchange}
+                                                    id="Date"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label htmlFor="Job" className="text-xs font-bold text-textMuted uppercase tracking-tight">Job / Project</label>
+                                                <input
+                                                    type="text"
+                                                    name="job"
+                                                    className="input-standard"
+                                                    value={invoiceData.job}
+                                                    onChange={onchange}
+                                                    id="job"
+                                                    placeholder="Project name"
+                                                    required
+                                                />
+                                            </div>
+                                            <div className="space-y-1">
+                                                <label htmlFor="duedate" className="text-xs font-bold text-textMuted uppercase tracking-tight">Due Date</label>
+                                                <input
+                                                    type="date"
+                                                    name="duedate"
+                                                    className="input-standard font-semibold text-primary"
+                                                    value={invoiceData.duedate}
+                                                    onChange={onchange}
+                                                    id="duedate"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
-                        </div>
-                    </div>
 
+                            {/* Line Items Section */}
+                            <section className="card-standard overflow-hidden mb-8 border-none shadow-premium">
+                                <div className="bg-gray-50/80 px-6 py-4 border-b border-borderLight flex items-center justify-between">
+                                    <h3 className="font-bold text-gray-800 text-lg uppercase tracking-wider">Line Items</h3>
+                                    <div className="w-64">
+                                        <Select
+                                            value={null}
+                                            onChange={onChangeitem}
+                                            options={items.map(item => ({
+                                                value: item._id,
+                                                label: item.itemname,
+                                            }))}
+                                            placeholder="+ Add Item"
+                                            className="react-select-container-sm"
+                                            classNamePrefix="react-select-sm"
+                                        />
+                                    </div>
+                                </div>
 
+                                <div className="overflow-x-auto">
+                                    <table className="w-full text-left">
+                                        <thead className="bg-gray-50/50 text-textMuted text-xs uppercase tracking-widest font-bold">
+                                            <tr>
+                                                <th className="px-6 py-4 w-1/2">Item & Description</th>
+                                                <th className="px-6 py-4 text-center">Qty</th>
+                                                <th className="px-6 py-4 text-center">Unit</th>
+                                                <th className="px-6 py-4 text-center">Price</th>
+                                                <th className="px-6 py-4 text-right pr-8">Amount</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-borderLight">
+                                            {searchitemResults.map((item) => {
+                                                const selectedItem = items.find((i) => i._id === item.value);
+                                                const itemPrice = selectedItem?.price || 0;
+                                                const itemId = item.value;
+                                                const quantity = quantityMap[itemId] || 1;
+                                                const discount = discountMap[itemId] || 0;
+                                                const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+                                                const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN');
 
-            }
+                                                return (
+                                                    <tr key={item.value} className="hover:bg-blue-50/30 transition-colors group">
+                                                        <td className="px-6 py-6">
+                                                            <div className="flex items-start justify-between mb-4">
+                                                                <span className="font-bold text-textMain text-lg">{item.label}</span>
+                                                                <button 
+                                                                    type="button" 
+                                                                    className="text-red-400 hover:text-red-600 opacity-0 group-hover:opacity-100 transition-opacity" 
+                                                                    onClick={() => onDeleteItem(item.value)}
+                                                                >
+                                                                    <i className="fas fa-trash-alt"></i>
+                                                                </button>
+                                                            </div>
+                                                            <div className="ckeditor-slim border rounded-std overflow-hidden">
+                                                                <CKEditor
+                                                                    editor={ClassicEditor}
+                                                                    data={selectedItem?.description || ''}
+                                                                    name={`description-${itemId}`}
+                                                                    onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-6 text-center align-top">
+                                                            <input
+                                                                type="number"
+                                                                className="input-standard text-center w-20 mx-auto"
+                                                                value={quantity}
+                                                                onChange={(event) => onChangeQuantity(event, itemId)}
+                                                                required
+                                                            />
+                                                        </td>
+                                                        <td className="px-6 py-6 text-center align-top">
+                                                            <span className="text-textMuted font-medium text-sm">{selectedItem?.unit}</span>
+                                                        </td>
+                                                        <td className="px-6 py-6 text-center align-top">
+                                                            <div className="relative">
+                                                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-textMuted"><CurrencySign /></span>
+                                                                <input
+                                                                    type="text"
+                                                                    className="input-standard pl-8 text-right font-medium"
+                                                                    value={itemPrice}
+                                                                    onChange={(event) => onChangePrice(event, itemId)}
+                                                                    required
+                                                                />
+                                                            </div>
+                                                        </td>
+                                                        <td className="px-6 py-6 text-right pr-8 align-top">
+                                                            <div className="text-lg font-bold text-textMain">
+                                                                <CurrencySign />{formattedTotalAmount}
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                );
+                                            })}
+                                        </tbody>
+                                    </table>
+                                </div>
+                                {itemExistsMessage && (
+                                    <div className="mx-6 my-4 p-3 bg-yellow-50 text-yellow-700 text-sm font-medium rounded-std border border-yellow-100 italic">
+                                        <i className="fas fa-info-circle mr-2"></i> {itemExistsMessage}
+                                    </div>
+                                )}
+                            </section>
 
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+                                {/* Notes Section */}
+                                <div className="lg:col-span-7">
+                                    <div className="card-standard p-6">
+                                        <h3 className="font-bold text-gray-800 text-lg uppercase tracking-wider mb-4">Invoice Notes</h3>
+                                        <div className="border border-borderLight rounded-std overflow-hidden">
+                                            <CKEditor
+                                                editor={ClassicEditor}
+                                                data={editorData}
+                                                onChange={handleEditorChange}
+                                                config={{
+                                                    extraPlugins: [MyCustomUploadAdapterPlugin],
+                                                }}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
 
+                                {/* Summary & Totals */}
+                                <div className="lg:col-span-5">
+                                    <div className="card-standard p-8 bg-blue-50/30 border-blue-100 shadow-premium">
+                                        <h3 className="font-bold text-gray-800 text-lg uppercase tracking-wider mb-6">Financial Summary</h3>
+                                        
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center text-textMain">
+                                                <span className="font-medium">Subtotal</span>
+                                                <span className="font-bold text-lg"><CurrencySign />{calculateSubtotal().toLocaleString('en-IN')}</span>
+                                            </div>
+                                            
+                                            <div className="flex justify-between items-center">
+                                                <span className="text-textMuted font-medium">Discount Amount</span>
+                                                <div className="relative w-32">
+                                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-textMuted text-xs"><CurrencySign /></span>
+                                                    <input
+                                                        type="number"
+                                                        className="input-standard pl-8 text-right font-bold text-red-500 py-1"
+                                                        value={discountTotal}
+                                                        onChange={handleDiscountChange}
+                                                        min="0"
+                                                    />
+                                                </div>
+                                            </div>
 
-            <form action="">
-                <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h1 className="modal-title fs-5" id="exampleModalLabel">Edit Customer</h1>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                            <div className="flex justify-between items-center text-textMuted">
+                                                <span className="font-medium text-sm capitalize">{signUpData.name} ({signUpData.percentage}%)</span>
+                                                <span className="font-bold text-md text-textMain"><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN')}</span>
+                                            </div>
+
+                                            <div className="pt-6 mt-6 border-t-2 border-dashed border-blue-200">
+                                                <div className="flex justify-between items-end mb-2">
+                                                    <span className="text-xl font-black text-textMain leading-none uppercase tracking-tighter">Total Amount</span>
+                                                    <span className="text-4xl font-black text-primary leading-none">
+                                                        <CurrencySign />{calculateTotal().toLocaleString('en-IN')}
+                                                    </span>
+                                                </div>
+                                                <div className="flex justify-between items-center bg-white/70 p-3 rounded-std border border-blue-100 shadow-soft">
+                                                    <span className="text-xs font-bold text-textMuted uppercase">Balance Due</span>
+                                                    <span className="text-xl font-black text-red-600"><CurrencySign />{calculateTotal().toLocaleString('en-IN')}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div className="modal-body">
-                                <div className="mb-3">
-                                    <label htmlFor="customerName" className="form-label">Name</label>
-                                    <select className="form-control" id="customerName" value={editedName} onChange={handleNameChange}>
-                                        <option value="" disabled>Select Name</option>
+                        </form>
+                    </main>
+                </div>
+            )}
+
+
+
+
+            {/* Customer Modals */}
+            <div className="customer-modals-container">
+            <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered modal-lg">
+                    <div className="modal-content border-none shadow-premium rounded-std overflow-hidden">
+                        <div className="modal-header bg-gray-50 border-b border-borderLight px-8 py-6">
+                            <h1 className="modal-title text-2xl font-black text-textMain tracking-tighter" id="exampleModalLabel uppercase">Edit Customer Profile</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body p-8 bg-white">
+                            <div className="space-y-6">
+                                <div className="space-y-1">
+                                    <label htmlFor="customerName" className="text-xs font-bold text-textMuted uppercase">Select Customer</label>
+                                    <select className="input-standard font-medium py-3" id="customerName" value={editedName} onChange={handleNameChange}>
+                                        <option value="" disabled>Choose a name...</option>
                                         {customers.map(customer => (
                                             <option key={customer._id} value={customer.name}>{customer.name}</option>
                                         ))}
                                     </select>
                                 </div>
-                                <div className="mb-3">
-                                    <label htmlFor="customerEmail" className="form-label">Select Email</label>
-                                    <select
-                                        className="form-control"
-                                        id="customerEmail"
-                                        value={editedEmail}
-                                        onChange={(e) => setEditedEmail(e.target.value)}
-                                    >
-                                        <option value="">-- Select an email --</option>
-                                        {customers.find(c => c.name === editedName)?.emails?.map((email, index) => (
-                                            <option key={index} value={email}>
-                                                {email}
-                                            </option>
-                                        ))}
-                                    </select>
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="customerPhone" className="form-label">Phone Number</label>
-                                    <input type="number" className="form-control" id="customerPhone" value={editedPhone} onChange={(e) => setEditedPhone(e.target.value)} />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="space-y-1">
+                                        <label htmlFor="customerEmail" className="text-xs font-bold text-textMuted uppercase">Primary Email</label>
+                                        <select
+                                            className="input-standard py-3"
+                                            id="customerEmail"
+                                            value={editedEmail}
+                                            onChange={(e) => setEditedEmail(e.target.value)}
+                                        >
+                                            <option value="">-- Choose an email --</option>
+                                            {customers.find(c => c.name === editedName)?.emails?.map((email, index) => (
+                                                <option key={index} value={email}>{email}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label htmlFor="customerPhone" className="text-xs font-bold text-textMuted uppercase">Phone Number</label>
+                                        <input 
+                                            type="text" 
+                                            className="input-standard py-3" 
+                                            id="customerPhone" 
+                                            value={editedPhone} 
+                                            onChange={(e) => setEditedPhone(e.target.value)} 
+                                            placeholder="e.g. +1 234 567 890"
+                                        />
+                                    </div>
                                 </div>
                             </div>
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleEditCustomer}>Save changes</button>
-                            </div>
+                        </div>
+                        <div className="modal-footer bg-gray-50 border-t border-borderLight px-8 py-4 gap-3">
+                            <button type="button" className="btn-secondary px-6 rounded-std font-bold" data-bs-dismiss="modal">Cancel</button>
+                            <button type="button" className="btn-primary px-8 rounded-std font-bold shadow-soft" data-bs-dismiss="modal" onClick={handleEditCustomer}>Update Customer</button>
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
 
-            {/* add customer */}
+            <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                <div className="modal-dialog modal-dialog-centered modal-xl">
+                    <div className="modal-content border-none shadow-premium rounded-std overflow-hidden">
+                        <div className="modal-header bg-gray-50 border-b border-borderLight px-8 py-6">
+                            <h1 className="modal-title text-2xl font-black text-textMain tracking-tighter" id="exampleModalLabel uppercase">New Customer Registration</h1>
+                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div className="modal-body p-8 bg-white max-h-[80vh] overflow-y-auto custom-scrollbar">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                {/* Basic Info */}
+                                <div className="space-y-1 lg:col-span-1">
+                                    <label className="text-xs font-bold text-textMuted uppercase">Customer Name</label>
+                                    <input
+                                        type="text"
+                                        className="input-standard py-3"
+                                        name="name"
+                                        value={credentials.name}
+                                        onChange={onchangeaddcustomer}
+                                        placeholder="Company or Individual Name"
+                                        required
+                                    />
+                                </div>
+                                <div className="space-y-1 lg:col-span-1">
+                                    <label className="text-xs font-bold text-textMuted uppercase">Phone Number</label>
+                                    <input
+                                        type="text"
+                                        name="number"
+                                        value={credentials.number}
+                                        onChange={onchangeaddcustomer}
+                                        className="input-standard py-3"
+                                        placeholder="Contact Phone"
+                                    />
+                                </div>
 
-            <form onSubmit={(e) => e.preventDefault()}>
-                <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h1 className="modal-title fs-5" id="exampleModalLabel">Add Customer</h1>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="row">
-
-                                    {/* Customer Name */}
-                                    <div className="col-12 col-sm-6 col-lg-4 mb-3">
-                                        <label className="form-label">Customer Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="name"
-                                            value={credentials.name}
-                                            onChange={onchangeaddcustomer}
-                                            placeholder="Customer Name"
-                                            required
-                                        />
-                                    </div>
-
-                                    {/* Emails */}
-                                    <div className="col-12 col-sm-6 col-lg-8 mb-3">
-                                        <label className="form-label">Contact Emails</label>
-                                        {credentials.emails.map((email, index) => (
-                                            <div className="input-group mb-2" key={index}>
-                                                <input
-                                                    type="email"
-                                                    className="form-control"
-                                                    value={email}
-                                                    onChange={(e) => handleEmailChange(index, e.target.value)}
-                                                    placeholder={`Contact Email #${index + 1}`}
-                                                    required
-                                                />
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-outline-danger"
-                                                    onClick={() => removeEmailField(index)}
-                                                    disabled={credentials.emails.length === 1}
-                                                >
-                                                    -
+                                {/* Emails Section */}
+                                <div className="space-y-3 lg:col-span-1">
+                                    <label className="text-xs font-bold text-textMuted uppercase">Email Contacts</label>
+                                    {credentials.emails.map((email, index) => (
+                                        <div className="flex gap-2" key={index}>
+                                            <input
+                                                type="email"
+                                                className="input-standard flex-1"
+                                                value={email}
+                                                onChange={(e) => handleEmailChange(index, e.target.value)}
+                                                placeholder={`Email #${index + 1}`}
+                                                required
+                                            />
+                                            {index > 0 && (
+                                                <button type="button" className="text-red-500 p-2" onClick={() => removeEmailField(index)}>
+                                                    <i className="fas fa-minus-circle"></i>
                                                 </button>
-                                                {index === credentials.emails.length - 1 && (
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-outline-primary"
-                                                        onClick={addEmailField}
-                                                    >
-                                                        +
-                                                    </button>
-                                                )}
-                                            </div>
-                                        ))}
-                                    </div>
+                                            )}
+                                        </div>
+                                    ))}
+                                    <button type="button" className="text-primary text-xs font-bold uppercase tracking-wider flex items-center hover:underline" onClick={addEmailField}>
+                                        <i className="fas fa-plus-circle mr-1"></i> Add Another Email
+                                    </button>
+                                </div>
 
-                                    {/* Phone Number */}
-                                    <div className="col-12 col-sm-6 col-lg-4 mb-3">
-                                        <label className="form-label">Phone Number</label>
-                                        <input
-                                            type="text"
-                                            name="number"
-                                            value={credentials.number}
-                                            onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Phone Number"
-                                        />
-                                    </div>
-
-                                    {/* Additional Information */}
-                                    <div className="col-12 mb-3">
-                                        <label className="form-label">Additional Information</label>
-                                        <textarea
-                                            name="information"
-                                            value={credentials.information}
-                                            onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Information"
-                                        />
-                                    </div>
-
-                                    {/* Address 1 & 2 */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">Address 1</label>
+                                {/* Address Section */}
+                                <div className="lg:col-span-3 pt-6 border-t border-borderLight mt-4 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-textMuted uppercase">Street Address</label>
                                         <input
                                             type="text"
                                             name="address1"
                                             value={credentials.address1}
                                             onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Address 1"
+                                            className="input-standard"
+                                            placeholder="Address line 1"
                                         />
                                     </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">Address 2</label>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-textMuted uppercase">Apt / Suite</label>
                                         <input
                                             type="text"
                                             name="address2"
                                             value={credentials.address2}
                                             onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Address 2"
+                                            className="input-standard"
+                                            placeholder="Address line 2"
                                         />
                                     </div>
-
-                                    {/* Country */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">Country</label>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-textMuted uppercase">Postal Code</label>
+                                        <input
+                                            type="text"
+                                            name="post"
+                                            value={credentials.post}
+                                            onChange={onchangeaddcustomer}
+                                            className="input-standard"
+                                            placeholder="ZIP / Postal Code"
+                                        />
+                                    </div>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-textMuted uppercase text-xs">Country</label>
                                         <CountrySelect
                                             name="country"
                                             value={credentials.countryid}
@@ -1513,14 +1414,11 @@ export default function Createinvoice() {
                                                 setCredentials({ ...credentials, countrydata: JSON.stringify(val) });
                                             }}
                                             valueType="short"
-                                            className="form-control"
                                             placeHolder="Select Country"
                                         />
                                     </div>
-
-                                    {/* State */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">State</label>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-textMuted uppercase text-xs">State / Province</label>
                                         <StateSelect
                                             name="state"
                                             countryid={countryid}
@@ -1532,10 +1430,8 @@ export default function Createinvoice() {
                                             placeHolder="Select State"
                                         />
                                     </div>
-
-                                    {/* City */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">City</label>
+                                    <div className="space-y-1">
+                                        <label className="text-xs font-bold text-textMuted uppercase text-xs">City</label>
                                         <CitySelect
                                             countryid={countryid}
                                             stateid={stateid}
@@ -1547,38 +1443,35 @@ export default function Createinvoice() {
                                             placeHolder="Select City"
                                         />
                                     </div>
+                                </div>
 
-                                    {/* Post Code */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">Post Code</label>
-                                        <input
-                                            type="text"
-                                            name="post"
-                                            value={credentials.post}
-                                            onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Post Code"
-                                        />
-                                    </div>
-
+                                <div className="lg:col-span-3 pt-6 border-t border-borderLight mt-4">
+                                    <label className="text-xs font-bold text-textMuted uppercase mb-1 block">Additional Information / Notes</label>
+                                    <textarea
+                                        name="information"
+                                        value={credentials.information}
+                                        onChange={onchangeaddcustomer}
+                                        className="input-standard min-h-[100px] py-3"
+                                        placeholder="Add any specific requirements for this customer..."
+                                    />
                                 </div>
                             </div>
-
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                <button
-                                    type="button"
-                                    className="btn btn-primary"
-                                    onClick={handleAddCustomer}
-                                    data-bs-dismiss="modal"
-                                >
-                                    Add Customer
-                                </button>
-                            </div>
+                        </div>
+                        <div className="modal-footer bg-gray-50 border-t border-borderLight px-8 py-4 gap-3">
+                            <button type="button" className="btn-secondary px-6 rounded-std font-bold" data-bs-dismiss="modal">Close</button>
+                            <button
+                                type="button"
+                                className="btn-primary px-10 rounded-std font-bold shadow-soft"
+                                onClick={handleAddCustomer}
+                                data-bs-dismiss="modal"
+                            >
+                                Register Customer
+                            </button>
                         </div>
                     </div>
                 </div>
-            </form>
+            </div>
+            </div>
 
             {showEmailModal && (
                 <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">

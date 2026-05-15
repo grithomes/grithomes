@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ColorRing } from 'react-loader-spinner'
-import Usernav from './Usernav';
-import Usernavbar from './Usernavbar';
+
+import Sidebar from './Sidebar';
 import { ReactMultiEmail } from 'react-multi-email';
 import 'react-multi-email/dist/style.css'
 import html2pdf from 'html2pdf.js';
@@ -72,7 +72,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getestimatedata/${estimateid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getestimatedata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -116,7 +116,7 @@ export default function Estimatedetail() {
     }
 
     try {
-      const response = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/checkcustomersignature/${encodeURIComponent(estimateIdpass)}`);
       const json = await response.json();
       console.log('Customer signature response:', json);
       if (response.ok && json.hasSignature) {
@@ -133,7 +133,7 @@ export default function Estimatedetail() {
     try {
       const ownerId = localStorage.getItem('userid');
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getownerdata/${ownerId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getownerdata/${ownerId}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -158,7 +158,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${estimateid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/gettransactiondata/${estimateid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -195,7 +195,7 @@ export default function Estimatedetail() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getsignupdata/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -383,7 +383,7 @@ export default function Estimatedetail() {
           display: block;
           font-weight: 400;
         }
-        .invoice-price .invoice-price-right small {
+        .invoice-price .invoice-price-right text-sm {
           display: block;
           opacity: .7;
           position: absolute;
@@ -535,7 +535,7 @@ thead{
         </style>
       </head>
       <body>
-        <div class="print-page">
+        <div className="print-page">
           ${content}
         </div>
       </body>
@@ -559,27 +559,27 @@ thead{
   const handleRemove = async (estimateid, estimateIdpass) => {
     // Show confirmation dialog
     const confirmDelete = window.confirm('Are you sure you want to delete this invoice?');
-  
+
     // If the user cancels, stop execution
     if (!confirmDelete) {
       console.log('Invoice deletion cancelled by the user.');
       return;
     }
-  
+
     try {
       // Check if there's a customer signature
       const signatureData = await checkCustomerSignature(estimateIdpass);
-  
+
       // If a signature exists, delete it
       if (signatureData) {
         const authToken = localStorage.getItem('authToken');
-        const deleteSignatureResponse = await fetch(`https://grithomes.onrender.com/api/delcustomersignature/${encodeURIComponent(estimateIdpass)}`, {
+        const deleteSignatureResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/delcustomersignature/${encodeURIComponent(estimateIdpass)}`, {
           method: 'DELETE',
           headers: {
             'Authorization': authToken,
           }
         });
-  
+
         if (!deleteSignatureResponse.ok) {
           const json = await deleteSignatureResponse.json();
           console.error('Error deleting customer signature:', json.message);
@@ -588,16 +588,16 @@ thead{
           console.log('Customer signature deleted successfully!');
         }
       }
-  
+
       // Proceed with deleting the estimate data
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/delestimatedata/${estimateid}`, {
         method: 'GET',
         headers: {
           'Authorization': authToken,
         }
       });
-  
+
       if (response.status === 401) {
         const json = await response.json();
         setAlertMessage(json.message);
@@ -606,7 +606,7 @@ thead{
         return; // Stop further execution
       } else {
         const json = await response.json();
-  
+
         if (json.success) {
           console.log('Data removed successfully!');
           navigate('/userpanel/Userdashboard');
@@ -614,7 +614,7 @@ thead{
           console.error('Error deleting invoice:', json.message);
         }
       }
-  
+
     } catch (error) {
       console.error('Error deleting invoice:', error);
     }
@@ -623,7 +623,7 @@ thead{
   // const handleRemove = async (estimateid) => {
   //   try {
   //     const authToken = localStorage.getItem('authToken');
-  //     const response = await fetch(`https://grithomes.onrender.com/api/delestimatedata/${estimateid}`, {
+  //     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/delestimatedata/${estimateid}`, {
   //       method: 'GET',
   //       headers: {
   //         'Authorization': authToken,
@@ -677,7 +677,7 @@ thead{
     // console.log(userEmail, "userEmail ============");
     try {
       const finalContent = content.trim() || ``; // If content is empty, use default value
-      const response = await fetch('https://grithomes.onrender.com/api/send-estimate-email', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/send-estimate-email`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -706,7 +706,7 @@ thead{
         setShowEmailAlert(true);
         // Update the database with emailsent status
         const updatedData = { ...estimateData, status: 'Send', emailsent: 'yes' }; // Update emailsent status
-        await fetch(`https://grithomes.onrender.com/api/updateestimateData/${estimateid}`, {
+        await fetch(`${import.meta.env.VITE_API_BASE_URL}/updateestimateData/${estimateid}`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -716,12 +716,12 @@ thead{
         });
 
         // Check if customer signature already exists
-        const checkResponse = await fetch(`https://grithomes.onrender.com/api/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
+        const checkResponse = await fetch(`${import.meta.env.VITE_API_BASE_URL}/checkcustomersignature/${encodeURIComponent(estimateData._id)}`);
         const checkJson = await checkResponse.json();
 
         if (checkResponse.ok && !checkJson.hasSignature) {
           // Create new customer signature only if it doesn't exist
-          await fetch('https://grithomes.onrender.com/api/customersignature', {
+          await fetch(`${import.meta.env.VITE_API_BASE_URL}/customersignature`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
@@ -799,7 +799,7 @@ thead{
     <div className='bg'>
       {
         loading ?
-          <div className='row'>
+          <div className="flex flex-col md:flex-row">
             <ColorRing
               // width={200}
               loading={loading}
@@ -811,541 +811,438 @@ thead{
               data-testid="loader"
             />
           </div> :
-          <div className='container-fluid'>
-            <div className="row">
-              <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
-                <div  >
-                  <Usernavbar />
+          <div className='w-full bg-gray-50 min-h-screen'>
+            <div className="flex flex-col md:flex-row">
+              <Sidebar />
+              <div className="flex-1 w-full mx-auto px-4 py-8 max-w-7xl">
+
+                {/* Header */}
+                <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4'>
+                  <div>
+                    <h1 className='text-3xl font-semibold mb-2'>Estimate Detail</h1>
+                    <nav aria-label="breadcrumb">
+                      <ol className="flex text-sm text-gray-600 space-x-2">
+                        <li><a href="/Userpanel/Userdashboard" className='hover:text-blue-600 transition-colors'>Dashboard</a></li>
+                        <li>/</li>
+                        <li className="text-gray-400">Estimate detail</li>
+                      </ol>
+                    </nav>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <div className="dropdown">
+                      <button className="btn dropdown-toggle no-arrow" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+                        <i className="fa-solid fa-ellipsis px-4 py-2 text-gray-600 hover:bg-gray-100 rounded-md transition-colors" ></i>
+                      </button>
+                      <ul className="dropdown-menu shadow-lg rounded-lg border-0" aria-labelledby="dropdownMenuButton">
+                        <li><a className="dropdown-item py-2" onClick={handlePrintContent}>Print</a></li>
+                        <li><a className="dropdown-item py-2" onClick={() => handleEditContent(estimateData)}>Edit</a></li>
+                        <li><a className="dropdown-item py-2" onClick={convertToPdf}>Pdf</a></li>
+                        <li><a className="dropdown-item py-2 text-red-600 hover:text-red-700" onClick={() => handleRemove(estimateData._id, estimateData.customeremail)}>Remove</a></li>
+                      </ul>
+                    </div>
+                    <button className='btn btn-primary px-6' data-bs-toggle="modal" data-bs-target="#sendEmailModal">Send</button>
+                  </div>
                 </div>
-              </div>
 
-              <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                <div className='d-lg-none d-md-none d-block mt-2'>
-                  <Usernav />
+                {/* Alerts */}
+                <div className='mb-4'>
+                  {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                  {showAlert && (
+                    <div className="alert alert-warning flex items-center shadow-sm" role="alert">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-6 h-6 mr-3 flex-shrink-0" viewBox="0 0 16 16" role="img" aria-label="Warning:">
+                        <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
+                      </svg>
+                      <div>You cannot edit a document that has already been partially paid. Please create a new document.</div>
+                      <button type="button" className="btn-close ms-auto" onClick={() => setShowAlert("")}></button>
+                    </div>
+                  )}
+                  {showEmailAlert && (
+                    <div className="alert alert-success flex items-center shadow-sm" role="alert">
+                      <div className="flex-1 text-green-800">Email sent successfully!</div>
+                      <button type="button" className="btn-close" aria-label="Close" onClick={handleAlertClose}></button>
+                    </div>
+                  )}
                 </div>
-                <div className='mx-3'>
-                  <form>
-                    <div className='row py-4 px-2 breadcrumbclr'>
-                      <div className="col-lg-6 col-md-6 col-sm-6 col-7 me-auto">
-                        <p className='fs-35 fw-bold'>Estimate</p>
-                        <nav aria-label="breadcrumb">
-                          <ol class="breadcrumb mb-0">
-                            <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">Estimatedetail</li>
-                          </ol>
-                        </nav>
-                      </div>
-                      <div className="col-lg-1 col-md-4 col-sm-4 col-3 text-right">
-                        <div className="dropdown">
-                          <button
-                            className="btn dropdown-toggle no-arrow" // Updated class here
-                            type="button"
-                            id="dropdownMenuButton"
-                            data-bs-toggle="dropdown"
-                            aria-expanded="false"
-                          >
-                            <i className="fa-solid fa-ellipsis ellipse px-3 py-1" ></i>
-                          </button>
-                          <ul className="dropdown-menu" aria-labelledby="dropdownMenuButton">
 
-
-                            <li><a className="dropdown-item" onClick={handlePrintContent}>Print</a></li>
-                            <li><a className="dropdown-item" onClick={() => handleEditContent(estimateData)}>Edit</a></li>
-                            <li><a className="dropdown-item" onClick={convertToPdf}>Pdf</a></li>
-                            <li><a className="dropdown-item" onClick={() => handleRemove(estimateData._id, estimateData.customeremail)}>Remove</a></li>
-                          </ul>
-                        </div>
-
-                      </div>
-                      <div className="col-lg-1">
-                        <a className='btn rounded-pill btn-danger text-white fw-bold' data-bs-toggle="modal" data-bs-target="#sendEmailModal">Send</a>
-                      </div>
-                      <div className='my-2'>
-                        {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                {/* Hidden Template for PDF Printing (Preserved exactly as original) */}
+                <div className="page" style={{ display: 'none' }} id='invoiceContent'>
+                  <div className="header ps pb-0" >
+                    {signupdata.companyImageUrl !== "" ?
+                      <img src={signupdata.companyImageUrl} style={{ height: '85px' }} className='logoimage' alt="" /> :
+                      <p className='text-xl font-semibold font-semibold'>{signupdata.companyname}</p>
+                    }
+                    <div className="company-info fs12">
+                      <h1 className='m-0 ' style={{ fontSize: '26px' }}>Estimate</h1>
+                      <p className='m-0'><strong>{signupdata.companyname}</strong></p>
+                      <p className='m-0'>{signupdata.address}</p>
+                      {signupdata.city ? JSON.parse(signupdata.city).name + ',' : ' '}
+                      {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
+                      <div className=''>{signupdata.state ? JSON.parse(signupdata.country).name : ' '}</div>
+                      <div ><a className='text-decoration-none' href={`mailto:${signupdata.email}`}>{signupdata.email}</a></div>
+                      <div ><a className='text-decoration-none' href={`${signupdata.website}`}>{signupdata.website}</a></div>
+                      <div>
+                        {signupdata.gstNumber == ''
+                          ?
+                          ""
+                          :
+                          `${signupdata.TaxName} ${signupdata.gstNumber}`
+                        }
                       </div>
                     </div>
+                  </div>
 
-                    {showAlert && (
-                      <>
-                        <div className="row">
-                          <div className="col-lg-7 col-sm-5 col-3"></div>
-                          <div className="col-9 col-sm-7 col-lg-5">
-                            <div class="alert alert-warning d-flex" role="alert">
-                              <svg xmlns="http://www.w3.org/2000/svg" class="alertwidth bi bi-exclamation-triangle-fill flex-shrink-0 me-2" viewBox="0 0 16 16" role="img" aria-label="Warning:">
-                                <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z" />
-                              </svg>
+                  <div className="invoice-details fs12 ps py-2 bg-light no-split">
+                    <div>
+                      <p className='m-0 text-green'><strong>Prepared For</strong></p>
+                      <p className='m-0'> {estimateData.customername}</p>
+                      <p className='m-0'>{estimateData.customeremail}</p>
+                      <p className='m-0'>{
+                        estimateData.customerphone == '' || estimateData.customerphone == '0' ? '' : estimateData.customerphone}</p>
+                    </div>
+                    <div>
+                      <p className='m-0 text-green'><strong>Estimate #:</strong> {estimateData.EstimateNumber}</p>
+                      <p className='m-0 text-green'><strong>Date:</strong> {formatCustomDate(estimateData.date)}</p>
+                      {
+                        estimateData.job == "" || estimateData.job == null
+                          ?
+                          ""
+                          :
+                          <p className='m-0'><strong className='text-green'>Job:</strong> {estimateData.job}</p>
+                      }
+                    </div>
+                  </div>
+                  <div className='ps pb-0'>
+                    <table className='fs12'>
+                      <thead className='border-b border-borderLight'>
+                        <tr>
+                          <th width="40%" className='text-green text-left'>Item</th>
+                          <th className='text-green  d-md-table-cell' width="15%">Quantity</th>
+                          <th className='text-green  d-md-table-cell' width="15%" >Unit</th>
+                          <th className='text-green  d-md-table-cell' width="15%">Price</th>
+                          <th className='text-green d-md-table-cell' width="15%" style={{ textAlign: 'right' }}>Amount</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {items.map((item) => (
+                          <tr className='border-b border-borderLight' key={item._id}>
+                            <td className='  d-md-table-cell' width="15%">
                               <div>
-                                You cannot edit a document that has already been partially paid. Please create a new document.
+                                <span><strong>{item.itemname}</strong></span>
+                                <div dangerouslySetInnerHTML={{ __html: item.description }} />
                               </div>
-                              <button type="button" class="btn-close" onClick={() => {
-                                // setmessage(false);
-                                setShowAlert("");
-                              }}></button>
-
-                            </div>
-                          </div>
-                        </div>
-
-                      </>
-
-                    )}
-
-                    <div class="page" style={{ display: 'none' }} id='invoiceContent'>
-                      <div class="header ps pb-0" >
-                        {signupdata.companyImageUrl !== "" ?
-                          <img src={signupdata.companyImageUrl} style={{ height: '85px' }} className='logoimage' alt="" /> :
-                          <p className='h4 fw-bold'>{signupdata.companyname}</p>
-                        }
-                        <div class="company-info fs12">
-                          <h1 className='m-0 ' style={{ fontSize: '26px' }}>Estimate</h1>
-                          <p className='m-0'><strong>{signupdata.companyname}</strong></p>
-                          <p className='m-0'>{signupdata.address}</p>
-                          {signupdata.city ? JSON.parse(signupdata.city).name + ',' : ' '}
-                          {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
-                          <div className=''>{signupdata.state ? JSON.parse(signupdata.country).name : ' '}</div>
-                          <div ><a className='text-decoration-none' href={`mailto:${signupdata.email}`}>{signupdata.email}</a></div>
-                          <div ><a className='text-decoration-none' href={`${signupdata.website}`}>{signupdata.website}</a></div>
-                          <div>
-                            {signupdata.gstNumber == ''
-                              ?
-                              ""
-                              :
-                              `${signupdata.TaxName} ${signupdata.gstNumber}`
-                            }
-                          </div>
-                          {/* <p className='m-0'>GST 774737217RT0001</p> */}
-                        </div>
-                      </div>
-
-                      <div class="invoice-details fs12 ps py-2 bg-light no-split">
-                        <div>
-                          <p className='m-0 text-green'><strong>Prepared For</strong></p>
-                          <p className='m-0'> {estimateData.customername}</p>
-                          <p className='m-0'>{estimateData.customeremail}</p>
-                          <p className='m-0'>{
-                            estimateData.customerphone == '' || estimateData.customerphone == '0' ? '' : estimateData.customerphone}</p>
-                        </div>
-                        <div>
-                          <p className='m-0 text-green'><strong>Estimate #:</strong> {estimateData.EstimateNumber}</p>
-                          <p className='m-0 text-green'><strong>Date:</strong> {formatCustomDate(estimateData.date)}</p>
-
-
-                          {
-                            estimateData.job == "" || estimateData.job == null
-                              ?
-                              ""
-                              :
-                              <p className='m-0'><strong className='text-green'>Job:</strong> {estimateData.job}</p>
-                          }
-                        </div>
-                      </div>
-                      <div className='ps pb-0'>
-
-
-                        <table className='fs12'>
-                          <thead className='border-bottom'>
-                            <tr>
-                              <th width="40%" className='text-green text-left'>Item</th>
-                              <th className='text-green  d-md-table-cell' width="15%">Quantity</th>
-                              <th className='text-green  d-md-table-cell' width="15%" >Unit</th>
-                              <th className='text-green  d-md-table-cell' width="15%">Price</th>
-                              <th className='text-green d-md-table-cell' width="15%" style={{ textAlign: 'right' }}>Amount</th>
-                            </tr>
-                          </thead>
-                          <tbody>
-                            {console.log(items, "items")}
-                            {items.map((item) => (
-                              <tr className='border-bottom' key={item._id}>
-                                <td className='  d-md-table-cell' width="15%">
-                                  <div>
-                                    <span><strong>{item.itemname}</strong></span>
-                                    <div dangerouslySetInnerHTML={{ __html: item.description }} />
-                                    {/* <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div> */}
-                                  </div>
-                                </td>
-                                <td className='e d-md-table-cell' width="15%">{item.itemquantity}</td>
-                                <td className=' d-md-table-cell' width="15%">{item.unit}</td>
-                                <td className=' d-md-table-cell' width="15%">{roundOff(item.price).toLocaleString('en-CA')}</td>
-                                <td className=' d-md-table-cell text-end' width="15%">{roundOff(item.amount).toLocaleString('en-CA')}</td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
-                      <div class="totals ps no-split">
-                        <table className='fs12'>
-                          <tr>
-                            <td className='text-end'>Subtotal:</td>
-                            <td style={{ textAlign: 'right' }}><CurrencySign />{roundOff(estimateData.subtotal).toLocaleString('en-CA')}</td>
+                            </td>
+                            <td className='e d-md-table-cell' width="15%">{item.itemquantity}</td>
+                            <td className=' d-md-table-cell' width="15%">{item.unit}</td>
+                            <td className=' d-md-table-cell' width="15%">{roundOff(item.price).toLocaleString('en-CA')}</td>
+                            <td className=' d-md-table-cell text-right' width="15%">{roundOff(item.amount).toLocaleString('en-CA')}</td>
                           </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                  <div className="totals ps no-split">
+                    <table className='fs12'>
+                      <tr>
+                        <td className='text-right'>Subtotal:</td>
+                        <td style={{ textAlign: 'right' }}><CurrencySign />{roundOff(estimateData.subtotal).toLocaleString('en-CA')}</td>
+                      </tr>
 
-                          {
-                            estimateData.discountTotal > 0
-                              ?
-                              <tr>
-                                <td className='text-end' width="22%">Discount</td>
-                                <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.discountTotal).toLocaleString('en-CA')}</td>
-                              </tr>
-                              :
-                              null
-                          }
-
-                          {
-                            signupdata.taxPercentage == 0
-                              ?
-                              <tr></tr>
-                              :
-                              <tr>
-                                <td className='text-end' width="22%">
-                                  {signupdata.TaxName} ({signupdata.taxPercentage}%)
-
-                                </td>
-                                <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.tax).toLocaleString('en-CA')}</td>
-                              </tr>
-                          }
-
-
+                      {
+                        estimateData.discountTotal > 0
+                          ?
                           <tr>
-                            <td className='text-end'>Total</td>
-                            <td style={{ textAlign: 'right' }}><CurrencySign />{roundOff(estimateData.total).toLocaleString('en-CA')}</td>
+                            <td className='text-right' width="22%">Discount</td>
+                            <td className='text-right' width="22%"><CurrencySign />{roundOff(estimateData.discountTotal).toLocaleString('en-CA')}</td>
                           </tr>
-
-                          {transactions.map((transaction) => (
-                            <tr key={transaction._id}>
-                              <td className='text-md-end' width="100%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
-                              <td className='text-end' width="100%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount.toLocaleString('en-CA')}</td>
-                            </tr>
-                          ))}
-                        </table>
-
-
-                      </div>
-
-
-
-                      <div className='ps text-right' >
-                        <p className='text-end'> <span className='p-3 text-green' style={{ background: '#f0f3f4' }} >Estimate Total: <strong><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0)).toLocaleString('en-CA')}</strong></span></p>
-                      </div>
-
-
-
-                      {estimateData.isAddSignature || estimateData.isCustomerSign ?
-                        <div className="invoice-body no-split">
-                          <p>By signing this document, the customer agrees to the services and conditions described in this document.</p>
-                          <div className="row">
-                            {console.log(ownerData, "ownerData")
-                            }
-                            {ownerData && estimateData.isAddSignature && (
-                              <div className="col-6">
-                                <div className="my-2">
-                                  <div>
-                                    <p className='text-center fw-bold '>{ownerData.companyname}</p>
-                                    <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr />
-                                    <p className='text-center'>{formatCustomDate(estimateData.createdAt)}</p>
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                            <div className="col-6">
-                              <div className="my-2">
-                                <div>
-                                  <p className='text-center fw-bold'>{estimateData.customername}</p>
-                                  {signatureData != null ?
-                                    signatureData.customersign == '' ? ('') :
-                                      (<div className="signature-section">
-                                        <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr />
-                                        <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
-                                      </div>) : ''}
-
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-
-                        </div> : ''
+                          :
+                          null
                       }
 
-                    </div>
+                      {
+                        signupdata.taxPercentage == 0
+                          ?
+                          <tr></tr>
+                          :
+                          <tr>
+                            <td className='text-right' width="22%">
+                              {signupdata.TaxName} ({signupdata.taxPercentage}%)
 
-                    <div className="row">
-                      <div className="col-12 col-sm-12 col-md-12 col-lg-8" id="">
-                        <div className='print' id='invoiceContent1'>
-                          <div className="invoice-body">
-                            <div className='row'>
-                              <div className='col-sm-12 col-md-6 mb-3 mb-md-0 pt-3'>
-                                {signupdata.companyImageUrl !== "" ?
-                                  <img src={signupdata.companyImageUrl} className='w-50 logoimage' alt="testing imahe" /> :
-                                  <p className='h4 fw-bold'>{signupdata.companyname}</p>
-                                }
+                            </td>
+                            <td className='text-right' width="22%"><CurrencySign />{roundOff(estimateData.tax).toLocaleString('en-CA')}</td>
+                          </tr>
+                      }
+
+
+                      <tr>
+                        <td className='text-right'>Total</td>
+                        <td style={{ textAlign: 'right' }}><CurrencySign />{roundOff(estimateData.total).toLocaleString('en-CA')}</td>
+                      </tr>
+
+                      {transactions.map((transaction) => (
+                        <tr key={transaction._id}>
+                          <td className='text-md-end' width="100%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
+                          <td className='text-right' width="100%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount.toLocaleString('en-CA')}</td>
+                        </tr>
+                      ))}
+                    </table>
+
+
+                  </div>
+
+
+
+                  <div className='ps text-right' >
+                    <p className='text-right'> <span className='p-6 text-green' style={{ background: '#f0f3f4' }} >Estimate Total: <strong><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0)).toLocaleString('en-CA')}</strong></span></p>
+                  </div>
+
+
+
+                  {estimateData.isAddSignature || estimateData.isCustomerSign ?
+                    <div className="invoice-body no-split">
+                      <p>By signing this document, the customer agrees to the services and conditions described in this document.</p>
+                      <div className="flex flex-col md:flex-row">
+                        {ownerData && estimateData.isAddSignature && (
+                          <div className="col-6">
+                            <div className="my-2">
+                              <div>
+                                <p className='text-center font-semibold '>{ownerData.companyname}</p>
+                                <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr />
+                                <p className='text-center'>{formatCustomDate(estimateData.createdAt)}</p>
                               </div>
-                              <div className='col-sm-12 col-md-6 text-md-end'>
-                                <h1>Estimate</h1>
-                                <div className='text-inverse mb-1'>
-                                  <strong>{signupdata.companyname}</strong>
-                                </div>
-                                <address className='m-t-5 m-b-5'>
-                                  <div className='mb-2'>
-                                    <div className=''>{signupdata.address} </div>
-                                    {signupdata.city ? JSON.parse(signupdata.city).name + ',' : ' '}
-                                    {signupdata.state ? JSON.parse(signupdata.state).name : ' '}
-                                  </div>
-
-                                  <div>{signupdata.email}</div>
-                                  <div>{signupdata.website} </div>
-                                  {/* <div>
-                                    {signupdata.gstNumber == ''
-                                    ?
-                                  ""
-                                  :
-                                  `${signupdata.TaxName } ${signupdata.gstNumber}`
-                                  }
-
-                                    </div> */}
-                                  {/* <div>{signupdata.TaxName}: {signupdata.gstNumber}</div> */}
-
-                                </address>
-                              </div>
-
                             </div>
-                            <div class="clr"></div>
                           </div>
-                          <div className='invoice-header'>
-                            <div className='row'>
-                              <div className='invoice-to col-sm-12 col-md-6'>
-                                <strong>Bill To</strong>
-                                {console.log(estimateData, "estimateData -======-==--==---===--")}
-                                <div className='text-inverse mb-1'>
-                                  {estimateData.customername}
-                                </div>
-                                <address className='m-t-5 m-b-5'>
-                                  <div>{estimateData.customeremail}</div>
-                                  <div>{estimateData.customerphone || ''}</div>
+                        )}
+                        <div className="col-6">
+                          <div className="my-2">
+                            <div>
+                              <p className='text-center font-semibold'>{estimateData.customername}</p>
+                              {signatureData != null ?
+                                signatureData.customersign == '' ? ('') :
+                                  (<div className="signature-section">
+                                    <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr />
+                                    <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
+                                  </div>) : ''}
 
-                                </address>
-                              </div>
-                              <div className='invoice-date col-sm-12 col-md-6'>
-                                <div className='row text-md-end'>
-                                  <div className='col-6 col-md'>
-                                    <strong>Estimate #</strong>
-                                  </div>
-                                  <div className='col-6 col-md invoice-detail-right'>{estimateData.EstimateNumber}</div>
-                                </div>
-                                <div className='row text-md-end'>
-                                  <div className='col-6 col-md'>
-                                    <strong>Date</strong>
-                                  </div>
-                                  <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.date)}</div>
-                                </div>
-                                {/* <div className='row text-md-end'>
-                                  <div className='col-6 col-md'>
-                                    <strong>Due date</strong>
-                                  </div>
-                                  <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
-                                </div> */}
-                                {/* <div className='row text-md-end'>
-                                  <div className='col-6 col-md'>
-                                    <strong>PO #</strong>
-                                  </div>
-                                  <div className='col-6 col-md invoice-detail-right'>{formatCustomDate(estimateData.duedate)}</div>
-                                </div> */}
-                                <div className='row text-md-end'>
-                                  <div className='col-6 col-md'>
-                                    <strong>Job</strong>
-                                  </div>
-                                  <div className='col-6 col-md invoice-detail-right'>{estimateData.job}</div>
-                                </div>
-
-                              </div>
-                            </div>
-                            <div class="clr"></div>
-                          </div>
-
-                          <div className='invoice-table'>
-                            <div className='table-responsive'>
-                              <table className='table table-invoice'>
-                                <thead>
-                                  <tr className='table table-invoice'>
-                                    <th className='text-start'>Item</th>
-                                    <th className='text-center d-none d-md-table-cell' width="15%">Quantity</th>
-                                    <th className='text-end d-none d-md-table-cell' width="15%"> Unit</th>
-                                    <th className='text-end d-none d-md-table-cell' width="15%"> Price</th>
-                                    <th className='text-end' width="15%"> Amount</th>
-                                  </tr>
-                                </thead>
-
-                                <tbody>
-                                  {items.map((item) => (
-                                    <tr key={item._id}>
-                                      <td>
-                                        <div>
-                                          <span><strong>{item.itemname}</strong></span>
-                                          <div dangerouslySetInnerHTML={{ __html: item.description }} />
-                                          {/* <div>{item.description.replace(/<\/?[^>]+(>|$)/g, '')}</div> */}
-                                        </div>
-                                      </td>
-                                      <td className="text-center d-none d-md-table-cell">{item.itemquantity}</td>
-                                      <td className="text-end d-none d-md-table-cell">{item.unit}</td>
-                                      <td className="text-end d-none d-md-table-cell"><CurrencySign />{roundOff(item.price)}</td>
-                                      <td className='text-end'><CurrencySign />{roundOff(item.amount)}</td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-
-                              </table>
-                            </div>
-                            <hr />
-                            <div className='row'>
-                              <div className='col-12'>
-                                <table className='table table-borderless table-small'>
-
-                                  <tbody>
-                                    <tr>
-                                      <td className='d-none d-md-table-cell' rowspan="5"></td>
-                                      <td className='text-md-end' width="22%">Subtotal</td>
-                                      <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.subtotal)}</td>
-                                    </tr>
-                                    {
-                                      estimateData.tax > 0
-                                        ?
-                                        <tr>
-                                          <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%) </td>
-                                          <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.tax)}</td>
-                                        </tr>
-                                        :
-                                        null
-                                    }
-                                    {
-                                      estimateData.discountTotal > 0
-                                        ?
-                                        <tr>
-                                          <td className='text-md-end' width="22%">Discount</td>
-                                          <td className='text-end' width="22%"><CurrencySign />{roundOff(estimateData.discountTotal)}</td>
-                                        </tr>
-                                        :
-                                        null
-                                    }
-                                    {/* <tr>
-                                      {console.log(estimateData, "estimateData")}
-
-                                      <td className='text-md-end' width="22%">Discount</td>
-                                      <td className='text-end' width="22%">${roundOff(estimateData.discountTotal)}</td>
-                                    </tr> */}
-                                    {/* <tr>
-
-                                      <td className='text-md-end' width="22%">{signupdata.TaxName} ({signupdata.taxPercentage}%)</td>
-                                      <td className='text-end' width="22%">${roundOff(estimateData.tax)}</td>
-                                    </tr> */}
-                                    <tr>
-
-                                      <td className='text-md-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}>Total</td>
-                                      <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{roundOff(estimateData.total)}</td>
-                                    </tr>
-                                    {transactions.map((transaction) => (
-                                      <tr key={transaction._id}>
-                                        <td className='text-md-end' width="22%">{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</td>
-                                        <td className='text-end' width="22%" style={{ borderBottom: '1px solid #ddd' }}><CurrencySign />{transaction.paidamount}</td>
-                                      </tr>
-                                    ))}
-                                  </tbody>
-                                </table>
-                              </div>
-                            </div>
-                            <div class="clr"></div>
-                          </div>
-
-                          <div className='invoice-price page-not-break'>
-                            <div className='invoice-price-left text-end'>
-                              <div className='d-none d-md-block'></div>
-
-                            </div>
-                            <div className='invoice-price-right'>
-                              <small>Amount Due</small>
-                              <span class="f-w-600 mt-3"><CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}</span>
-                            </div>
-
-                          </div>
-
-                          {estimateData.isAddSignature || estimateData.isCustomerSign ?
-                            <div className="invoice-body">
-                              <p>By signing this document, the customer agrees to the services and conditions described in this document.</p>
-                              <div className="row">
-                                {console.log(ownerData, "ownerData")
-                                }
-                                {ownerData && estimateData.isAddSignature && (
-                                  <div className="col-6">
-                                    <div className="my-2">
-                                      <div>
-                                        <p className='text-center fw-bold fs-5'>{ownerData.companyname}</p>
-                                        <img src={ownerData.data} alt="Saved Signature" style={{ width: "100%" }} /><hr />
-                                        <p className='text-center'>{formatCustomDate(estimateData.createdAt)}</p>
-                                      </div>
-                                    </div>
-                                  </div>
-                                )}
-                                <div className="col-6">
-                                  <div className="my-2">
-                                    <div>
-                                      <p className='text-center fw-bold fs-5'>{estimateData.customername}</p>
-                                      {signatureData != null ?
-                                        signatureData.customersign == '' ? ('') :
-                                          (<div className="signature-section">
-                                            <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr />
-                                            <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
-                                          </div>) : ''}
-                                      {/* {signatureData ? (
-                                            <div className="signature-section">
-                                              <img src={`${signatureData.customersign}`} alt="Customer Signature" style={{ width: "100%" }} /><hr/>
-                                              <p className='text-center'>{formatCustomDate(signatureData.createdAt)}</p>
-                                            </div>
-                                          ) : (
-                                            ''
-                                          )} */}
-                                    </div>
-                                  </div>
-                                </div>
-                              </div>
-
-                            </div> : ''
-                          }
-
-
-                          <div className='invoice-body invoice-body-text'>
-                            <div className='mt-1'>
-                              <span>{estimateData.information == '' ? '' : 'Note:'}</span>
-                              <div className='information-content' dangerouslySetInnerHTML={{ __html: estimateData.information }} />
                             </div>
                           </div>
                         </div>
                       </div>
 
-                      <div className="col-12 col-sm-12 col-md-12 col-lg-4">
-                        <div className='mb-2'>
-                          {showEmailAlert && (
-                            <div className="alert alert-success row" role="alert">
-                              <div className="col-11">
-                                <p className='mb-0'>Email sent successfully!</p>
-                              </div>
-                              <button type="button" className="btn-close" aria-label="Close" onClick={handleAlertClose}></button>
-                            </div>
-                          )}
-                        </div>
-                        <div className='box1 rounded adminborder px-4 py-4'>
-                          <div className="row">
-                            <div className="col-6">
-                              <p>Total</p>
-                            </div>
-                            <div className="col-6 text-end">
-                              <p><CurrencySign />{estimateData.total}</p>
-                            </div>
+                    </div> : ''
+                  }
 
-                          </div><hr />
+                </div>
+
+                {/* Main UI Detail View */}
+                <div className="flex flex-col lg:flex-row gap-6">
+                  {/* Left Side: Document Details */}
+                  <div className="w-full lg:w-3/4">
+                    <div className="card-standard border-0 shadow-sm rounded-xl overflow-hidden" id="invoiceContent1">
+                      {/* Top Header Info */}
+                      <div className="bg-white p-8 border-b border-gray-100">
+                        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                          <div className="w-full md:w-1/2">
+                            {signupdata.companyImageUrl !== "" ?
+                              <img src={signupdata.companyImageUrl} className='h-20 object-contain' alt="Company Logo" /> :
+                              <p className='text-3xl font-bold text-gray-800'>{signupdata.companyname}</p>
+                            }
+                          </div>
+                          <div className="w-full md:w-1/2 md:text-right">
+                            <h1 className="text-4xl font-bold text-gray-900 mb-2">Estimate</h1>
+                            <div className="text-gray-600 leading-relaxed">
+                              <strong className="text-gray-800 block mb-1">{signupdata.companyname}</strong>
+                              <div>{signupdata.address}</div>
+                              <div>
+                                {signupdata.city ? JSON.parse(signupdata.city).name + ',' : ''} {signupdata.state ? JSON.parse(signupdata.state).name : ''}
+                              </div>
+                              <div>{signupdata.email}</div>
+                              <div>{signupdata.website}</div>
+                            </div>
+                          </div>
                         </div>
                       </div>
 
+                      {/* Bill To & Meta Section */}
+                      <div className="bg-gray-50/50 p-8 border-b border-gray-100">
+                        <div className="flex flex-col md:flex-row justify-between gap-8">
+                          <div className="w-full md:w-1/2">
+                            <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-3">Bill To</h3>
+                            <div className="text-gray-800 font-medium text-lg mb-1">{estimateData.customername}</div>
+                            <div className="text-gray-600 leading-relaxed">
+                              <div>{estimateData.customeremail}</div>
+                              <div>{estimateData.customerphone || ''}</div>
+                            </div>
+                          </div>
+                          <div className="w-full md:w-1/2">
+                            <div className="bg-white p-4 rounded-lg shadow-sm border border-gray-100">
+                              <div className="flex justify-between items-center mb-2 pb-2 border-b border-gray-50">
+                                <span className="text-gray-500">Estimate #</span>
+                                <span className="font-semibold text-gray-800">{estimateData.EstimateNumber}</span>
+                              </div>
+                              <div className="flex justify-between items-center mb-2 pb-2 border-b border-gray-50">
+                                <span className="text-gray-500">Date</span>
+                                <span className="font-medium text-gray-800">{formatCustomDate(estimateData.date)}</span>
+                              </div>
+                              {estimateData.job && (
+                                <div className="flex justify-between items-center">
+                                  <span className="text-gray-500">Job</span>
+                                  <span className="font-medium text-gray-800">{estimateData.job}</span>
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Line Items */}
+                      <div className="p-4 md:p-8">
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block overflow-x-auto">
+                          <table className="w-full text-left border-collapse">
+                            <thead>
+                              <tr className="bg-gray-50/80 border-y border-gray-100">
+                                <th className="py-4 px-4 text-sm font-semibold text-gray-600">Item</th>
+                                <th className="py-4 px-4 text-sm font-semibold text-gray-600 text-center w-24">Quantity</th>
+                                <th className="py-4 px-4 text-sm font-semibold text-gray-600 text-right w-24">Unit</th>
+                                <th className="py-4 px-4 text-sm font-semibold text-gray-600 text-right w-32">Price</th>
+                                <th className="py-4 px-4 text-sm font-semibold text-gray-600 text-right w-32">Amount</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-50">
+                              {items.map((item) => (
+                                <tr key={item._id} className="hover:bg-gray-50/50 transition-colors">
+                                  <td className="py-4 px-4">
+                                    <div className="font-semibold text-gray-800 mb-1">{item.itemname}</div>
+                                    <div className="text-sm text-gray-500" dangerouslySetInnerHTML={{ __html: item.description }} />
+                                  </td>
+                                  <td className="py-4 px-4 text-center text-gray-700">{item.itemquantity}</td>
+                                  <td className="py-4 px-4 text-right text-gray-700">{item.unit}</td>
+                                  <td className="py-4 px-4 text-right text-gray-700"><CurrencySign />{roundOff(item.price)}</td>
+                                  <td className="py-4 px-4 text-right font-medium text-gray-800"><CurrencySign />{roundOff(item.amount)}</td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="block md:hidden space-y-4">
+                          {items.map((item) => (
+                            <div key={item._id} className="bg-white border border-gray-100 rounded-lg p-4 shadow-sm">
+                              <div className="font-semibold text-gray-800 mb-2">{item.itemname}</div>
+                              <div className="text-sm text-gray-500 mb-3" dangerouslySetInnerHTML={{ __html: item.description }} />
+                              <div className="flex justify-between items-center py-2 border-t border-gray-50">
+                                <span className="text-gray-500 text-sm">Qty</span>
+                                <span className="text-gray-800 font-medium">{item.itemquantity} {item.unit}</span>
+                              </div>
+                              <div className="flex justify-between items-center py-2 border-t border-gray-50">
+                                <span className="text-gray-500 text-sm">Price</span>
+                                <span className="text-gray-800"><CurrencySign />{roundOff(item.price)}</span>
+                              </div>
+                              <div className="flex justify-between items-center py-2 border-t border-gray-50">
+                                <span className="text-gray-500 font-medium">Amount</span>
+                                <span className="text-gray-900 font-bold"><CurrencySign />{roundOff(item.amount)}</span>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Totals Box */}
+                        <div className="flex justify-end mt-8 pt-6 border-t border-gray-100">
+                          <div className="w-full sm:w-2/3 md:w-1/2 lg:w-1/3">
+                            <div className="space-y-3">
+                              <div className="flex justify-between text-gray-600">
+                                <span>Subtotal</span>
+                                <span><CurrencySign />{roundOff(estimateData.subtotal)}</span>
+                              </div>
+                              {estimateData.tax > 0 && (
+                                <div className="flex justify-between text-gray-600">
+                                  <span>{signupdata.TaxName} ({signupdata.taxPercentage}%)</span>
+                                  <span><CurrencySign />{roundOff(estimateData.tax)}</span>
+                                </div>
+                              )}
+                              {estimateData.discountTotal > 0 && (
+                                <div className="flex justify-between text-gray-600">
+                                  <span>Discount</span>
+                                  <span><CurrencySign />{roundOff(estimateData.discountTotal)}</span>
+                                </div>
+                              )}
+                              <div className="flex justify-between text-lg font-bold text-gray-900 pt-3 border-t border-gray-200">
+                                <span>Total</span>
+                                <span><CurrencySign />{roundOff(estimateData.total)}</span>
+                              </div>
+                              {transactions.map((transaction) => (
+                                <div key={transaction._id} className="flex justify-between text-sm text-green-600 pt-2 border-t border-gray-100">
+                                  <span>{transaction.method == "deposit" ? "Deposit" : "Paid"} on {formatCustomDate(transaction.paiddate)}</span>
+                                  <span><CurrencySign />{transaction.paidamount}</span>
+                                </div>
+                              ))}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Notes and Signatures */}
+                      <div className="p-8 bg-gray-50/30 border-t border-gray-100">
+                        {estimateData.information && (
+                          <div className="mb-8">
+                            <h4 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-2">Note</h4>
+                            <div className="text-gray-700 bg-white p-4 rounded-lg border border-gray-100 shadow-sm" dangerouslySetInnerHTML={{ __html: estimateData.information }} />
+                          </div>
+                        )}
+
+                        {(estimateData.isAddSignature || estimateData.isCustomerSign) && (
+                          <div>
+                            <p className="text-gray-500 text-sm mb-6">By signing this document, the customer agrees to the services and conditions described in this document.</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                              {ownerData && estimateData.isAddSignature && (
+                                <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
+                                  <p className='text-center font-semibold text-gray-800 mb-4'>{ownerData.companyname}</p>
+                                  <div className="h-24 flex items-center justify-center mb-4 border-b border-dashed border-gray-300">
+                                    <img src={ownerData.data} alt="Saved Signature" className="max-h-full max-w-full object-contain" />
+                                  </div>
+                                  <p className='text-center text-sm text-gray-500'>{formatCustomDate(estimateData.createdAt)}</p>
+                                </div>
+                              )}
+                              <div className="bg-white p-6 rounded-lg border border-gray-100 shadow-sm">
+                                <p className='text-center font-semibold text-gray-800 mb-4'>{estimateData.customername}</p>
+                                <div className="h-24 flex items-center justify-center mb-4 border-b border-dashed border-gray-300">
+                                  {signatureData && signatureData.customersign !== '' ? (
+                                    <img src={`${signatureData.customersign}`} alt="Customer Signature" className="max-h-full max-w-full object-contain" />
+                                  ) : (
+                                    <span className="text-gray-300 text-sm italic">Pending Signature</span>
+                                  )}
+                                </div>
+                                <p className='text-center text-sm text-gray-500'>
+                                  {signatureData && signatureData.customersign !== '' ? formatCustomDate(signatureData.createdAt) : '-'}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        )}
+                      </div>
                     </div>
+                  </div>
 
-
-                  </form>
+                  {/* Right Side: Status/Summary Sidebar */}
+                  <div className="w-full lg:w-1/4">
+                    <div className='card-standard p-6 rounded-xl shadow-sm border border-gray-100 sticky top-6'>
+                      <h3 className="text-sm font-semibold text-gray-500 uppercase tracking-wider mb-4">Summary</h3>
+                      <div className="space-y-4">
+                        <div className="flex justify-between items-center pb-4 border-b border-gray-100">
+                          <span className="text-gray-600">Total</span>
+                          <span className="font-semibold text-gray-900"><CurrencySign />{estimateData.total}</span>
+                        </div>
+                        <div className="bg-blue-50 p-4 rounded-lg">
+                          <div className="text-sm text-blue-800 mb-1">Amount Due</div>
+                          <div className="text-2xl font-bold text-blue-900">
+                            <CurrencySign />{roundOff(estimateData.total - transactions.reduce((total, payment) => total + payment.paidamount, 0))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -1353,19 +1250,19 @@ thead{
       }
 
       {/* email model  */}
-      <div class="modal fade" id="sendEmailModal" tabindex="-1" ref={modalRef} aria-labelledby="exampleModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-          <div class="modal-content">
-            <div class="modal-header">
-              <h1 class="modal-title fs-4 fw-bold" id="exampleModalLabel">Send document</h1>
-              <button type="button" class="btn-close" id="closebutton" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div className="modal fade" id="sendEmailModal" tabindex="-1" ref={modalRef} aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div className="modal-dialog modal-lg">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h1 className="modal-title text-2xl font-semibold" id="exampleModalLabel">Send document</h1>
+              <button type="button" className="btn-close" id="closebutton" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
+            <div className="modal-body">
               <form onSubmit={handleFormSubmit}>
-                <div class="row mb-3">
-                  <label for="to" class="col-sm-2 col-form-label">To</label>
-                  <div class="col-sm-10">
-                    {/* <input type="text" class="form-control" id="to" name="to" value={invoiceData.customeremail}/> */}
+                <div className="row mb-6">
+                  <label for="to" className="col-sm-2 col-form-label">To</label>
+                  <div className="col-sm-10">
+                    {/* <input type="text" className="form-control" id="to" name="to" value={invoiceData.customeremail}/> */}
                     <ReactMultiEmail
                       emails={emails}
                       onChange={handleEmailChange}
@@ -1396,9 +1293,9 @@ thead{
                     />
                   </div>
                 </div>
-                <div class="row mb-3">
-                  <label for="bcc" class="col-sm-2 col-form-label">Bcc</label>
-                  <div class="col-sm-10">
+                <div className="row mb-6">
+                  <label for="bcc" className="col-sm-2 col-form-label">Bcc</label>
+                  <div className="col-sm-10">
                     <ReactMultiEmail
                       emails={bccEmails}
                       onChange={handleBccEmailsChange}
@@ -1428,13 +1325,13 @@ thead{
                     />
                   </div>
                 </div>
-                <div class="mb-3">
-                  <label for="content" class="form-label">Content</label>
-                  <textarea class="form-control" id="content" name="content" rows="5" defaultValue={content} onChange={handleContentChange}></textarea>
+                <div className="mb-3">
+                  <label for="content" className="form-label">Content</label>
+                  <textarea className="form-control" id="content" name="content" rows="5" defaultValue={content} onChange={handleContentChange}></textarea>
                 </div>
-                <div class="modal-footer">
-                  <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                  <button type="submit" class="btn btn-primary" data-bs-dismiss="modal">Send</button>
+                <div className="modal-footer">
+                  <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                  <button type="submit" className="btn btn-primary" data-bs-dismiss="modal">Send</button>
                 </div>
               </form>
             </div>

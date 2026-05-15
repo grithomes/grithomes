@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react'
 import { format } from 'date-fns';
 import { useNavigate } from 'react-router-dom'
 import { ColorRing } from 'react-loader-spinner'
-import Usernav from './Usernav';
-import Usernavbar from './Usernavbar';
+
+import Sidebar from './Sidebar';
 import { CKEditor } from '@ckeditor/ckeditor5-react';
 import ClassicEditor from '@ckeditor/ckeditor5-build-classic';
 import Select from 'react-select';
@@ -37,16 +37,16 @@ class MyCustomUploadAdapter {
                     method: 'POST',
                     body: formData,
                 })
-                .then(response => response.json())
-                .then(data => {
-                    resolve({
-                        default: data.secure_url
+                    .then(response => response.json())
+                    .then(data => {
+                        resolve({
+                            default: data.secure_url
+                        });
+                        console.log(data.secure_url, "================================================================");
+                    })
+                    .catch(error => {
+                        reject(error.message || 'Failed to upload image to Cloudinary');
                     });
-                    console.log(data.secure_url, "================================================================");
-                })
-                .catch(error => {
-                    reject(error.message || 'Failed to upload image to Cloudinary');
-                });
             });
         });
     }
@@ -75,7 +75,7 @@ export default function Createestimate() {
     const [alertShow, setAlertShow] = useState("");
     const [SelectedCustomerId, setSelectedCustomerId] = useState("");
     const [selectedCustomerDetails, setSelectedCustomerDetails] = useState({
-        name: '', email: '', number:''
+        name: '', email: '', number: ''
     });
     const [isCustomerSelected, setIsCustomerSelected] = useState(false);
     const [editedName, setEditedName] = useState('');
@@ -85,22 +85,22 @@ export default function Createestimate() {
     const [signUpData, setsignUpData] = useState(0);
     const [discountTotal, setdiscountTotal] = useState(0);
     const [estimateData, setestimateData] = useState({
-        customername: '', itemname: '', customeremail: '',customerphone:'', estimate_id: '', EstimateNumber: '', purchaseorder: '',
+        customername: '', itemname: '', customeremail: '', customerphone: '', estimate_id: '', EstimateNumber: '', purchaseorder: '',
         job: '', date: format(new Date(), 'yyyy-MM-dd'), description: '', itemquantity: '', price: '', discount: '',
         amount: '', tax: '', discountTotal: '', taxpercentage: '', subtotal: '', total: '', amountdue: '', information: '',
     });
 
     // const [editorData, setEditorData] = useState("<p></p>");
     const [editorData, setEditorData] = useState(``);
-    const [noteimageUrl, setnoteImageUrl] = useState(''); 
+    const [noteimageUrl, setnoteImageUrl] = useState('');
     const [alertMessage, setAlertMessage] = useState('');
     const [isSignatureModalOpen, setIsSignatureModalOpen] = useState(false);
     const [hasSignature, setHasSignature] = useState(false);
     const [ownerId, setOwnerId] = useState('');
     const [isAddSignatureSwitchOn, setIsAddSignatureSwitchOn] = useState(false);
     const [isCustomerSignSwitchOn, setIsCustomerSignSwitchOn] = useState(false);
-const [emailOptions, setEmailOptions] = useState([]);
-const [showEmailModal, setShowEmailModal] = useState(false);
+    const [emailOptions, setEmailOptions] = useState([]);
+    const [showEmailModal, setShowEmailModal] = useState(false);
 
     const [credentials, setCredentials] = useState({
         name: '',
@@ -114,22 +114,22 @@ const [showEmailModal, setShowEmailModal] = useState(false);
         address2: '',
         post: '',
     });
-const handleEmailChange = (index, value) => {
-  const newEmails = [...credentials.emails];
-  newEmails[index] = value;
-  setCredentials({ ...credentials, emails: newEmails });
-};
+    const handleEmailChange = (index, value) => {
+        const newEmails = [...credentials.emails];
+        newEmails[index] = value;
+        setCredentials({ ...credentials, emails: newEmails });
+    };
 
-const addEmailField = () => {
-  setCredentials({ ...credentials, emails: [...credentials.emails, ''] });
-};
+    const addEmailField = () => {
+        setCredentials({ ...credentials, emails: [...credentials.emails, ''] });
+    };
 
-const removeEmailField = (index) => {
-  if (credentials.emails.length > 1) {
-    const newEmails = credentials.emails.filter((_, i) => i !== index);
-    setCredentials({ ...credentials, emails: newEmails });
-  }
-};
+    const removeEmailField = (index) => {
+        if (credentials.emails.length > 1) {
+            const newEmails = credentials.emails.filter((_, i) => i !== index);
+            setCredentials({ ...credentials, emails: newEmails });
+        }
+    };
 
     useEffect(() => {
         const fetchData = async () => {
@@ -167,7 +167,7 @@ const removeEmailField = (index) => {
         if (event.target.checked) {
             try {
                 const ownerId = localStorage.getItem('userid');
-                const response = await fetch(`https://grithomes.onrender.com/api/check-signature/${ownerId}`);
+                const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/check-signature/${ownerId}`);
                 const data = await response.json();
                 setHasSignature(data.hasSignature);
 
@@ -205,7 +205,7 @@ const removeEmailField = (index) => {
             const ownerId = localStorage.getItem('userid');
             const email = localStorage.getItem('userEmail');
             const companyname = localStorage.getItem('companyname');
-            await fetch('https://grithomes.onrender.com/api/ownersignature', {
+            await fetch(`${import.meta.env.VITE_API_BASE_URL}/ownersignature`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -221,13 +221,13 @@ const removeEmailField = (index) => {
 
     const roundOff = (value) => {
         return Math.round(value * 100) / 100;
-      };
+    };
 
     const fetchLastEstimateNumber = async () => {
         try {
             const userid = localStorage.getItem('userid');
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/lastEstimateNumber/${userid}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/lastEstimateNumber/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -264,7 +264,7 @@ const removeEmailField = (index) => {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/customers/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -289,44 +289,44 @@ const removeEmailField = (index) => {
             console.error('Error fetching data:', error);
         }
     }
-    
+
     const fetchsignupdata = async () => {
         try {
-          const userid = localStorage.getItem("userid");
-          const authToken = localStorage.getItem('authToken');
-          const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
-            headers: {
-              'Authorization': authToken,
+            const userid = localStorage.getItem("userid");
+            const authToken = localStorage.getItem('authToken');
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getsignupdata/${userid}`, {
+                headers: {
+                    'Authorization': authToken,
+                }
+            });
+
+            if (response.status === 401) {
+                const json = await response.json();
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0, 0);
+                return; // Stop further execution
             }
-          });
-    
-          if (response.status === 401) {
-            const json = await response.json();
-            setAlertMessage(json.message);
-            setloading(false);
-            window.scrollTo(0, 0);
-            return; // Stop further execution
-          }
-          else {
-            const json = await response.json();
-    
-            // if (Array.isArray(json)) {
-            // setTaxPercentage(json.taxPercentage);
-            // setsignUpData(json)
-            console.log("json: ",json.taxPercentage);
-            // }
-          }
-    
+            else {
+                const json = await response.json();
+
+                // if (Array.isArray(json)) {
+                // setTaxPercentage(json.taxPercentage);
+                // setsignUpData(json)
+                console.log("json: ", json.taxPercentage);
+                // }
+            }
+
         } catch (error) {
-          console.error('Error fetching data:', error);
+            console.error('Error fetching data:', error);
         }
-      }
+    }
 
     const fetchitemdata = async () => {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/itemdata/${userid}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -409,9 +409,9 @@ const removeEmailField = (index) => {
         const selectedCustomerId = event.value;
         setSelectedCustomerId(selectedCustomerId);
         const selectedCustomer = customers.find((customer) => customer._id === selectedCustomerId);
-        
-        console.log(selectedCustomer,"Selected Customer");
-        
+
+        console.log(selectedCustomer, "Selected Customer");
+
         if (selectedCustomer) {
             setestimateData({
                 ...estimateData,
@@ -419,22 +419,22 @@ const removeEmailField = (index) => {
                 customerphone: selectedCustomer.number,
             });
 
-           setSelectedCustomerDetails({
-  name: selectedCustomer.name,
-  email: selectedCustomer.emails?.[0] || '',
-  number: selectedCustomer.number
-});
+            setSelectedCustomerDetails({
+                name: selectedCustomer.name,
+                email: selectedCustomer.emails?.[0] || '',
+                number: selectedCustomer.number
+            });
 
-// Handle multiple emails
-if (selectedCustomer.emails?.length > 1) {
-  setEmailOptions(selectedCustomer.emails);
-  setShowEmailModal(true); // open modal
-} else {
-  setestimateData(prev => ({
-    ...prev,
-    customeremail: selectedCustomer.emails?.[0] || '',
-  }));
-}
+            // Handle multiple emails
+            if (selectedCustomer.emails?.length > 1) {
+                setEmailOptions(selectedCustomer.emails);
+                setShowEmailModal(true); // open modal
+            } else {
+                setestimateData(prev => ({
+                    ...prev,
+                    customeremail: selectedCustomer.emails?.[0] || '',
+                }));
+            }
             setIsCustomerSelected(true);
         }
 
@@ -465,7 +465,7 @@ if (selectedCustomer.emails?.length > 1) {
             console.error('Unable to determine SelectedCustomerId');
             return;
         }
-    
+
         const updatedCustomerDetails = {
             name: editedName,
             email: editedEmail,
@@ -477,10 +477,10 @@ if (selectedCustomer.emails?.length > 1) {
             email: editedEmail,
             number: editedNumber
         });
-    
+
         console.log(SelectedCustomerId, 'edited SelectedCustomerId');
         console.log('Updated customer details:', updatedCustomerDetails);
-    
+
     };
 
     // const handleEditCustomer = () => {
@@ -620,11 +620,11 @@ if (selectedCustomer.emails?.length > 1) {
 
             const selectedCustomer = customers.find((customer) => customer._id === SelectedCustomerId);
 
-  // Validate customer fields
-  if (!selectedCustomerDetails.name || !selectedCustomerDetails.email) {
-    alert('Customer name, email, and phone are required. Please fill out these details.');
-    return;
-}
+            // Validate customer fields
+            if (!selectedCustomerDetails.name || !selectedCustomerDetails.email) {
+                alert('Customer name, email, and phone are required. Please fill out these details.');
+                return;
+            }
 
 
             // Summing up subtotal, total, and amount due for the entire estimate
@@ -654,13 +654,13 @@ if (selectedCustomer.emails?.length > 1) {
                 taxpercentage: signUpData.percentage,
                 amountdue: amountdue,
                 noteimageUrl: noteimageUrl,
-                isAddSignature: isAddSignatureSwitchOn, 
+                isAddSignature: isAddSignatureSwitchOn,
                 isCustomerSign: isCustomerSignSwitchOn,
             };
-            console.log(data,"Data sdsdfsdsfsdf");
+            console.log(data, "Data sdsdfsdsfsdf");
 
             // Sending estimate data to the backend API
-            const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/savecreateestimate`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -678,8 +678,8 @@ if (selectedCustomer.emails?.length > 1) {
             else {
                 if (response.ok) {
                     const responseData = await response.json();
-                    console.log(responseData,"responseData");
-                    
+                    console.log(responseData, "responseData");
+
                     if (responseData.success) {
                         const estimateid = responseData.estimate._id;
                         navigate('/userpanel/Estimatedetail', { state: { estimateid } });
@@ -702,125 +702,125 @@ if (selectedCustomer.emails?.length > 1) {
     };
 
 
-  const handleSubmit1 = async (e) => {
-    e.preventDefault();
-    try {
-        const userid = localStorage.getItem('userid'); // Assuming you have user ID stored in local storage
-        const authToken = localStorage.getItem('authToken');
+    const handleSubmit1 = async (e) => {
+        e.preventDefault();
+        try {
+            const userid = localStorage.getItem('userid'); // Assuming you have user ID stored in local storage
+            const authToken = localStorage.getItem('authToken');
 
-        // Ensure the selected customer exists
-        const selectedCustomer = customers.find((customer) => customer._id === SelectedCustomerId);
+            // Ensure the selected customer exists
+            const selectedCustomer = customers.find((customer) => customer._id === SelectedCustomerId);
 
-        if (!selectedCustomer) {
-            alert('Please select a customer.');
-            return;
-        }
+            if (!selectedCustomer) {
+                alert('Please select a customer.');
+                return;
+            }
 
-        const { customername, customeremail, customerphone } = selectedCustomer;
+            const { customername, customeremail, customerphone } = selectedCustomer;
 
-        // Validate customer fields
-        if (!customername || !customeremail || !customerphone) {
-            alert('Customer name, email, and phone are required. Please fill out these details.');
-            return;
-        }
+            // Validate customer fields
+            if (!customername || !customeremail || !customerphone) {
+                alert('Customer name, email, and phone are required. Please fill out these details.');
+                return;
+            }
 
-        await new Promise(resolve => setTimeout(resolve, 100));
+            await new Promise(resolve => setTimeout(resolve, 100));
 
-        const estimateItems = searchitemResults.map((item) => {
-            const selectedItem = items.find((i) => i._id === item.value);
-            const itemPrice = selectedItem?.price || 0;
-            const unit = selectedItem?.unit || 0;
-            const itemId = item.value;
-            const quantity = quantityMap[itemId] || 1;
-            const discount = discountMap[itemId] || 0;
-            const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+            const estimateItems = searchitemResults.map((item) => {
+                const selectedItem = items.find((i) => i._id === item.value);
+                const itemPrice = selectedItem?.price || 0;
+                const unit = selectedItem?.unit || 0;
+                const itemId = item.value;
+                const quantity = quantityMap[itemId] || 1;
+                const discount = discountMap[itemId] || 0;
+                const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
 
-            return {
-                itemId: itemId,
-                itemname: selectedItem.itemname,
-                itemquantity: quantity,
-                price: itemPrice,
-                unit,
-                discount,
-                description: selectedItem.description,
-                amount: discountedAmount, // Add subtotal to each item
+                return {
+                    itemId: itemId,
+                    itemname: selectedItem.itemname,
+                    itemquantity: quantity,
+                    price: itemPrice,
+                    unit,
+                    discount,
+                    description: selectedItem.description,
+                    amount: discountedAmount, // Add subtotal to each item
+                };
+            });
+
+            // Summing up subtotal, total, and amount due for the entire estimate
+            const subtotal = estimateItems.reduce((acc, curr) => acc + curr.amount, 0);
+            const total = calculateTotal();
+            const amountdue = total;
+            const taxAmount = calculateTaxAmount(); // Calculate tax amount based on subtotal and tax percentage
+
+            const data = {
+                userid: userid,
+                customername: selectedCustomerDetails.name,
+                customeremail: selectedCustomerDetails.email,
+                customerphone: selectedCustomerDetails.number,
+                estimate_id: estimateData.estimate_id,
+                EstimateNumber: estimateData.EstimateNumber,
+                purchaseorder: estimateData.purchaseorder,
+                job: estimateData.job || 'No Job',
+                discountTotal: discountTotal || 0,
+                information: editorData,
+                date: estimateData.date,
+                items: estimateItems,
+                subtotal: subtotal,
+                total: total,
+                tax: taxAmount,
+                taxpercentage: signUpData.percentage,
+                amountdue: amountdue,
+                noteimageUrl: noteimageUrl,
+                isAddSignature: isAddSignatureSwitchOn,
+                isCustomerSign: isCustomerSignSwitchOn,
             };
-        });
 
-        // Summing up subtotal, total, and amount due for the entire estimate
-        const subtotal = estimateItems.reduce((acc, curr) => acc + curr.amount, 0);
-        const total = calculateTotal();
-        const amountdue = total;
-        const taxAmount = calculateTaxAmount(); // Calculate tax amount based on subtotal and tax percentage
+            console.log(data, "Data to send");
 
-        const data = {
-            userid: userid,
-            customername: selectedCustomerDetails.name,
-            customeremail: selectedCustomerDetails.email,
-            customerphone: selectedCustomerDetails.number,
-            estimate_id: estimateData.estimate_id,
-            EstimateNumber: estimateData.EstimateNumber,
-            purchaseorder: estimateData.purchaseorder,
-            job: estimateData.job || 'No Job',
-            discountTotal: discountTotal || 0,
-            information: editorData,
-            date: estimateData.date,
-            items: estimateItems,
-            subtotal: subtotal,
-            total: total,
-            tax: taxAmount,
-            taxpercentage: signUpData.percentage,
-            amountdue: amountdue,
-            noteimageUrl: noteimageUrl,
-            isAddSignature: isAddSignatureSwitchOn, 
-            isCustomerSign: isCustomerSignSwitchOn,
-        };
+            // Sending estimate data to the backend API
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/savecreateestimate`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': authToken,
+                },
+                body: JSON.stringify({ userid, estimateData: data }),
+            });
 
-        console.log(data, "Data to send");
-
-        // Sending estimate data to the backend API
-        const response = await fetch('https://grithomes.onrender.com/api/savecreateestimate', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Authorization': authToken,
-            },
-            body: JSON.stringify({ userid, estimateData: data }),
-        });
-
-        if (response.status === 401) {
-            const responseData = await response.json();
-            setAlertMessage(responseData.message);
-            setloading(false);
-            window.scrollTo(0, 0);
-            return; // Stop further execution
-        } else {
-            if (response.ok) {
+            if (response.status === 401) {
                 const responseData = await response.json();
-                console.log(responseData, "responseData");
+                setAlertMessage(responseData.message);
+                setloading(false);
+                window.scrollTo(0, 0);
+                return; // Stop further execution
+            } else {
+                if (response.ok) {
+                    const responseData = await response.json();
+                    console.log(responseData, "responseData");
 
-                if (responseData.success) {
-                    const estimateid = responseData.estimate._id;
-                    navigate('/userpanel/Estimatedetail', { state: { estimateid } });
-                    console.log('Estimate saved successfully!');
+                    if (responseData.success) {
+                        const estimateid = responseData.estimate._id;
+                        navigate('/userpanel/Estimatedetail', { state: { estimateid } });
+                        console.log('Estimate saved successfully!');
+                    } else {
+                        console.error('Failed to save the estimate.');
+                    }
                 } else {
+                    const responseData = await response.json();
+                    setmessage(true);
+                    setAlertShow(responseData.error);
                     console.error('Failed to save the estimate.');
                 }
-            } else {
-                const responseData = await response.json();
-                setmessage(true);
-                setAlertShow(responseData.error);
-                console.error('Failed to save the estimate.');
             }
+
+        } catch (error) {
+            console.error('Error creating estimate:', error);
         }
+    };
 
-    } catch (error) {
-        console.error('Error creating estimate:', error);
-    }
-};
 
-  
-  
+
     const handleDiscountChange = (event) => {
         const value = event.target.value;
         // If the input is empty or NaN, set the value to 0
@@ -890,7 +890,7 @@ if (selectedCustomer.emails?.length > 1) {
         e.preventDefault();
         let userid = localStorage.getItem('userid');
         const authToken = localStorage.getItem('authToken');
-        const response = await fetch('https://grithomes.onrender.com/api/addcustomer', {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/addcustomer`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -960,730 +960,633 @@ if (selectedCustomer.emails?.length > 1) {
 
     return (
         <div className='bg'>
-            {
-                loading ?
-                    <div className='row'>
-                        <ColorRing
-                            // width={200}
-                            loading={loading}
-                            // size={500}
-                            display="flex"
-                            justify-content="center"
-                            align-items="center"
-                            aria-label="Loading Spinner"
-                            data-testid="loader"
-                        />
-                    </div> :
-                    <div className='container-fluid'>
-                        <div className="row">
-                            <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
-                                <div  >
-                                    <Usernavbar />
+            {loading ? (
+                <div className="flex justify-center items-center h-screen">
+                    <ColorRing loading={loading} aria-label="Loading Spinner" />
+                </div>
+            ) : (
+                <div className="w-full bg-gray-50 min-h-screen">
+                    <div className="flex flex-col md:flex-row">
+                        <Sidebar />
+                        <div className="flex-1 w-full mx-auto px-4 py-8 max-w-7xl">
+                            {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                            <form onSubmit={handleSubmit}>
+                                {/* Header */}
+                                <div className='flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4'>
+                                    <div>
+                                        <h2 className='text-3xl font-bold text-gray-800 mb-1'>Create Estimate</h2>
+                                        <nav aria-label="breadcrumb">
+                                            <ol className="breadcrumb mb-0 text-sm">
+                                                <li className="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='text-gray-500 hover:text-primary transition-colors text-decoration-none'>Dashboard</a></li>
+                                                <li className="breadcrumb-item active text-gray-800 font-medium" aria-current="page">Create Estimate</li>
+                                            </ol>
+                                        </nav>
+                                    </div>
+                                    <button className='btn-primary font-semibold px-6 py-2.5 rounded-full shadow-sm flex items-center gap-2' type="submit">
+                                        <i className="fas fa-save"></i> Save Estimate
+                                    </button>
                                 </div>
-                            </div>
 
-                            <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                                <div className='d-lg-none d-md-none d-block mt-2'>
-                                    <Usernav />
-                                </div>
-                                <div className='mx-4'>
-                                    <form onSubmit={handleSubmit}>
-                                        <div className='row py-4 px-2 breadcrumbclr'>
-                                            <div className="col-lg-4 col-md-6 col-sm-12 col-7 me-auto">
-                                                <p className='fs-35 fw-bold'>Estimate</p>
-                                                <nav aria-label="breadcrumb">
-                                                    <ol class="breadcrumb mb-0">
-                                                        <li class="breadcrumb-item"><a href="/Userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
-                                                        <li class="breadcrumb-item active" aria-current="page">Estimate</li>
-                                                    </ol>
-                                                </nav>
-                                            </div>
-                                            <div className="col-lg-3 col-md-4 col-sm-12 col-5 text-right">
-                                                <button className='btn rounded-pill btn-danger text-white fw-bold' type="submit">Save</button>
-                                            </div>
-                                            <div className='mt-4'>
-                                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
-                                            </div>
-                                        </div>
-                                        <div className="row">
-                                            
-                                        <div className="col-lg-3 col-12">
-                                                <div className='box1 rounded adminborder p-4 my-2 mx-0 mb-5'>
-                                                    <div className="form-check form-switch">
-                                                        <div>
-                                                            <label className="form-check-label" htmlFor="signatureSwitch">Signature</label>
-                                                            <input
-                                                                className="form-check-input"
-                                                                type="checkbox"
-                                                                role="switch"
-                                                                id="signatureSwitch"
-                                                                onChange={handleSignatureSwitch}
-                                                                checked={hasSignature}
-                                                            />
-                                                        </div>
-                                                        {hasSignature && (
-                                                            <>
-                                                                <div>
-                                                                    <label className="form-check-label" htmlFor="addSignatureSwitch">Add My Signature</label>
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        role="switch"
-                                                                        id="addSignatureSwitch"
-                                                                        checked={isAddSignatureSwitchOn}
-                                                                        onChange={handleAddSignatureSwitch}
-                                                                    />
-                                                                </div>
-                                                                <div>
-                                                                    <label className="form-check-label" htmlFor="customerSignSwitch">Customer to Sign</label>
-                                                                    <input
-                                                                        className="form-check-input"
-                                                                        type="checkbox"
-                                                                        role="switch"
-                                                                        id="customerSignSwitch"
-                                                                        checked={isCustomerSignSwitchOn}
-                                                                        onChange={handleCustomerSignSwitch}
-                                                                    />
-                                                                </div>
-                                                            </>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                {isSignatureModalOpen && (
-                                                    <SignatureModal
-                                                        onSave={saveSignature}
-                                                        onClose={() => setIsSignatureModalOpen(false)}
-                                                    />
-                                                )}
-                                            </div>
-                                            <div className="col-lg-12 col-12 order-2 order-lg-1"> 
-                                                <div className='box1 rounded adminborder p-4 m-2 mb-5'>
-                                                    <div className='row me-2'>
-                                                        <div className="col-md-6 col-lg-7 col-12">
-                                                            {isCustomerSelected ? (
-                                                                <div className="customerdetail p-3">
-                                                                    <ul>
-                                                                        <li className='fw-bold fs-4'>{selectedCustomerDetails.name}</li>
-                                                                        <li>
-                                                                            <a href="" className='text-decoration-none' data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a>
-                                                                        </li>
-                                                                    </ul>
-                                                                    <p>{selectedCustomerDetails.email}</p>
-                                                                    <p>{selectedCustomerDetails.number}</p>
-                                                                </div>
-                                                            ) : (
-                                                                <div className="search-container forms">
-                                                                    <p className='fs-20 mb-0'>Select Customers</p>
-                                                                    <div className="row">
-                                                                        <div className="col-8">
-                                                                            {/*<VirtualizedSelect
-                                                                                id="searchitems"
-                                                                                name="customername"
-                                                                                className="form-control zindex op pl-0"
-                                                                                placeholder=""
-                                                                                onChange={onChangecustomer}
-                                                                                required
-                                                                                options={customers.map((customer, index) =>
-                                                                                    ({ label: customer.name, value: customer._id })
-                                                                                )}
-                                                                            />*/}
-                                                                            <Select
-                                                                                value={searchcustomerResults}
-                                                                                onChange={onChangecustomer}
-                                                                                options={customers.map(customer => ({
-                                                                                    value: customer._id,
-                                                                                    label: customer.name,
-                                                                                }))}
-                                                                                placeholder=""
-                                                                                required
-                                                                            />
-                                                                        </div> 
-                                                                        <div className="col-3">
-                                                                            <a role='button' className="btn btn-success btn-sm me-2 text-white mt-1" data-bs-toggle="modal" data-bs-target="#exampleModal1">
-                                                                                <i class="fa-solid fa-plus"></i>
-                                                                            </a>
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                        <div className="col-lg-5 col-md-6">
-                                                            <div className="row">
-                                                                {message == true ? (
-                                                                    <div className="alert alert-warning alert-dismissible fade show" role="alert">
-                                                                        <strong>{alertShow}</strong>
-                                                                        <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                                                                    </div>
-                                                                ) : (
-                                                                    ""
-                                                                )}
-                                                                <div className="col-lg-12">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor="estimatenumbr" className="form-label">
-                                                                            Estimate Number
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            name="EstimateNumber"
-                                                                            className="form-control"
-                                                                            value={estimateData.EstimateNumber}
-                                                                            onChange={onchange}
-                                                                            // placeholder="estimate Number"
-                                                                            id="estimatenumbr"
-                                                                            required
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-12">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor="purchaseoder" className="form-label">
-                                                                            Purchase Order (PO) #
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            name="purchaseorder"
-                                                                            className="form-control"
-                                                                            onChange={onchange}
-                                                                            id="purchaseoder"
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-12">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor="Date" className="form-label">
-                                                                            Date
-                                                                        </label>
-                                                                        <input
-                                                                            type="date"
-                                                                            name="date"
-                                                                            className="form-control"
-                                                                            value={estimateData.date}
-                                                                            onChange={onchange}
-                                                                            // placeholder="Date"
-                                                                            id="Date"
-                                                                            required
-                                                                        />
-                                                                    </div>
-                                                                </div>
-                                                                <div className="col-lg-12">
-                                                                    <div className="mb-3">
-                                                                        <label htmlFor="Job" className="form-label">
-                                                                            Job
-                                                                        </label>
-                                                                        <input
-                                                                            type="text"
-                                                                            name="job"
-                                                                            className="form-control"
-                                                                            value={estimateData.job}
-                                                                            onChange={onchange}
-                                                                            // placeholder="Date"
-                                                                            id="job"
-                                                                            required
-                                                                        />
-                                                                    </div>
-                                                                </div>
+                                <div className="flex flex-col lg:flex-row gap-6">
+                                    {/* Main Form Area */}
+                                    <div className="w-full lg:w-3/4 flex flex-col gap-6 order-2 lg:order-1">
+
+                                        {/* Top Meta Information Card */}
+                                        <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6'>
+                                            <div className='grid grid-cols-1 md:grid-cols-2 gap-8'>
+                                                {/* Customer Section */}
+                                                <div>
+                                                    {isCustomerSelected ? (
+                                                        <div className="bg-gray-50 p-5 rounded-lg border border-gray-100 h-full relative">
+                                                            <div className="absolute top-4 right-4">
+                                                                <a href="#" className='text-primary hover:text-blue-800 text-sm font-medium text-decoration-none bg-blue-50 px-3 py-1 rounded-full' data-bs-toggle="modal" data-bs-target="#exampleModal">Edit</a>
+                                                            </div>
+                                                            <h3 className='font-bold text-xl text-gray-800 mb-2 pr-12'>{selectedCustomerDetails.name}</h3>
+                                                            <div className="space-y-1 text-gray-600">
+                                                                <p className="flex items-center gap-2 mb-1"><i className="fas fa-envelope text-gray-400"></i> {selectedCustomerDetails.email}</p>
+                                                                <p className="flex items-center gap-2 mb-0"><i className="fas fa-phone text-gray-400"></i> {selectedCustomerDetails.number}</p>
                                                             </div>
                                                         </div>
-                                                    </div>
-
-                                                    <div className='box1 rounded adminborder p-4 m-2'>
-                                                        <div className="table-responsive">
-                                                            <table className="table">
-                                                                <thead>
-                                                                    <tr>
-                                                                        <th scope="col">ITEM</th>
-                                                                        <th scope="col">QUANTITY</th>
-                                                                        <th scope="col">UNIT</th>
-                                                                        <th scope="col">PRICE</th>
-                                                                        <th scope="col">AMOUNT</th>
-                                                                    </tr>
-                                                                </thead>
-                                                                <tbody>
-                                                                    {searchitemResults.map((item) => {
-                                                                        const selectedItem = items.find((i) => i._id === item.value);
-                                                                        const itemPrice = selectedItem?.price || 0;
-                                                                        const itemId = item.value;
-                                                                        const quantity = quantityMap[itemId] || 1;
-                                                                        const discount = discountMap[itemId] || 0;
-
-                                                                        const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
-                                                                        const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN', {
-                                                                            // style: 'currency',
-                                                                            // currency: 'INR',
-                                                                        });
-
-                                                                        return (
-                                                                            <tr key={item.value}>
-                                                                                <td scope="col">
-                                                                                    <div className="mb-3 d-flex align-items-baseline justify-content-between">
-                                                                                        <p>{item.label}</p>
-                                                                                        <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => onDeleteItem(item.value)}>
-                                                                                            <i className="fas fa-trash"></i>
-                                                                                        </button>
-                                                                                    </div>
-                                                                                    <div className="row">
-                                                                                        <div className="col">
-                                                                                            <label htmlFor={`item-description-${itemId}`} className="form-label">Description</label>
-
-                                                                                            <CKEditor
-                                                                                                editor={ClassicEditor}
-                                                                                                data={selectedItem?.description || ''}
-                                                                                                name={`description-${itemId}`}
-                                                                                                onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
-                                                                                                onBlur={(event, editor) => {
-                                                                                                    console.log('Blur.', editor);
-                                                                                                }}
-                                                                                                onFocus={(event, editor) => {
-                                                                                                    console.log('Focus.', editor);
-                                                                                                }}
-                                                                                            />
-
-                                                                                        </div>
-
-                                                                                    </div>
-                                                                                </td>
-                                                                                <td>
-                                                                                    <input
-                                                                                        type="number"
-                                                                                        name={`quantity-${itemId}`}
-                                                                                        className="form-control"
-                                                                                        value={quantity}
-                                                                                        onChange={(event) => onChangeQuantity(event, itemId)}
-                                                                                        id={`quantity-${itemId}`}
-                                                                                        required
-                                                                                    />
-                                                                                </td>
-                                                                                <td>
-                                                                                {selectedItem?.unit}
-                                                                                </td>
-                                                                                <td>
-                                                                
-                                                                                    <input
-                                                                                        type="text"
-                                                                                        name={`price-${itemId}`}
-                                                                                        className="form-control"
-                                                                                        value={itemPrice}
-                                                                                        onChange={(event) => onChangePrice(event, itemId)}
-                                                                                        id={`price-${itemId}`}
-                                                                                        required
-                                                                                    />
-
-                                                                                </td>
-                                                                               
-                                                                                {/* <td className="text-center">
-                                                                                    <p><CurrencySign />{discountTotal.toFixed(2)}</p>
-                                                                                </td> */}
-                                                                                <td className="text-center">
-                                                                                    <p><CurrencySign />{formattedTotalAmount}</p>
-                                                                                </td>
-                                                                            </tr>
-                                                                        );
-                                                                    })}
-
-                                                                    {itemExistsMessage && (
-                                                                        <div className="alert alert-warning mt-3" role="alert">
-                                                                            {itemExistsMessage}
-                                                                        </div>
-                                                                    )}
-                                                                </tbody>
-                                                            </table>
-                                                        </div>
-
-                                                        <div className="row pt-3">
-                                                            <div className="col-lg-6 col-md-12">
-                                                                <div className="search-container forms">
-                                                                    <p className='fs-20 mb-0'>Select Item</p>
-                                                                    {/* <VirtualizedSelect
-                                                                        id="searchitems"
-                                                                        name="itemname"
-                                                                        className="form-control zindex op pl-0"
-                                                                        placeholder=""
-                                                                        onChange={onChangeitem}
-                                                                        options={items.map((item, index) =>
-                                                                            ({ label: item.itemname, value: item._id })
-
-                                                                        )}
-
-                                                                    >
-                                                                    </VirtualizedSelect> */}
+                                                    ) : (
+                                                        <div className="h-full flex flex-col">
+                                                            <label className='block text-sm font-semibold text-gray-700 mb-2'>Select Customer <span className="text-red-500">*</span></label>
+                                                            <div className="flex gap-2">
+                                                                <div className="flex-1">
                                                                     <Select
-                                                                        value={searchitemResults}
-                                                                        onChange={onChangeitem}
-                                                                        options={items.map(item => ({
-                                                                            value: item._id,
-                                                                            label: item.itemname,
+                                                                        value={searchcustomerResults}
+                                                                        onChange={onChangecustomer}
+                                                                        options={customers.map(customer => ({
+                                                                            value: customer._id,
+                                                                            label: customer.name,
                                                                         }))}
-                                                                        placeholder=""
+                                                                        placeholder="Search customers..."
+                                                                        required
+                                                                        className="react-select-container"
+                                                                        classNamePrefix="react-select"
                                                                     />
                                                                 </div>
-                                                            </div>
-                                                            <div className="col-lg-6 col-md-12">
-                                                                <div className="row">
-                                                                    <div className="col-6 col-md-3">
-                                                                        <p>Subtotal</p>
-                                                                        <p>Discount</p>
-                                                                        {/* <p>GST</p> */}
-                                                                        <p className='pt-3'>{signUpData.name} {signUpData.percentage}%</p>
-
-                                                                        <p>Total</p>
-                                                                    </div>
-                                                                    <div className="col-6 col-md-9">
-                                                                        <p className="mb-3"><CurrencySign />{calculateSubtotal().toLocaleString('en-IN', {
-                                                                            // style: 'currency',
-                                                                            // currency: 'INR',
-                                                                        })}</p>
-                                                                        <div className="mb-3">
-                                                                            <input
-                                                                                type="number"
-                                                                                name="totaldiscount"
-                                                                                className="form-control"
-                                                                                value={discountTotal}
-                                                                                onChange={handleDiscountChange} // Ensure proper event binding
-                                                                                placeholder="Enter Discount Total"
-                                                                                id="discountInput"
-                                                                                min="0"
-                                                                            />
-                                                                        </div>
-                                                                        {/* <div className="mb-3">
-                                                                            <input
-                                                                                type="number"
-                                                                                name="tax"
-                                                                                className="form-control"
-                                                                                value={taxPercentage}
-                                                                                onChange={handleTaxChange}
-                                                                                placeholder="Enter GST Percentage"
-                                                                                id="taxInput"
-                                                                                min="0"
-                                                                            />
-                                                                        </div> */}
-                                                                        <p><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN', {
-                                                                            // style: 'currency',
-                                                                            // currency: 'INR',
-                                                                        })}</p>
-
-                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
-                                                                            // style: 'currency',
-                                                                            // currency: 'INR',
-                                                                        })}</p>
-                                                                    </div>
-                                                                </div>
+                                                                <a role='button' className="bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center justify-center transition-colors shadow-sm" data-bs-toggle="modal" data-bs-target="#exampleModal1" title="Add New Customer">
+                                                                    <i className="fa-solid fa-plus"></i>
+                                                                </a>
                                                             </div>
                                                         </div>
-                                                        <hr />
-                                                        <div className="row pt-3">
-                                                            <div className="col-lg-6 col-md-12"></div>
-                                                            <div className="col-lg-6 col-md-12">
-                                                                <div className="row">
-                                                                    <div className="col-6 col-md-3">
-                                                                        <p>Amount due</p>
-                                                                    </div>
-                                                                    <div className="col-6 col-md-9">
-                                                                        <p><CurrencySign />{calculateTotal().toLocaleString('en-IN', {
-                                                                            // style: 'currency',
-                                                                            // currency: 'INR',
-                                                                        })}</p>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
+                                                    )}
+                                                </div>
+
+                                                {/* Estimate Details Section */}
+                                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                    {message == true && (
+                                                        <div className="col-span-full alert alert-warning alert-dismissible fade show mb-2" role="alert">
+                                                            <strong>{alertShow}</strong>
+                                                            <button type="button" className="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                                                         </div>
+                                                    )}
+                                                    <div>
+                                                        <label htmlFor="estimatenumbr" className="block text-sm font-semibold text-gray-700 mb-1">Estimate Number <span className="text-red-500">*</span></label>
+                                                        <input
+                                                            type="text"
+                                                            name="EstimateNumber"
+                                                            className="input-standard bg-gray-50"
+                                                            value={estimateData.EstimateNumber}
+                                                            onChange={onchange}
+                                                            id="estimatenumbr"
+                                                            required
+                                                        />
                                                     </div>
-
-                                                    <div className='box1 rounded adminborder m-2 mt-5'>
-                                                        <CKEditor
-                                                            editor={ClassicEditor}
-                                                            data={editorData}
-                                                            onChange={handleEditorChange}
-                                                            config={{
-                                                                extraPlugins: [MyCustomUploadAdapterPlugin],
-                                                            }}
-                                                            onBlur={(event, editor) => {
-                                                                console.log('Blur.', editor);
-                                                            }}
-                                                            onFocus={(event, editor) => {
-                                                                console.log('Focus.', editor);
-                                                            }}
+                                                    <div>
+                                                        <label htmlFor="purchaseoder" className="block text-sm font-semibold text-gray-700 mb-1">P.O. Number</label>
+                                                        <input
+                                                            type="text"
+                                                            name="purchaseorder"
+                                                            className="input-standard bg-gray-50"
+                                                            onChange={onchange}
+                                                            id="purchaseoder"
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label htmlFor="Date" className="block text-sm font-semibold text-gray-700 mb-1">Date <span className="text-red-500">*</span></label>
+                                                        <input
+                                                            type="date"
+                                                            name="date"
+                                                            className="input-standard bg-gray-50"
+                                                            value={estimateData.date}
+                                                            onChange={onchange}
+                                                            id="Date"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <label htmlFor="Job" className="block text-sm font-semibold text-gray-700 mb-1">Job <span className="text-red-500">*</span></label>
+                                                        <input
+                                                            type="text"
+                                                            name="job"
+                                                            className="input-standard bg-gray-50"
+                                                            value={estimateData.job}
+                                                            onChange={onchange}
+                                                            id="Job"
+                                                            required
                                                         />
                                                     </div>
                                                 </div>
                                             </div>
-                                         
                                         </div>
 
-                                    </form>
+                                        {/* Items Table Card */}
+                                        <div className='bg-white rounded-xl border border-gray-100 shadow-sm overflow-hidden'>
+                                            <div className="overflow-x-auto">
+                                                <div className="hidden md:grid grid-cols-12 gap-4 bg-gray-50 border-b border-gray-100 p-4 text-xs uppercase tracking-wider text-gray-500 font-semibold">
+                                                    <div className="col-span-5">Item</div>
+                                                    <div className="col-span-2">Quantity</div>
+                                                    <div className="col-span-2">Price</div>
+                                                    <div className="col-span-3 text-right">Amount</div>
+                                                </div>
+
+                                                <div className="divide-y divide-gray-50">
+                                                    {searchitemResults.map((item) => {
+                                                        const selectedItem = items.find((i) => i._id === item.value);
+                                                        const itemPrice = selectedItem?.price || 0;
+                                                        const itemId = item.value;
+                                                        const quantity = quantityMap[itemId] || 1;
+                                                        const discount = discountMap[itemId] || 0;
+
+                                                        const discountedAmount = calculateDiscountedAmount(itemPrice, quantity, discount);
+                                                        const formattedTotalAmount = Number(discountedAmount).toLocaleString('en-IN');
+
+                                                        return (
+                                                            <div key={item.value} className="p-4 hover:bg-gray-50/50 transition-colors">
+                                                                <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-start">
+                                                                    {/* Item details */}
+                                                                    <div className="col-span-1 md:col-span-5">
+                                                                        <div className="flex justify-between items-start mb-2">
+                                                                            <p className="font-semibold text-gray-800">{item.label}</p>
+                                                                            <button type="button" className="text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-1.5 rounded-md transition-colors md:hidden" onClick={() => onDeleteItem(item.value)}>
+                                                                                <i className="fas fa-trash text-sm"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                        <div className="prose prose-sm max-w-none ck-editor-container">
+                                                                            <CKEditor
+                                                                                editor={ClassicEditor}
+                                                                                data={selectedItem?.description || ''}
+                                                                                onChange={(event, editor) => onChangeDescription(event, editor, itemId)}
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Quantity */}
+                                                                    <div className="col-span-1 md:col-span-2 flex items-center md:items-start gap-2 md:gap-0 md:flex-col">
+                                                                        <span className="md:hidden text-sm text-gray-500 w-20">Qty:</span>
+                                                                        <div className="flex items-center w-full">
+                                                                            <input
+                                                                                type="number"
+                                                                                className="input-standard text-center rounded-r-none border-r-0 w-full"
+                                                                                value={quantity}
+                                                                                onChange={(event) => onChangeQuantity(event, itemId)}
+                                                                                required
+                                                                            />
+                                                                            <span className="bg-gray-100 border border-gray-200 text-gray-600 px-3 py-2 text-sm rounded-r-lg whitespace-nowrap">
+                                                                                {selectedItem?.unit || 'unit'}
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Price */}
+                                                                    <div className="col-span-1 md:col-span-2 flex items-center md:items-start gap-2 md:gap-0 md:flex-col">
+                                                                        <span className="md:hidden text-sm text-gray-500 w-20">Price:</span>
+                                                                        <div className="relative w-full">
+                                                                            <span className="absolute left-3 top-2 text-gray-500"><CurrencySign /></span>
+                                                                            <input
+                                                                                type="text"
+                                                                                className="input-standard pl-8 w-full"
+                                                                                value={itemPrice}
+                                                                                onChange={(event) => onChangePrice(event, itemId)}
+                                                                                required
+                                                                            />
+                                                                        </div>
+                                                                    </div>
+
+                                                                    {/* Amount and Desktop Delete */}
+                                                                    <div className="col-span-1 md:col-span-3 flex justify-between items-center md:items-start md:justify-end gap-4 pt-2 md:pt-0">
+                                                                        <span className="md:hidden text-sm text-gray-500 font-semibold">Total Amount:</span>
+                                                                        <div className="flex items-center gap-4">
+                                                                            <p className="font-bold text-gray-800 text-lg"><CurrencySign />{formattedTotalAmount}</p>
+                                                                            <button type="button" className="hidden md:block text-red-500 hover:text-red-700 bg-red-50 hover:bg-red-100 p-2 rounded-md transition-colors" onClick={() => onDeleteItem(item.value)} title="Remove Item">
+                                                                                <i className="fas fa-trash"></i>
+                                                                            </button>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    })}
+
+                                                    {itemExistsMessage && (
+                                                        <div className="p-4">
+                                                            <div className="alert alert-warning mb-0" role="alert">
+                                                                {itemExistsMessage}
+                                                            </div>
+                                                        </div>
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            {/* Item Selector & Totals block */}
+                                            <div className="p-6 bg-gray-50/50 border-t border-gray-100 flex flex-col lg:flex-row gap-8">
+                                                <div className="w-full lg:w-1/2">
+                                                    <label className='block text-sm font-semibold text-gray-700 mb-2'>Add Items to Estimate</label>
+                                                    <Select
+                                                        value={searchitemResults}
+                                                        onChange={onChangeitem}
+                                                        options={items.map(item => ({
+                                                            value: item._id,
+                                                            label: item.itemname,
+                                                        }))}
+                                                        placeholder="Search and select items..."
+                                                        className="react-select-container shadow-sm"
+                                                        classNamePrefix="react-select"
+                                                    />
+                                                </div>
+
+                                                <div className="w-full lg:w-1/2 bg-white p-5 rounded-lg border border-gray-100 shadow-sm">
+                                                    <div className="space-y-3">
+                                                        <div className="flex justify-between items-center text-gray-600">
+                                                            <span>Subtotal</span>
+                                                            <span className="font-medium text-gray-800"><CurrencySign />{calculateSubtotal().toLocaleString('en-IN')}</span>
+                                                        </div>
+                                                        <div className="flex justify-between items-center gap-4">
+                                                            <span className="text-gray-600 whitespace-nowrap">Discount</span>
+                                                            <div className="relative w-1/2 max-w-[150px]">
+                                                                <span className="absolute left-3 top-2 text-gray-500"><CurrencySign /></span>
+                                                                <input
+                                                                    type="number"
+                                                                    className="input-standard pl-8 py-1.5 text-right w-full"
+                                                                    value={discountTotal}
+                                                                    onChange={handleDiscountChange}
+                                                                    min="0"
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex justify-between items-center text-gray-600 pt-2">
+                                                            <span>Tax ({signUpData.name} {signUpData.percentage}%)</span>
+                                                            <span className="font-medium text-gray-800"><CurrencySign />{calculateTaxAmount().toLocaleString('en-IN')}</span>
+                                                        </div>
+                                                        <div className="pt-3 mt-3 border-t border-gray-100 flex justify-between items-center">
+                                                            <span className="font-bold text-gray-800 text-lg">Total Amount</span>
+                                                            <span className="font-bold text-primary text-2xl"><CurrencySign />{calculateTotal().toLocaleString('en-IN')}</span>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {/* Editor Section */}
+                                        <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6'>
+                                            <label className="block text-sm font-semibold text-gray-700 mb-3">Additional Notes / Terms</label>
+                                            <div className="border border-gray-200 rounded-lg overflow-hidden">
+                                                <CKEditor
+                                                    editor={ClassicEditor}
+                                                    data={editorData}
+                                                    onChange={handleEditorChange}
+                                                    config={{
+                                                        extraPlugins: [MyCustomUploadAdapterPlugin],
+                                                    }}
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Sidebar: Settings */}
+                                    <div className="w-full lg:w-1/4 order-1 lg:order-2">
+                                        <div className='bg-white rounded-xl border border-gray-100 shadow-sm p-6 sticky top-6'>
+                                            <h3 className="font-bold text-gray-800 mb-4 pb-2 border-b border-gray-100">Settings</h3>
+
+                                            <div className="space-y-4">
+                                                <div className="flex items-center justify-between p-3 bg-gray-50 rounded-lg border border-gray-100">
+                                                    <label className="font-medium text-gray-700 cursor-pointer select-none" htmlFor="signatureSwitch">Enable Signatures</label>
+                                                    <div className="form-check form-switch mb-0">
+                                                        <input
+                                                            className="form-check-input cursor-pointer"
+                                                            type="checkbox"
+                                                            role="switch"
+                                                            id="signatureSwitch"
+                                                            onChange={handleSignatureSwitch}
+                                                            checked={hasSignature}
+                                                        />
+                                                    </div>
+                                                </div>
+
+                                                {hasSignature && (
+                                                    <div className="pl-4 space-y-3 border-l-2 border-blue-100 py-2">
+                                                        <div className="flex items-center justify-between">
+                                                            <label className="text-sm text-gray-600 cursor-pointer select-none" htmlFor="addSignatureSwitch">My Signature</label>
+                                                            <div className="form-check form-switch mb-0">
+                                                                <input
+                                                                    className="form-check-input cursor-pointer"
+                                                                    type="checkbox"
+                                                                    role="switch"
+                                                                    id="addSignatureSwitch"
+                                                                    checked={isAddSignatureSwitchOn}
+                                                                    onChange={handleAddSignatureSwitch}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                        <div className="flex items-center justify-between">
+                                                            <label className="text-sm text-gray-600 cursor-pointer select-none" htmlFor="customerSignSwitch">Customer Signature</label>
+                                                            <div className="form-check form-switch mb-0">
+                                                                <input
+                                                                    className="form-check-input cursor-pointer"
+                                                                    type="checkbox"
+                                                                    role="switch"
+                                                                    id="customerSignSwitch"
+                                                                    checked={isCustomerSignSwitchOn}
+                                                                    onChange={handleCustomerSignSwitch}
+                                                                />
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                )}
+                                            </div>
+
+                                            {isSignatureModalOpen && (
+                                                <SignatureModal
+                                                    onSave={saveSignature}
+                                                    onClose={() => setIsSignatureModalOpen(false)}
+                                                />
+                                            )}
+                                        </div>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <form action="">
+                        <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div className="modal-dialog modal-lg">
+                                <div className="modal-content">
+                                    <div className="modal-header">
+                                        <h1 className="modal-title text-xl" id="exampleModalLabel">Edit Customer</h1>
+                                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div className="modal-body">
+                                        <div className="mb-6">
+                                            <label htmlFor="customerName" className="form-label">Name</label>
+                                            <select className="input-standard" id="customerName" value={editedName} onChange={handleNameChange}>
+                                                <option value="" disabled>Select Name</option>
+                                                {customers.map(customer => (
+                                                    <option key={customer._id} value={customer.name}>{customer.name}</option>
+                                                ))}
+                                            </select>
+                                        </div>
+                                        <div className="mb-6">
+                                            <label htmlFor="customerEmail" className="form-label">Email</label>
+                                            <input type="email" className="input-standard" id="customerEmail" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} />
+                                        </div>
+                                    </div>
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="button" className="btn-primary" data-bs-dismiss="modal" onClick={handleEditCustomer}>Save changes</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                    </form>
 
-                        <form action="">
-                            <div className="modal fade" id="exampleModal" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                                <div className="modal-dialog modal-lg">
-                                    <div className="modal-content">
-                                        <div className="modal-header">
-                                            <h1 className="modal-title fs-5" id="exampleModalLabel">Edit Customer</h1>
-                                            <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                        </div>
-                                        <div className="modal-body">
-                                            <div className="mb-3">
-                                                <label htmlFor="customerName" className="form-label">Name</label>
-                                                <select className="form-control" id="customerName" value={editedName} onChange={handleNameChange}>
-                                                    <option value="" disabled>Select Name</option>
-                                                    {customers.map(customer => (
-                                                        <option key={customer._id} value={customer.name}>{customer.name}</option>
-                                                    ))}
-                                                </select>
-                                            </div>
-                                            <div className="mb-3">
-                                                <label htmlFor="customerEmail" className="form-label">Email</label>
-                                                <input type="email" className="form-control" id="customerEmail" value={editedEmail} onChange={(e) => setEditedEmail(e.target.value)} />
-                                            </div>
-                                        </div>
-                                        <div className="modal-footer">
-                                            <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            <button type="button" className="btn btn-primary" data-bs-dismiss="modal" onClick={handleEditCustomer}>Save changes</button>
-                                        </div>
+                    {/* add customer */}
+                    <form onSubmit={(e) => e.preventDefault()}>
+                        <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                            <div className="modal-dialog modal-lg">
+                                <div className="modal-content">
+                                    <div className="modal-header">
+                                        <h1 className="modal-title text-xl" id="exampleModalLabel">Add Customer</h1>
+                                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                </div>
-                            </div>
-                        </form>
+                                    <div className="modal-body">
+                                        <div className="flex flex-col md:flex-row">
 
-                        {/* add customer */}
- <form onSubmit={(e) => e.preventDefault()}>
-                <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                    <div className="modal-dialog modal-lg">
-                        <div className="modal-content">
-                            <div className="modal-header">
-                                <h1 className="modal-title fs-5" id="exampleModalLabel">Add Customer</h1>
-                                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                            </div>
-                            <div className="modal-body">
-                                <div className="row">
-
-                                    {/* Customer Name */}
-                                    <div className="col-12 col-sm-6 col-lg-4 mb-3">
-                                        <label className="form-label">Customer Name</label>
-                                        <input
-                                            type="text"
-                                            className="form-control"
-                                            name="name"
-                                            value={credentials.name}
-                                            onChange={onchangeaddcustomer}
-                                            placeholder="Customer Name"
-                                            required
-                                        />
-                                    </div>
-
-                                    {/* Emails */}
-                                    <div className="col-12 col-sm-6 col-lg-8 mb-3">
-                                        <label className="form-label">Contact Emails</label>
-                                        {credentials.emails.map((email, index) => (
-                                            <div className="input-group mb-2" key={index}>
+                                            {/* Customer Name */}
+                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/3 px-2 mb-6">
+                                                <label className="form-label">Customer Name</label>
                                                 <input
-                                                    type="email"
-                                                    className="form-control"
-                                                    value={email}
-                                                    onChange={(e) => handleEmailChange(index, e.target.value)}
-                                                    placeholder={`Contact Email #${index + 1}`}
+                                                    type="text"
+                                                    className="input-standard"
+                                                    name="name"
+                                                    value={credentials.name}
+                                                    onChange={onchangeaddcustomer}
+                                                    placeholder="Customer Name"
                                                     required
                                                 />
-                                                <button
-                                                    type="button"
-                                                    className="btn btn-outline-danger"
-                                                    onClick={() => removeEmailField(index)}
-                                                    disabled={credentials.emails.length === 1}
-                                                >
-                                                    -
-                                                </button>
-                                                {index === credentials.emails.length - 1 && (
-                                                    <button
-                                                        type="button"
-                                                        className="btn btn-outline-primary"
-                                                        onClick={addEmailField}
-                                                    >
-                                                        +
-                                                    </button>
-                                                )}
                                             </div>
-                                        ))}
+
+                                            {/* Emails */}
+                                            <div className="w-full px-2 col-sm-6 w-full lg:w-2/3 px-2 mb-6">
+                                                <label className="form-label">Contact Emails</label>
+                                                {credentials.emails.map((email, index) => (
+                                                    <div className="input-group mb-2" key={index}>
+                                                        <input
+                                                            type="email"
+                                                            className="input-standard"
+                                                            value={email}
+                                                            onChange={(e) => handleEmailChange(index, e.target.value)}
+                                                            placeholder={`Contact Email #${index + 1}`}
+                                                            required
+                                                        />
+                                                        <button
+                                                            type="button"
+                                                            className="btn btn-outline-danger"
+                                                            onClick={() => removeEmailField(index)}
+                                                            disabled={credentials.emails.length === 1}
+                                                        >
+                                                            -
+                                                        </button>
+                                                        {index === credentials.emails.length - 1 && (
+                                                            <button
+                                                                type="button"
+                                                                className="btn-secondary"
+                                                                onClick={addEmailField}
+                                                            >
+                                                                +
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+
+                                            {/* Phone Number */}
+                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/3 px-2 mb-6">
+                                                <label className="form-label">Phone Number</label>
+                                                <input
+                                                    type="text"
+                                                    name="number"
+                                                    value={credentials.number}
+                                                    onChange={onchangeaddcustomer}
+                                                    className="input-standard"
+                                                    placeholder="Phone Number"
+                                                />
+                                            </div>
+
+                                            {/* Additional Information */}
+                                            <div className="w-full px-2 mb-6">
+                                                <label className="form-label">Additional Information</label>
+                                                <textarea
+                                                    name="information"
+                                                    value={credentials.information}
+                                                    onChange={onchangeaddcustomer}
+                                                    className="input-standard"
+                                                    placeholder="Information"
+                                                />
+                                            </div>
+
+                                            {/* Address 1 & 2 */}
+                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
+                                                <label className="form-label">Address 1</label>
+                                                <input
+                                                    type="text"
+                                                    name="address1"
+                                                    value={credentials.address1}
+                                                    onChange={onchangeaddcustomer}
+                                                    className="input-standard"
+                                                    placeholder="Address 1"
+                                                />
+                                            </div>
+
+                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
+                                                <label className="form-label">Address 2</label>
+                                                <input
+                                                    type="text"
+                                                    name="address2"
+                                                    value={credentials.address2}
+                                                    onChange={onchangeaddcustomer}
+                                                    className="input-standard"
+                                                    placeholder="Address 2"
+                                                />
+                                            </div>
+
+                                            {/* Country */}
+                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
+                                                <label className="form-label">Country</label>
+                                                <CountrySelect
+                                                    name="country"
+                                                    value={credentials.countryid}
+                                                    onChange={(val) => {
+                                                        setcountryid(val.id);
+                                                        setcountry(val.name);
+                                                        setCredentials({ ...credentials, countrydata: JSON.stringify(val) });
+                                                    }}
+                                                    valueType="short"
+                                                    className="input-standard"
+                                                    placeHolder="Select Country"
+                                                />
+                                            </div>
+
+                                            {/* State */}
+                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
+                                                <label className="form-label">State</label>
+                                                <StateSelect
+                                                    name="state"
+                                                    countryid={countryid}
+                                                    onChange={(val) => {
+                                                        setstateid(val.id);
+                                                        setstate(val.name);
+                                                        setCredentials({ ...credentials, statedata: JSON.stringify(val) });
+                                                    }}
+                                                    placeHolder="Select State"
+                                                />
+                                            </div>
+
+                                            {/* City */}
+                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
+                                                <label className="form-label">City</label>
+                                                <CitySelect
+                                                    countryid={countryid}
+                                                    stateid={stateid}
+                                                    onChange={(val) => {
+                                                        setcityid(val.id);
+                                                        setcity(val.name);
+                                                        setCredentials({ ...credentials, citydata: JSON.stringify(val) });
+                                                    }}
+                                                    placeHolder="Select City"
+                                                />
+                                            </div>
+
+                                            {/* Post Code */}
+                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
+                                                <label className="form-label">Post Code</label>
+                                                <input
+                                                    type="text"
+                                                    name="post"
+                                                    value={credentials.post}
+                                                    onChange={onchangeaddcustomer}
+                                                    className="input-standard"
+                                                    placeholder="Post Code"
+                                                />
+                                            </div>
+
+                                        </div>
                                     </div>
 
-                                    {/* Phone Number */}
-                                    <div className="col-12 col-sm-6 col-lg-4 mb-3">
-                                        <label className="form-label">Phone Number</label>
-                                        <input
-                                            type="text"
-                                            name="number"
-                                            value={credentials.number}
-                                            onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Phone Number"
-                                        />
+                                    <div className="modal-footer">
+                                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button
+                                            type="button"
+                                            className="btn-primary"
+                                            onClick={handleAddCustomer}
+                                            data-bs-dismiss="modal"
+                                        >
+                                            Add Customer
+                                        </button>
                                     </div>
-
-                                    {/* Additional Information */}
-                                    <div className="col-12 mb-3">
-                                        <label className="form-label">Additional Information</label>
-                                        <textarea
-                                            name="information"
-                                            value={credentials.information}
-                                            onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Information"
-                                        />
-                                    </div>
-
-                                    {/* Address 1 & 2 */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">Address 1</label>
-                                        <input
-                                            type="text"
-                                            name="address1"
-                                            value={credentials.address1}
-                                            onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Address 1"
-                                        />
-                                    </div>
-
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">Address 2</label>
-                                        <input
-                                            type="text"
-                                            name="address2"
-                                            value={credentials.address2}
-                                            onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Address 2"
-                                        />
-                                    </div>
-
-                                    {/* Country */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">Country</label>
-                                        <CountrySelect
-                                            name="country"
-                                            value={credentials.countryid}
-                                            onChange={(val) => {
-                                                setcountryid(val.id);
-                                                setcountry(val.name);
-                                                setCredentials({ ...credentials, countrydata: JSON.stringify(val) });
-                                            }}
-                                            valueType="short"
-                                            className="form-control"
-                                            placeHolder="Select Country"
-                                        />
-                                    </div>
-
-                                    {/* State */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">State</label>
-                                        <StateSelect
-                                            name="state"
-                                            countryid={countryid}
-                                            onChange={(val) => {
-                                                setstateid(val.id);
-                                                setstate(val.name);
-                                                setCredentials({ ...credentials, statedata: JSON.stringify(val) });
-                                            }}
-                                            placeHolder="Select State"
-                                        />
-                                    </div>
-
-                                    {/* City */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">City</label>
-                                        <CitySelect
-                                            countryid={countryid}
-                                            stateid={stateid}
-                                            onChange={(val) => {
-                                                setcityid(val.id);
-                                                setcity(val.name);
-                                                setCredentials({ ...credentials, citydata: JSON.stringify(val) });
-                                            }}
-                                            placeHolder="Select City"
-                                        />
-                                    </div>
-
-                                    {/* Post Code */}
-                                    <div className="col-12 col-sm-6 col-lg-6 mb-3">
-                                        <label className="form-label">Post Code</label>
-                                        <input
-                                            type="text"
-                                            name="post"
-                                            value={credentials.post}
-                                            onChange={onchangeaddcustomer}
-                                            className="form-control"
-                                            placeholder="Post Code"
-                                        />
-                                    </div>
-
                                 </div>
                             </div>
-
-                            <div className="modal-footer">
-                                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        </div>
+                    </form>
+                </div>
+            )}
+            {showEmailModal && (
+                <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
+                    <div className="modal-dialog">
+                        <div className="modal-content">
+                            <div className="modal-header">
+                                <h5 className="modal-title">Select an Email for Estimate</h5>
                                 <button
                                     type="button"
-                                    className="btn btn-primary"
-                                    onClick={handleAddCustomer}
-                                    data-bs-dismiss="modal"
-                                >
-                                    Add Customer
-                                </button>
+                                    className="btn-close"
+                                    onClick={() => setShowEmailModal(false)}
+                                ></button>
+                            </div>
+                            <div className="modal-body">
+                                <p>This customer has multiple emails. Please select one:</p>
+                                {emailOptions.map((email, index) => (
+                                    <div className="form-check" key={index}>
+                                        <input
+                                            className="form-check-input"
+                                            type="radio"
+                                            name="selectedEmail"
+                                            id={`email-${index}`}
+                                            value={email}
+                                            onChange={() => {
+                                                setestimateData(prev => ({
+                                                    ...prev,
+                                                    customeremail: email,
+                                                }));
+
+                                                setSelectedCustomerDetails(prev => ({
+                                                    ...prev,
+                                                    email: email,
+                                                }));
+
+                                                setShowEmailModal(false);
+                                            }}
+                                        />
+                                        <label className="form-check-label" htmlFor={`email-${index}`}>
+                                            {email}
+                                        </label>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>
                 </div>
-            </form>
-                    </div>
-
-
-            }
-            {showEmailModal && (
-  <div className="modal fade show" style={{ display: 'block' }} tabIndex="-1">
-    <div className="modal-dialog">
-      <div className="modal-content">
-        <div className="modal-header">
-          <h5 className="modal-title">Select an Email for Estimate</h5>
-          <button
-            type="button"
-            className="btn-close"
-            onClick={() => setShowEmailModal(false)}
-          ></button>
-        </div>
-        <div className="modal-body">
-          <p>This customer has multiple emails. Please select one:</p>
-          {emailOptions.map((email, index) => (
-            <div className="form-check" key={index}>
-              <input
-                className="form-check-input"
-                type="radio"
-                name="selectedEmail"
-                id={`email-${index}`}
-                value={email}
-                onChange={() => {
-                  setestimateData(prev => ({
-                    ...prev,
-                    customeremail: email,
-                  }));
-
-                  setSelectedCustomerDetails(prev => ({
-                    ...prev,
-                    email: email,
-                  }));
-
-                  setShowEmailModal(false);
-                }}
-              />
-              <label className="form-check-label" htmlFor={`email-${index}`}>
-                {email}
-              </label>
-            </div>
-          ))}
-        </div>
-      </div>
-    </div>
-  </div>
-)}
+            )}
         </div>
     )
 }

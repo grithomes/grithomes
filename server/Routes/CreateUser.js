@@ -6,7 +6,7 @@ const User = require('../models/User');
 const Restaurant = require('../models/Restaurent')
 const { body, validationResult } = require('express-validator');
 const jwt = require('jsonwebtoken');
-const jwrsecret = "MYNameisJashandeepSInghjoharmukts"
+const jwrsecret = process.env.JWT_SECRET
 const bcrypt = require("bcryptjs");
 const Category = require('../models/Category')
 const Subcategory = require('../models/Subcategory')
@@ -840,15 +840,15 @@ router.post('/send-invoice-email', async (req, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: "grithomesltd@gmail.com",
-            pass: "lpctmxmuoudgnopd"
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
     });
 
     const currencySign = getCurrencySign(currencyType);
 
     const mailOptions = {
-        from: 'grithomesltd@gmail.com',
+        from: process.env.EMAIL_USER,
         to: to.join(', '),
         bcc: bcc.join(', '),
         subject: `Invoice from ${companyName}`,
@@ -933,8 +933,8 @@ router.post('/send-deposit-email', async (req, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: "grithomesltd@gmail.com",
-            pass: "lpctmxmuoudgnopd"
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
     });
 
@@ -943,15 +943,15 @@ router.post('/send-deposit-email', async (req, res) => {
     //     port: 465, // Replace with the appropriate port
     //     secure: true, // true for 465, false for other ports
     //     auth: {
-    //       user: 'grithomesltd@gmail.com',
-    //       pass: 'lpctmxmuoudgnopd'
+    //       user: process.env.EMAIL_USER,
+    //       pass: process.env.EMAIL_PASS
     //     }
     //   });
 
     const currencySign = getCurrencySign(currencyType);
 
     const mailOptions = {
-        from: 'grithomesltd@gmail.com',
+        from: process.env.EMAIL_USER,
         to: to.join(', '),
         bcc: bcc.join(', '),
         subject: `Deposit Request from ${companyName}`,
@@ -1034,7 +1034,7 @@ router.post('/send-estimate-email', async (req, res) => {
     // const transporter = nodemailer.createTransport({
     //     service: 'gmail',
     //     auth: {
-    //         user: "grithomesltd@gmail.com",
+    //         user: process.env.EMAIL_USER,
     //         pass: "cwoxnbrrxvsjfbmr"
     //     },
     // });
@@ -1042,8 +1042,8 @@ router.post('/send-estimate-email', async (req, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: "grithomesltd@gmail.com",
-            pass: "lpctmxmuoudgnopd"
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
     });
 
@@ -1052,15 +1052,15 @@ router.post('/send-estimate-email', async (req, res) => {
     //     port: 465, // Replace with the appropriate port
     //     secure: true, // true for 465, false for other ports
     //     auth: {
-    //       user: 'grithomesltd@gmail.com',
-    //       pass: 'lpctmxmuoudgnopd'
+    //       user: process.env.EMAIL_USER,
+    //       pass: process.env.EMAIL_PASS
     //     }
     //   });
 
     const currencySign = getCurrencySign(currencyType);
 
     const mailOptions = {
-        from: 'grithomesltd@gmail.com',
+        from: process.env.EMAIL_USER,
         to: to.join(', '),
         bcc: bcc.join(', '),
         subject: `Estimate from ${companyName}`,
@@ -1136,7 +1136,7 @@ router.post('/send-estimate-signed-email', async (req, res) => {
     // const transporter = nodemailer.createTransport({
     //     service: 'gmail',
     //     auth: {
-    //         user: "grithomesltd@gmail.com",
+    //         user: process.env.EMAIL_USER,
     //         pass: "cwoxnbrrxvsjfbmr"
     //     },
     // });
@@ -1144,13 +1144,13 @@ router.post('/send-estimate-signed-email', async (req, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: "grithomesltd@gmail.com",
-            pass: "lpctmxmuoudgnopd"
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
     });
 
     const mailOptions = {
-        from: "grithomesltd@gmail.com",
+        from: process.env.EMAIL_USER,
         to: to,
         subject: 'Your document has been signed',
         html: `<html>
@@ -1218,13 +1218,13 @@ router.post('/send-Invoice-signed-email', async (req, res) => {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: "grithomesltd@gmail.com",
-            pass: "lpctmxmuoudgnopd"
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
     });
 
     const mailOptions = {
-        from: 'grithomesltd@gmail.com',
+        from: process.env.EMAIL_USER,
         to: to,
         subject: 'Your document has been signed',
         html: `<html>
@@ -1739,8 +1739,8 @@ function sendWelcomeEmail(userEmail, name, isFirstTimeLogin) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: "grithomesltd@gmail.com",
-            pass: "lpctmxmuoudgnopd"
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
     });
     // const transporter = nodemailer.createTransport({
@@ -1748,8 +1748,8 @@ function sendWelcomeEmail(userEmail, name, isFirstTimeLogin) {
     //     port: 465, // Replace with the appropriate port
     //     secure: true, // true for 465, false for other ports
     //     auth: {
-    //       user: 'grithomesltd@gmail.com',
-    //       pass: 'lpctmxmuoudgnopd'
+    //       user: process.env.EMAIL_USER,
+    //       pass: process.env.EMAIL_PASS
     //     }
     //   });
 
@@ -1790,8 +1790,8 @@ router.post('/forgot-password', async (req, res) => {
         const transporter = nodemailer.createTransport({
             service: 'gmail',
             auth: {
-                user: "grithomesltd@gmail.com",
-                pass: "lpctmxmuoudgnopd"
+                user: process.env.EMAIL_USER,
+                pass: process.env.EMAIL_PASS
             },
         });
         // const transporter = nodemailer.createTransport({
@@ -1799,8 +1799,8 @@ router.post('/forgot-password', async (req, res) => {
         //     port: 465, // Replace with the appropriate port
         //     secure: true, // true for 465, false for other ports
         //     auth: {
-        //       user: 'grithomesltd@gmail.com',
-        //       pass: 'lpctmxmuoudgnopd'
+        //       user: process.env.EMAIL_USER,
+        //       pass: process.env.EMAIL_PASS
         //     }
         //   });
 
@@ -3615,8 +3615,8 @@ function sendTeamWelcomeEmail(userEmail, name, isFirstTimeLogin, companyName) {
     const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
-            user: "grithomesltd@gmail.com",
-            pass: "lpctmxmuoudgnopd"
+            user: process.env.EMAIL_USER,
+            pass: process.env.EMAIL_PASS
         },
     });
     // const transporter = nodemailer.createTransport({
@@ -3624,13 +3624,13 @@ function sendTeamWelcomeEmail(userEmail, name, isFirstTimeLogin, companyName) {
     //     port: 465, // Replace with the appropriate port
     //     secure: true, // true for 465, false for other ports
     //     auth: {
-    //       user: 'grithomesltd@gmail.com',
-    //       pass: 'lpctmxmuoudgnopd'
+    //       user: process.env.EMAIL_USER,
+    //       pass: process.env.EMAIL_PASS
     //     }
     //   });
 
     const mailOptions = {
-        from: 'grithomesltd@gmail.com',
+        from: process.env.EMAIL_USER,
         to: userEmail,
         subject: subject,
         html: message,

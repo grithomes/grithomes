@@ -44,7 +44,7 @@ const SignatureModal = ({ onSave, onClose }) => {
                         className: 'sigCanvas',
                     }} 
                 />
-                <div className='d-flex justify-content-center'>
+                <div className='flex justify-center'>
                     <button onClick={(e) => clear(e)} className='btn btn-light'>Clear</button>
                     <button onClick={save} className='btn btn-light mx-2 text-primary'>Save</button>
                 </div>

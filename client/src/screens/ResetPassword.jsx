@@ -20,7 +20,7 @@ export default function ResetPassword() {
     }
 
     try {
-      const response = await fetch('https://grithomes.onrender.com/api/reset-password', {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/reset-password`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
@@ -42,24 +42,24 @@ export default function ResetPassword() {
   };
 
   return (
-    <div className='py-3'>
-        <h1 className='text-center my-5 fw-bold'>IN<span className='clrblue'>VOICE</span></h1>
-        <section className='d-flex justify-content-center align-items-center'>
-            <div className='signin-form loginbox p-5 pb-4 mt-3'>
-                <p className='h4 fw-bold'>Reset Password</p>
+    <div className='py-6'>
+        <h1 className='text-center my-5 font-semibold'>IN<span className='clrblue'>VOICE</span></h1>
+        <section className='flex justify-center items-center'>
+            <div className='signin-form loginbox p-8 pb-4 mt-6'>
+                <p className='text-xl font-semibold font-semibold'>Reset Password</p>
 
-                <div class="form-group mb-4 pt-3">
-                    <label class="label mb-1" for="password">New Password</label>
-                    <input type="password" class="form-control" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New Password" />
+                <div className="form-group mb-6 pt-4">
+                    <label className="label mb-1" for="password">New Password</label>
+                    <input type="password" className="form-control" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New Password" />
                 </div>
-                <div class="form-group mb-4">
-                    <label class="label mb-1" for="password">Confirm Password</label>
-                    <input type="password" class="form-control" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm Password" />
+                <div className="form-group mb-6">
+                    <label className="label mb-1" for="password">Confirm Password</label>
+                    <input type="password" className="form-control" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm Password" />
                 </div>
-                <div class="d-flex justify-content-center">
-                    <button class="form-control w-75 btn btnblur text-white mb-1" onClick={handleResetPassword}>Reset Password</button>
+                <div className="d-flex justify-center">
+                    <button className="form-control w-75 btn btnblur text-white mb-1" onClick={handleResetPassword}>Reset Password</button>
                 </div>
-                {message && <p className='text-danger text-center fw-bold'>{message}</p>}
+                {message && <p className='text-danger text-center font-semibold'>{message}</p>}
             </div>
         </section>
     </div>

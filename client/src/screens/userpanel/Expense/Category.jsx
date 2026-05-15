@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import Usernavbar from '../Usernavbar';
-import Usernav from '../Usernav';
+import Sidebar from '../Sidebar';
+
 import { ColorRing } from 'react-loader-spinner';
 
 export default function ExpenseType() {
@@ -14,7 +14,7 @@ export default function ExpenseType() {
     const [alertMessage, setAlertMessage] = useState('');
     const [alertmessageShow, setAlertmessageShow] = useState('');
 
-    const apiURL = 'https://grithomes.onrender.com/api/expensetype';
+    const apiURL = `${import.meta.env.VITE_API_BASE_URL}/expensetype`;
 
     // Fetch all expense types on component mount
     useEffect(() => {
@@ -83,6 +83,7 @@ export default function ExpenseType() {
                 } else {
                     console.error('Error deleting expense type');
                 }
+
             } catch (error) {
                 console.error('Error deleting expense type:', error);
             }
@@ -90,14 +91,12 @@ export default function ExpenseType() {
     };
 
     return (
-        <div className="bg">
+        <div className="bg-gray-50 min-h-screen">
             {
                 loading ?
-                    <div className='row'>
+                    <div className="flex justify-center items-center min-h-[400px]">
                         <ColorRing
-                            // width={200}
                             loading={loading}
-                            // size={500}
                             display="flex"
                             justify-content="center"
                             align-items="center"
@@ -105,70 +104,71 @@ export default function ExpenseType() {
                             data-testid="loader"
                         />
                     </div> :
-                    <div className="container-fluid">
-                        <div className="row">
-                            <div className="col-lg-2 col-md-3 b-shadow bg-white d-lg-block d-md-block d-none">
-                                <div>
-                                    <Usernavbar />
-                                </div>
+                    <div className="flex flex-col md:flex-row min-h-screen">
+                        <Sidebar />
+                        <div className="flex-1 w-full mx-auto px-4 md:px-8 py-8">
+
+                            {/* Header */}
+                            <div className="mb-8">
+                                <h2 className="text-2xl font-bold text-gray-800">Expense Categories</h2>
+                                <p className="text-sm text-gray-500 mt-1">Manage categories for your business expenses</p>
                             </div>
 
-                            <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                                <div className="d-lg-none d-md-none d-block mt-2">
-                                    <Usernav />
-                                </div>
-                                <div className='mt-4 mx-4'>
-                                    {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
-                                    {alertmessageShow == true ?
-                                        <div class="alert alert-warning d-flex justify-content-between" role="alert">
-                                            <div>
-                                                {alertmessageShow}
-                                            </div>
-                                            <button type="button" class="btn-close" onClick={() => {
-                                                setAlertmessageShow("");
-                                            }}>
-                                            </button>
+                            <div className='mb-6'>
+                                {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                                {alertmessageShow && (
+                                    <div className="bg-yellow-50 border border-yellow-200 text-yellow-800 rounded-lg p-4 flex justify-between items-start shadow-sm mb-6">
+                                        <div className="font-medium">
+                                            {alertmessageShow}
                                         </div>
-                                        : ''
-                                    }
-                                </div>
+                                        <button type="button" className="text-yellow-600 hover:text-yellow-800 focus:outline-none transition-colors" onClick={() => setAlertmessageShow("")}>
+                                            <i className="fa-solid fa-xmark text-lg"></i>
+                                        </button>
+                                    </div>
+                                )}
+                            </div>
 
-                                <div className="container mt-4">
-                                    <div className="row">
-                                        {/* Left column - Form to add/update expense types */}
-                                        <div className="col-md-7">
-                                            <h3>{selectedExpenseType ? 'Update Expense Type' : 'Add Expense Type'}</h3>
-                                            <form onSubmit={handleSubmit}>
-                                                <div className="mb-3">
-                                                    <label htmlFor="name" className="form-label">Expense Type Name</label>
-                                                    <input
-                                                        type="text"
-                                                        id="name"
-                                                        name="name"
-                                                        className="form-control"
-                                                        value={formData.name}
-                                                        onChange={handleInputChange}
-                                                        required
-                                                    />
-                                                </div>
-                                                <div className="mb-3">
-                                                    <label htmlFor="description" className="form-label">Description</label>
-                                                    <textarea
-                                                        id="description"
-                                                        name="description"
-                                                        className="form-control"
-                                                        value={formData.description}
-                                                        onChange={handleInputChange}
-                                                        required
-                                                    />
-                                                </div>
-                                                <button type="submit" className="btn btn-primary" disabled={loading}>
-                                                    {selectedExpenseType ? 'Update Expense Type' : 'Add Expense Type'}
+                            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                                {/* Left column - Form to add/update expense types */}
+                                <div className="lg:col-span-5">
+                                    <div className="card-standard">
+                                        <h3 className="text-lg font-semibold text-gray-800 mb-6 border-b border-gray-100 pb-4">
+                                            {selectedExpenseType ? 'Edit Category' : 'Add New Category'}
+                                        </h3>
+                                        <form onSubmit={handleSubmit} className="space-y-6">
+                                            <div>
+                                                <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-2">Category Name <span className="text-red-500">*</span></label>
+                                                <input
+                                                    type="text"
+                                                    id="name"
+                                                    name="name"
+                                                    className="input-standard"
+                                                    value={formData.name}
+                                                    onChange={handleInputChange}
+                                                    required
+                                                    placeholder="e.g., Office Supplies"
+                                                />
+                                            </div>
+                                            <div>
+                                                <label htmlFor="description" className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+                                                <textarea
+                                                    id="description"
+                                                    name="description"
+                                                    rows="4"
+                                                    className="input-standard resize-none"
+                                                    value={formData.description}
+                                                    onChange={handleInputChange}
+                                                    placeholder="Brief description of the category..."
+                                                />
+                                            </div>
+                                            <div className="flex gap-3 pt-2">
+                                                <button type="submit" className="btn-primary flex-1 justify-center" disabled={loading}>
+                                                    {selectedExpenseType ? 'Update Category' : 'Save Category'}
                                                 </button>
                                                 {selectedExpenseType && (
                                                     <button
                                                         type="button"
-                                                        className="btn btn-secondary ms-2"
+                                                        className="px-6 py-2.5 bg-white border border-gray-300 text-gray-700 font-medium rounded-lg hover:bg-gray-50 transition-colors shadow-sm focus:outline-none focus:ring-2 focus:ring-primary/20"
                                                         onClick={() => {
                                                             setSelectedExpenseType(null);
                                                             setFormData({ name: '', description: '' });
@@ -177,42 +177,60 @@ export default function ExpenseType() {
                                                         Cancel
                                                     </button>
                                                 )}
-                                            </form>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+
+                                {/* Right column - List of expense types */}
+                                <div className="lg:col-span-7">
+                                    <div className="card-standard">
+                                        <div className="flex justify-between items-center border-b border-gray-100 pb-4 mb-4">
+                                            <h3 className="text-lg font-semibold text-gray-800">Existing Categories</h3>
+                                            <span className="bg-primary/10 text-primary text-xs font-bold px-3 py-1 rounded-full">
+                                                {expenseTypes.length} {expenseTypes.length === 1 ? 'Category' : 'Categories'}
+                                            </span>
                                         </div>
 
-                                        {/* Right column - List of expense types */}
-                                        <div className="col-md-5">
-                                            <h3>Expense Types List</h3>
-                                            {loading ? (
-                                                <div className="d-flex justify-content-center">
-                                                    <ColorRing
-                                                        visible={true}
-                                                        height="80"
-                                                        width="80"
-                                                        ariaLabel="loading"
-                                                        wrapperClass="d-flex justify-content-center"
-                                                    />
+                                        {loading ? (
+                                            <div className="flex justify-center py-12">
+                                                <ColorRing
+                                                    visible={true}
+                                                    height="60"
+                                                    width="60"
+                                                    ariaLabel="loading"
+                                                    wrapperClass="d-flex justify-center"
+                                                />
+                                            </div>
+                                        ) : expenseTypes.length > 0 ? (
+                                            <div className="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                                                {expenseTypes.map((expenseType) => (
+                                                    <div key={expenseType._id} className="flex justify-between items-start p-4 bg-white border border-gray-100 rounded-xl hover:border-primary/30 hover:shadow-md transition-all duration-200 group">
+                                                        <div className="flex-1 cursor-pointer pr-4" onClick={() => handleEdit(expenseType)}>
+                                                            <h4 className="text-md font-semibold text-gray-900 group-hover:text-primary transition-colors">{expenseType.name}</h4>
+                                                            {expenseType.description && (
+                                                                <p className="text-sm text-gray-500 mt-1 line-clamp-2">{expenseType.description}</p>
+                                                            )}
+                                                        </div>
+                                                        <button
+                                                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors focus:outline-none shrink-0"
+                                                            onClick={() => handleDelete(expenseType._id)}
+                                                            title="Delete category"
+                                                        >
+                                                            <i className="fa-solid fa-trash-can"></i>
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-center py-12 px-4 border-2 border-dashed border-gray-200 rounded-xl bg-gray-50/50">
+                                                <div className="w-16 h-16 bg-gray-100 text-gray-400 rounded-full flex items-center justify-center mx-auto mb-4">
+                                                    <i className="fa-solid fa-tags text-2xl"></i>
                                                 </div>
-                                            ) : expenseTypes.length > 0 ? (
-                                                <ul className="list-group">
-                                                    {expenseTypes.map((expenseType) => (
-                                                        <li key={expenseType._id} className="list-group-item d-flex justify-content-between align-items-center">
-                                                            <div onClick={() => handleEdit(expenseType)}>
-                                                                <strong>{expenseType.name}</strong> - {expenseType.description}
-                                                            </div>
-                                                            <button
-                                                                className="btn btn-danger btn-sm"
-                                                                onClick={() => handleDelete(expenseType._id)}
-                                                            >
-                                                                Delete
-                                                            </button>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            ) : (
-                                                <p>No expense types available.</p>
-                                            )}
-                                        </div>
+                                                <h3 className="text-lg font-medium text-gray-900 mb-1">No Categories Yet</h3>
+                                                <p className="text-gray-500 max-w-sm mx-auto">Start by adding a new expense category using the form to organize your business expenses.</p>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>

@@ -22,7 +22,7 @@ export default function Login() {
 //   const handleSubmit = async(e) => {
 //     e.preventDefault();
 //     setloginbtnloader(true);
-//     const response = await fetch("https://grithomes.onrender.com/api/login",{
+//     const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/login`,{
 //         method:'POST',
 //         headers: {
 //             'Content-Type':'application/json'
@@ -69,7 +69,7 @@ const handleSubmit = async (e) => {
 
   try {
     const sanitizedEmail = credentials.email.toLowerCase().replace(/\s+/g, '');
-    const response = await fetch("https://grithomes.onrender.com/api/login", {
+    const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -119,56 +119,56 @@ const onchange = (event) => {
 }
 
   return (
-    <div className='py-3'>
-        <h1 className='text-center my-5 fw-bold'>IN<span className='clrblue'>VOICE</span></h1>
-      <section className='d-flex justify-content-center align-items-center'>
-        
-        <form class="signin-form loginbox" onSubmit={handleSubmit}>
-            <div className=' p-5 pb-4 mt-3'>
-                <p className='h4 fw-bold'>Sign In</p>
+    <div className='min-h-screen flex flex-col justify-center items-center px-6 bg-background relative overflow-hidden'>
+      {/* Decorative gradient blur */}
+      <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-primary opacity-10 rounded-full blur-3xl pointer-events-none"></div>
 
-                <div class="form-group mb-3 pt-3">
-                    <label class="label" for="name">Email</label>
-                    <input type="text" class="form-control" name="email" value={credentials.email}  onChange={onchange} placeholder="Email" required />
-                </div>
-                <div class="form-group mb-3">
-                    <label class="label" for="password">Password</label>
-                    <input type="password" class="form-control" name="password" value={credentials.password}  onChange={onchange} placeholder="Password" required />
-                </div>
-                <div class="form-group d-flex justify-content-center">
-                    {
-        loginbtnloader?
-        <button class="form-control w-75 btn btnblur text-white mb-1">
-          <ColorRing
-        // width={200}
-        loading={loginbtnloader}
-        height={30}
-        display="flex"
-        padding-bottom= "12px"
-        justify-content= "center"
-        align-items="center"
-        aria-label="Loading Spinner"
-        data-testid="loader"        
-      /></button>
-        :<button type="submit" class="form-control w-75 btn btnblur text-white mb-1">Sign In</button>}
-                </div>
-            </div>
+      <div className="text-center mb-6 z-10">
+        <h1 className='font-bold text-4xl text-textMain tracking-tight mb-2'>
+          IN<span className="text-primary text-5xl">VOICE</span>
+        </h1>
+        <p className="text-textMuted font-medium text-lg">Manage your premium invoices securely.</p>
+      </div>
 
-            {alertShow && (
-              <>
-                <p className='text-danger text-center fw-bold'>Login with correct details.</p>             
-              </>                      
-              )}
-            <div class="form-group mb-3">
-                <div class=" text-center">
-                    <p class="checkbox-wrap checkbox-primary mb-0 fw-bold">Don't have an account?
-                    <Link className="text-dark" aria-current="page" to="/signup">Sign up</Link>
-                    </p>
-                    <p className='fw-bold pointer' onClick={handleForgetPassword}>Forgot Password?</p>
-                </div>
+      <div className="card-standard p-8 z-10 w-full max-w-md">
+        <form className="signin-form" onSubmit={handleSubmit}>
+          <div className="mb-8">
+            <h4 className="font-bold text-2xl text-textMain mb-1">Welcome Back</h4>
+            <p className="text-textMuted text-sm">Please sign in to your dashboard</p>
+          </div>
+
+          <div className="form-group mb-5">
+            <label className="block font-semibold mb-2 text-sm text-textMain" htmlFor="name">Email</label>
+            <input type="email" className="input-standard" name="email" value={credentials.email} onChange={onchange} placeholder="Enter your email" required />
+          </div>
+          
+          <div className="form-group mb-6">
+            <label className="block font-semibold mb-2 text-sm text-textMain" htmlFor="password">Password</label>
+            <input type="password" className="input-standard" name="password" value={credentials.password} onChange={onchange} placeholder="••••••••" required />
+          </div>
+
+          <div className="form-group mb-6">
+            {loginbtnloader ? (
+              <button disabled className="btn-primary w-full py-3 flex justify-center items-center opacity-70 cursor-not-allowed">
+                <ColorRing loading={loginbtnloader} height={30} display="flex" aria-label="Loading" />
+              </button>
+            ) : (
+              <button type="submit" className="btn-primary w-full py-3 text-base shadow-soft hover:shadow-lg transition-all">Sign In</button>
+            )}
+          </div>
+
+          {alertShow && (
+            <div className="bg-red-50 text-red-700 border border-red-200 px-6 py-3 rounded-std text-center text-sm font-medium mb-4">
+               Login failed. Please verify your credentials.
             </div>
+          )}
+
+          <div className="flex justify-between items-center mt-6 pt-5 border-t border-borderLight text-sm font-semibold">
+            <Link className="text-primary hover:text-blue-800 transition-colors" to="/signup">Create Account</Link>
+            <span className="text-textMuted hover:text-textMain transition-colors cursor-pointer" onClick={handleForgetPassword}>Forgot Password?</span>
+          </div>
         </form>
-      </section>
+      </div>
     </div>
   )
 }

@@ -26,26 +26,26 @@ import './Teamstyle.css'
 
   return (
     <div>
-      <nav class="navbar bg-body-tertiary d-block d-lg-none d-md-none">
-  <div class="">
-    <button class="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
-      <span class="navbar-toggler-icon text-black"></span>
+      <nav className="navbar bg-body-tertiary block md:hidden">
+  <div className="">
+    <button className="navbar-toggler" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasNavbar" aria-controls="offcanvasNavbar" aria-label="Toggle navigation">
+      <span className="navbar-toggler-icon text-black"></span>
     </button>
-    <div class="offcanvas offcanvas-start text-black" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
-      <div class="offcanvas-header">
-        <h5 class="offcanvas-title" id="offcanvasNavbarLabel">IN<span className='clrblue'>VOICE</span></h5>
-        <button type="button" class="btn-close " data-bs-dismiss="offcanvas" aria-label="Close"></button>
+    <div className="offcanvas offcanvas-start text-black" tabindex="-1" id="offcanvasNavbar" aria-labelledby="offcanvasNavbarLabel">
+      <div className="offcanvas-header">
+        <h5 className="offcanvas-title" id="offcanvasNavbarLabel">IN<span className='clrblue'>VOICE</span></h5>
+        <button type="button" className="btn-close " data-bs-dismiss="offcanvas" aria-label="Close"></button>
       </div>
-      <div class="offcanvas-body nav">
+      <div className="offcanvas-body nav">
       <ul>
                     <li>
                       <Link to="/Teammemberpanel/Teammenberdashboard" className={`nav-link scrollto icones text-black ${location.pathname == '/Teammemberpanel/Teammenberdashboard' ? 'active' : ''}`}>
-                        <i class="fa-solid fa-house me-2 dashclr"></i> <span>Dashboard</span>
+                        <i className="fa-solid fa-house mr-2 dashclr"></i> <span>Dashboard</span>
                       </Link>
                     </li>
                     <li>
                         <a onClick={handleLogout} className=" pointer nav-link scrollto icones text-black">
-                          <i class="fa-solid fa-right-from-bracket me-2"></i>
+                          <i className="fa-solid fa-right-from-bracket mr-2"></i>
                           <span>Logout</span>
                         </a>
                       </li>

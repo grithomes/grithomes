@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { ColorRing } from 'react-loader-spinner';
-import Usernavbar from './userpanel/Usernavbar';
-import Usernav from './userpanel/Usernav';
+import Sidebar from './userpanel/Sidebar';
+
 import Alertauthtoken from '../components/Alertauthtoken';
 
 export default function Timeschemahistory() {
@@ -33,7 +33,7 @@ export default function Timeschemahistory() {
   const fetchAllEntries = async () => {
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${teamid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/userEntries/${teamid}`, {
         headers: {
           Authorization: authToken,
         },
@@ -77,7 +77,7 @@ export default function Timeschemahistory() {
     setIsDeleting(true); // Disable the button while processing
 
     try {
-      const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${entryId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/userEntries/${entryId}`, {
         method: "DELETE",
       });
 
@@ -110,7 +110,7 @@ export default function Timeschemahistory() {
   const calculateTotalTime = (startTime, endTime) => {
     const start = new Date(startTime);
     const end = new Date(endTime);
-    
+
     if (isNaN(start.getTime()) || isNaN(end.getTime())) {
       return '0 hours 0 minutes 0 seconds'; // Return default value if invalid
     }
@@ -133,7 +133,7 @@ export default function Timeschemahistory() {
 
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${entryId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/userEntries/${entryId}`, {
         method: "PUT",
         headers: {
           'Authorization': authToken,
@@ -167,7 +167,7 @@ export default function Timeschemahistory() {
     const { name, value } = e.target;
     setEditForm((prevForm) => {
       const newForm = { ...prevForm, [name]: value };
-      
+
       // If startTime or endTime is changed, recalculate total time
       if (name === 'startTime' || name === 'endTime') {
         const totalTime = calculateTotalTime(newForm.startTime, newForm.endTime);
@@ -199,9 +199,9 @@ export default function Timeschemahistory() {
 
   return (
     <div className="bg">
-      <div className="container-fluid">
+      <div className="w-full ">
         {loading ? (
-          <div className="row">
+          <div className="flex flex-wrap -mx-2">
             <ColorRing
               loading={loading}
               display="flex"
@@ -212,26 +212,24 @@ export default function Timeschemahistory() {
             />
           </div>
         ) : (
-          <div className="row">
+          <div className="flex flex-wrap -mx-2">
             <div className="col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none">
-              <Usernavbar />
+              <Sidebar />
             </div>
 
-            <div className="col-lg-10 col-md-9 col-12 mx-auto">
-              <div className="d-lg-none d-md-none d-block mt-2">
-                <Usernav />
-              </div>
-              <div className="mt-4 mx-4">
+            <div className="flex-1 w-full mx-auto px-4">
+
+              <div className="mt-6 mx-4">
                 {alertMessage && (
                   <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />
                 )}
               </div>
-              <div className="row my-4 mx-3">
+              <div className="flex flex-wrap -mx-2 my-4 mx-3">
                 <div className="text">
                   <p>History</p>
                 </div>
 
-                <div className="box1 rounded adminborder pt-3 text-center pb-3">
+                <div className="card-standard rounded adminborder pt-4 text-center pb-4">
                   {uniqueMonths.map((monthIndex, index) => {
                     const monthEntries = userEntries.filter(
                       (entry) => new Date(entry.startTime).getMonth() === monthIndex
@@ -299,7 +297,7 @@ export default function Timeschemahistory() {
                                       {isDeleting ? "Deleting..." : "Delete"}
                                     </button>
                                     <button
-                                      className="btn btn-primary ms-2"
+                                      className="btn-primary ml-2"
                                       onClick={() => handleEditClick(entry)}
                                     >
                                       Edit
@@ -340,45 +338,45 @@ export default function Timeschemahistory() {
               </div>
 
               {editEntry && (
-                <div className="edit-form mt-3">
+                <div className="edit-form mt-6">
                   <h5>Edit Entry</h5>
                   <form onSubmit={(e) => handleEditSubmit(e, editEntry._id)}>
                     <div className="form-group">
                       <label>Start Time</label>
                       <input
                         type="datetime-local"
-                        className="form-control"
+                        className="input-standard"
                         name="startTime"
                         value={editForm.startTime}
                         onChange={handleEditChange}
                       />
                     </div>
-                    <div className="form-group mt-3">
+                    <div className="form-group mt-6">
                       <label>End Time</label>
                       <input
                         type="datetime-local"
-                        className="form-control"
+                        className="input-standard"
                         name="endTime"
                         value={editForm.endTime}
                         onChange={handleEditChange}
                       />
                     </div>
-                    <div className="form-group mt-3">
+                    <div className="form-group mt-6">
                       <label>Total Time</label>
                       <input
                         type="text"
-                        className="form-control"
+                        className="input-standard"
                         name="totalTime"
                         value={editForm.totalTime}
                         disabled
                       />
                     </div>
-                    <button type="submit" className="btn btn-success mt-3">
+                    <button type="submit" className="btn btn-success mt-6">
                       Save
                     </button>
                     <button
                       type="button"
-                      className="btn btn-secondary mt-3 ms-2"
+                      className="btn btn-secondary mt-6 ml-2"
                       onClick={() => setEditEntry(null)}
                     >
                       Cancel

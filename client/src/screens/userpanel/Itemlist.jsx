@@ -1,14 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import Usernavbar from './Usernavbar';
+import Sidebar from './Sidebar';
 import { useNavigate } from 'react-router-dom';
-import Usernav from './Usernav';
-import { ColorRing } from  'react-loader-spinner'
+
+import { ColorRing } from 'react-loader-spinner'
 import CurrencySign from '../../components/CurrencySign ';
 import Alertauthtoken from '../../components/Alertauthtoken';
 // import Nav from './Nav';
 
 export default function Itemlist() {
-    const [ loading, setloading ] = useState(true);
+    const [loading, setloading] = useState(true);
     const [items, setitems] = useState([]);
     const [selecteditems, setselecteditems] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
@@ -18,9 +18,8 @@ export default function Itemlist() {
     const entriesPerPage = 10;
 
     useEffect(() => {
-        if(!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true")
-        {
-          navigate("/");
+        if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") == "true") {
+            navigate("/");
         }
         fetchdata();
     }, [])
@@ -31,30 +30,30 @@ export default function Itemlist() {
 
     const fetchdata = async () => {
         try {
-            const userid =  localStorage.getItem("userid");
+            const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/itemdata/${userid}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/itemdata/${userid}`, {
                 headers: {
-                  'Authorization': authToken,
+                    'Authorization': authToken,
                 }
-              });
+            });
 
-              if (response.status === 401) {
+            if (response.status === 401) {
                 const json = await response.json();
                 setAlertMessage(json.message);
                 setloading(false);
-                window.scrollTo(0,0);
+                window.scrollTo(0, 0);
                 return; // Stop further execution
-              }
-              else{
+            }
+            else {
                 const json = await response.json();
-            
+
                 if (Array.isArray(json)) {
                     setitems(json);
                 }
                 setloading(false);
-              }
-            
+            }
+
         } catch (error) {
             console.error('Error fetching data:', error);
         }
@@ -69,13 +68,13 @@ export default function Itemlist() {
         const date = new Date(dateString);
         const options = { day: 'numeric', month: 'short', year: 'numeric' };
         return date.toLocaleDateString('en-US', options);
-        
+
     };
 
     const handleDeleteClick = async (itemId) => {
         try {
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/delitem/${itemId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/delitem/${itemId}`, {
                 method: 'GET',
                 headers: {
                     'Authorization': authToken,
@@ -83,23 +82,23 @@ export default function Itemlist() {
             });
 
             if (response.status === 401) {
-              const json = await response.json();
-              setAlertMessage(json.message);
-              setloading(false);
-              window.scrollTo(0,0);
-              return; // Stop further execution
-            }
-            else{
                 const json = await response.json();
-    
+                setAlertMessage(json.message);
+                setloading(false);
+                window.scrollTo(0, 0);
+                return; // Stop further execution
+            }
+            else {
+                const json = await response.json();
+
                 if (json.Success) {
                     fetchdata(); // Refresh the items list
                 } else {
                     console.error('Error deleting item:', json.message);
-                }  
+                }
             }
-    
-            
+
+
         } catch (error) {
             console.error('Error deleting item:', error);
         }
@@ -112,174 +111,169 @@ export default function Itemlist() {
 
     // Pagination functions
     const getPageCount = () => Math.ceil(filteredItems.length / entriesPerPage);
-  
+
     const getCurrentPageItems = () => {
-      const startIndex = currentPage * entriesPerPage;
-      const endIndex = startIndex + entriesPerPage;
-      return filteredItems.slice(startIndex, endIndex);
+        const startIndex = currentPage * entriesPerPage;
+        const endIndex = startIndex + entriesPerPage;
+        return filteredItems.slice(startIndex, endIndex);
     };
-  
+
     const handlePrevPage = () => {
-      if (currentPage > 0) {
-        setCurrentPage(currentPage - 1);
-      }
+        if (currentPage > 0) {
+            setCurrentPage(currentPage - 1);
+        }
     };
-  
+
     const handleNextPage = () => {
-      if ((currentPage + 1) * entriesPerPage < items.length) {
-        setCurrentPage(currentPage + 1);
-      }
+        if ((currentPage + 1) * entriesPerPage < items.length) {
+            setCurrentPage(currentPage + 1);
+        }
     };
 
-  return (
-    <div className='bg'>
-    {
-      loading?
-      <div className='row'>
-        <ColorRing
-      // width={200}
-      loading={loading}
-      // size={500}
-      display="flex"
-      justify-content= "center"
-      align-items="center"
-      aria-label="Loading Spinner"
-      data-testid="loader"        
-    />
-      </div>:
-        <div className='container-fluid'>
-            <div className="row">
-                <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
-                    <div  >
-                    <Usernavbar/>
-                    </div>
-                </div>
+    return (
+        <div className='bg'>
+            {
+                loading ?
+                    <div className="flex flex-col md:flex-row">
+                        <ColorRing
+                            // width={200}
+                            loading={loading}
+                            // size={500}
+                            display="flex"
+                            justify-content="center"
+                            align-items="center"
+                            aria-label="Loading Spinner"
+                            data-testid="loader"
+                        />
+                    </div> :
+                    <div className='w-full '>
+                        <div className="flex flex-col md:flex-row">
+                            <Sidebar />
+                            <div className="flex-1 w-full mx-auto px-4">
 
-                <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                    <div className='d-lg-none d-md-none d-block mt-2'>
-                        <Usernav/>
-                    </div>
-                    <div className='mt-4 mx-4'>
-                        {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
-                    </div>
-                    <div className="bg-white my-5 p-4 box mx-4">
-                        <div className='row py-2'>
-                            <div className="col-lg-4 col-md-6 col-sm-6 col-7 me-auto">
-                                <p className='h5 fw-bold'>Items</p>
-                                <nav aria-label="breadcrumb">
-                                    <ol class="breadcrumb mb-0">
-                                        <li class="breadcrumb-item"><a href="/itempanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
-                                        <li class="breadcrumb-item active" aria-current="page">Items</li>
-                                    </ol>
-                                </nav>
-                            </div>
-                            <div className="col-lg-3 col-md-4 col-sm-4 col-5 text-right">
-                                <button className='btn rounded-pill btnclr text-white fw-bold' onClick={handleAddClick}>+ Create</button>
-                            </div>
-                        </div><hr />
+                                <div className='mt-6 mx-4'>
+                                    {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
+                                </div>
+                                <div className='flex flex-wrap items-center justify-between py-6 px-4 mb-6 bg-white shadow-sm rounded-xl border border-gray-100 mx-4'>
+                                    <div>
+                                        <p className='text-3xl font-bold text-gray-800'>Items</p>
+                                        <nav aria-label="breadcrumb">
+                                            <ol className="flex text-sm text-gray-500 mt-2 space-x-2">
+                                                <li><a href="/userpanel/Userdashboard" className='hover:text-primary transition-colors text-decoration-none'>Dashboard</a></li>
+                                                <li><span className="mx-2">/</span></li>
+                                                <li className="text-gray-800 font-semibold" aria-current="page">Items</li>
+                                            </ol>
+                                        </nav>
+                                    </div>
+                                    <div className="mt-4 md:mt-0 flex flex-wrap gap-4">
+                                        <div className="relative">
+                                            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                                <i className="fa-solid fa-search text-gray-400"></i>
+                                            </div>
+                                            <input
+                                                type="text"
+                                                className="input-standard pl-10 w-full sm:w-64"
+                                                placeholder="Search by name"
+                                                value={searchQuery}
+                                                onChange={(e) => setSearchQuery(e.target.value)}
+                                            />
+                                        </div>
+                                        <button className='btn-primary' onClick={handleAddClick}>
+                                            <i className="fa-solid fa-plus mr-2"></i> Create Item
+                                        </button>
+                                    </div>
+                                </div>
 
-                        <div className='row my-2'>
-                            <div className="col-lg-3 col-md-6 col-sm-6 col-12">
-                                <input
-                                    type="text"
-                                    className="form-control mb-2"
-                                    placeholder="Search by name"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-                        </div>
-
-                        <div className="row px-2 table-responsive">
-                            <table class="table table-bordered">
-                                <thead>
-                                    <tr>
-                                        <th scope="col">ID </th>
-                                        <th scope="col">Item </th>
-                                        <th scope="col">Amount </th>
-                                        <th scope="col">Date </th>
-                                        <th scope="col">Edit/Delete </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                            {getCurrentPageItems().map((item, index) => (
-                                                <tr key={index}>
-                                                    <th scope="row">{index + 1}</th>
-                                                    <td>{item.itemname}</td>
-                                                    <td><CurrencySign />{item.price}</td>
-                                                    <td>{formatDate(item.createdAt)}</td>
-                                                    <td>
-                                                        <div className="d-flex">
-                                                            <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={() => handleEditClick(item)}>
-                                                                <i className="fa-solid fa-pen"></i>
-                                                            </a>
-                                                            <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(item._id)}>
-                                                                <i className="fas fa-trash"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
+                                <div className="card-standard mx-4 mb-8 overflow-hidden">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left border-collapse">
+                                            <thead>
+                                                <tr className="bg-gray-50 border-b border-gray-100 text-sm text-gray-500">
+                                                    <th className="px-6 py-4 font-medium">ID</th>
+                                                    <th className="px-6 py-4 font-medium">Item</th>
+                                                    <th className="px-6 py-4 font-medium">Amount</th>
+                                                    <th className="px-6 py-4 font-medium">Date</th>
+                                                    <th className="px-6 py-4 font-medium text-right">Actions</th>
                                                 </tr>
-                                            ))}
-                                            {/* {filteredItems.map((item, index) => (
-                                                <tr key={index}>
-                                                    <th scope="row">{index + 1}</th>
-                                                    <td>{item.itemname}</td>
-                                                    <td><CurrencySign />{item.price}</td>
-                                                    <td>{formatDate(item.createdAt)}</td>
-                                                    <td>
-                                                        <div className="d-flex">
-                                                            <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={() => handleEditClick(item)}>
-                                                                <i className="fa-solid fa-pen"></i>
-                                                            </a>
-                                                            <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(item._id)}>
-                                                                <i className="fas fa-trash"></i>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            ))} */}
-                                        </tbody>
-                                {/* <tbody>
-                                        {items.map((item, index) => (
-                                            <tr key={index}>
-                                                <th scope="row">{index + 1}</th>
-                                                <td>{item.itemname}</td>
-                                                <td><CurrencySign />{item.price}</td>
-                                                <td>{formatDate(item.createdAt)}</td>
-                                                <td>
-                                                    <div className="d-flex">
-                                                        <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={ () => handleEditClick(item)}>
+                                            </thead>
+                                            <tbody className="divide-y divide-gray-100">
+                                                {getCurrentPageItems().map((item, index) => (
+                                                    <tr key={index} className="hover:bg-gray-50 transition-colors">
+                                                        <td className="px-6 py-4 text-sm text-gray-500">
+                                                            #{currentPage * entriesPerPage + index + 1}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm font-medium text-gray-800">
+                                                            {item.itemname}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-gray-800 font-medium">
+                                                            <CurrencySign />{item.price}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-gray-500">
+                                                            {formatDate(item.createdAt)}
+                                                        </td>
+                                                        <td className="px-6 py-4 text-sm text-right">
+                                                            <div className="flex justify-end gap-2">
+                                                                <button
+                                                                    className="p-2 text-primary hover:bg-indigo-50 rounded-lg transition-colors"
+                                                                    onClick={() => handleEditClick(item)}
+                                                                    title="Edit"
+                                                                >
                                                                     <i className="fa-solid fa-pen"></i>
-                                                                </a>
-                                                                <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(item._id)}>
-                                                                    <i className="fas fa-trash"></i>
                                                                 </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                </tbody> */}
-                            </table>
+                                                                <button
+                                                                    className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                                                    onClick={() => handleDeleteClick(item._id)}
+                                                                    title="Delete"
+                                                                >
+                                                                    <i className="fa-solid fa-trash"></i>
+                                                                </button>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                        
+                                        {filteredItems.length === 0 && (
+                                            <div className="text-center py-12">
+                                                <div className="w-16 h-16 mx-auto bg-gray-50 rounded-full flex items-center justify-center mb-4">
+                                                    <i className="fa-solid fa-box-open text-2xl text-gray-400"></i>
+                                                </div>
+                                                <h3 className="text-lg font-medium text-gray-900 mb-1">No items found</h3>
+                                                <p className="text-gray-500">Get started by creating a new item.</p>
+                                            </div>
+                                        )}
+                                    </div>
+                                    
+                                    {/* Pagination */}
+                                    {getPageCount() > 1 && (
+                                        <div className='flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50'>
+                                            <span className="text-sm text-gray-500">
+                                                Showing {currentPage * entriesPerPage + 1} to {Math.min((currentPage + 1) * entriesPerPage, filteredItems.length)} of {filteredItems.length} entries
+                                            </span>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={handlePrevPage} 
+                                                    className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${currentPage === 0 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`} 
+                                                    disabled={currentPage === 0}
+                                                >
+                                                    Previous
+                                                </button>
+                                                <button
+                                                    onClick={handleNextPage}
+                                                    className={`px-4 py-2 text-sm font-medium rounded-lg border transition-colors ${((currentPage + 1) * entriesPerPage >= items.length) ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed' : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'}`}
+                                                    disabled={(currentPage + 1) * entriesPerPage >= items.length}
+                                                >
+                                                    Next
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        {/* Pagination buttons */}
-                <div className='row mt-3'>
-                  <div className='col-12'>
-                    <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
-                      Previous Page
-                    </button>
-                    <button
-                      onClick={handleNextPage}
-                      disabled={(currentPage + 1) * entriesPerPage >= items.length}
-                    >
-                      Next Page
-                    </button>
-                  </div>
-                </div>
                     </div>
-                </div>
-            </div>
+            }
         </div>
-}
-    </div>
-  )
+    )
 }

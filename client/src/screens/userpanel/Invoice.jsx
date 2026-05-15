@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import Usernavbar from './Usernavbar';
+import Sidebar from './Sidebar';
 import { useNavigate, useLocation } from 'react-router-dom';
-import Usernav from './Usernav';
+
 import { ColorRing } from 'react-loader-spinner';
 import CurrencySign from '../../components/CurrencySign ';
 import Alertauthtoken from '../../components/Alertauthtoken';
@@ -12,7 +12,7 @@ export default function Invoice() {
   const [tableloading, settableLoading] = useState(true);
   const [invoices, setInvoices] = useState([]);
   const [transactions, setTransactions] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(0);
   const [totalPages, setTotalPages] = useState(0);
   const [alertMessage, setAlertMessage] = useState('');
   const [filterStatus, setFilterStatus] = useState('All');
@@ -26,12 +26,12 @@ export default function Invoice() {
 
     if (!localStorage.getItem("authToken") || localStorage.getItem("isTeamMember") === "true") {
       navigate("/");
-     
+
     } else {
-  
-      
+
+
       fetchData();
-   
+
     }
   }, [currentPage, filterStatus, searchQuery]);
 
@@ -41,16 +41,16 @@ export default function Invoice() {
       // setLoading(true);
       settableLoading(true)
       const userid = localStorage.getItem("userid");
-      
+
       const endpoint = searchQuery.trim()
-      ? `https://grithomes.onrender.com/api/searchinvoices/${userid}?search=${encodeURIComponent(searchQuery)}&status=${filterStatus}`
-      : `https://grithomes.onrender.com/api/invoicedata/${userid}/?page=${currentPage}&limit=${limit}&status=${filterStatus}`;
-      
+        ? `${import.meta.env.VITE_API_BASE_URL}/searchinvoices/${userid}?search=${encodeURIComponent(searchQuery)}&status=${filterStatus}`
+        : `${import.meta.env.VITE_API_BASE_URL}/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`;
+
       const authToken = localStorage.getItem('authToken');
-      console.log(authToken,"authToken");
-      
+      console.log(authToken, "authToken");
+
       const response = await fetch(endpoint, {
-         headers: { 'Authorization': authToken }
+        headers: { 'Authorization': authToken }
       });
       console.log(response, "Hello it fecthdata after endpoint")
 
@@ -67,7 +67,7 @@ export default function Invoice() {
       // const invoicesList = json.invoices;
       const invoicesList = Array.isArray(json.invoices) ? json.invoices : [];
       console.log(invoicesList, "invoicesList");
-setTotalPages(json.totalPages);
+      setTotalPages(json.totalPages);
       setInvoices(invoicesList);
 
       if (!searchQuery.trim()) {
@@ -78,8 +78,8 @@ setTotalPages(json.totalPages);
       }
 
       const transactionPromises = invoicesList.map(async (invoice) => {
-        const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
-        headers: { 'Authorization': authToken }
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/gettransactiondata/${invoice._id}`, {
+          headers: { 'Authorization': authToken }
         });
         if (response.status === 401) {
           const transactionJson = await response.json();
@@ -121,20 +121,20 @@ setTotalPages(json.totalPages);
 
   const getStatus = (invoice) => {
     if (invoice.status === 'Send') {
-      return <span className="badge bg-primary"><i className="fa-solid fa-circle me-1"></i>Send</span>;
+      return <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-blue-200"><i className="fa-solid fa-circle me-1"></i>Send</span>;
     }
 
     const relatedTransactions = transactions.filter(t => t.invoiceId === invoice._id);
     const totalPaidAmount = relatedTransactions.reduce((total, payment) => total + parseFloat(payment.paidamount), 0);
 
     if (totalPaidAmount === 0) {
-      return <span className="badge bg-secondary"><i className="fa-solid fa-circle me-1"></i>Saved</span>;
+      return <span className="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-gray-200"><i className="fa-solid fa-circle me-1"></i>Saved</span>;
     } else if (totalPaidAmount > 0 && totalPaidAmount < invoice.total) {
-      return <span className="badge bg-warning"><i className="fa-solid fa-circle me-1"></i>Partially Paid</span>;
+      return <span className="badge-warning"><i className="fa-solid fa-circle me-1"></i>Partially Paid</span>;
     } else if (totalPaidAmount >= invoice.total) {
-      return <span className="badge bg-success"><i className="fa-solid fa-circle me-1"></i>Paid</span>;
+      return <span className="badge-success"><i className="fa-solid fa-circle me-1"></i>Paid</span>;
     }
-    return <span className="badge bg-danger"><i className="fa-solid fa-circle me-1"></i>Pending</span>;
+    return <span className="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-red-200"><i className="fa-solid fa-circle me-1"></i>Pending</span>;
   };
 
   const handlePrevPage = () => currentPage > 0 && setCurrentPage(currentPage - 1);
@@ -143,96 +143,102 @@ setTotalPages(json.totalPages);
   return (
     <div className="bg">
       {loading ? (
-        <div className="d-flex justify-content-center align-items-center vh-100">
+        <div className="flex justify-center items-center vh-100">
           <ColorRing loading={loading} aria-label="Loading Spinner" />
         </div>
       ) : (
-        <div className="container-fluid">
-          <div className="row">
-            <div className="col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none">
-              <Usernavbar />
-            </div>
-            <div className="col-lg-10 col-md-9 col-12 mx-auto">
-              <div className="d-lg-none d-md-none d-block mt-2">
-                <Usernav />
-              </div>
-              <div className="bg-white my-5 p-3 box mx-2 mx-md-4">
+        <div className="w-full bg-gray-50 min-h-screen">
+          <div className="flex flex-col md:flex-row">
+            <Sidebar />
+            <div className="flex-1 w-full mx-auto px-4 py-8">
+              <div className="bg-white p-6 rounded-xl border border-gray-100 shadow-sm max-w-7xl mx-auto">
                 {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
-                <div className="d-flex justify-content-between align-items-center mb-3 flex-wrap">
-                  <h5 className="fw-bold">Invoices</h5>
-                  <button className="btn btn-primary rounded-pill fw-bold" onClick={handleAddClick}>+ Add New</button>
+
+                <div className="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                  <h2 className="text-2xl font-bold text-gray-800">Invoices</h2>
+                  <button className="btn-primary font-semibold flex items-center gap-2" onClick={handleAddClick}>
+                    <i className="fas fa-plus"></i> Add New Invoice
+                  </button>
                 </div>
-                <hr />
-                <div className="row mb-3 g-2">
-                  <div className="col-6 col-md-3">
-                    <select className="form-select" onChange={(e) => setFilterStatus(e.target.value)} value={filterStatus}>
-                      <option value="All">All</option>
+
+                <div className="flex flex-col md:flex-row gap-4 mb-6 bg-gray-50 p-4 rounded-lg border border-gray-100">
+                  <div className="w-full md:w-1/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Filter Status</label>
+                    <select className="input-standard bg-white" onChange={(e) => { setFilterStatus(e.target.value); setCurrentPage(0); }} value={filterStatus}>
+                      <option value="All">All Invoices</option>
                       <option value="Paid">Paid</option>
                       <option value="Partially Paid">Partially Paid</option>
                       <option value="Saved">Saved</option>
-                      <option value="Send">Send</option>
+                      <option value="Send">Sent</option>
                     </select>
                   </div>
-                  <div className="col-6 col-md-3">
-                    <input
-                      type="text"
-                      className="form-control"
-                      placeholder="Search by Name / Job"
-                      value={searchQuery}
-                      onChange={(e) => {
-                        const value = e.target.value;
-                        setSearchQuery(value);
-
-                        if (value.trim() === '') {
+                  <div className="w-full md:w-1/3">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Search Invoices</label>
+                    <div className="relative">
+                      <input
+                        type="text"
+                        className="input-standard bg-white pl-10"
+                        placeholder="Search by Name or Job..."
+                        value={searchQuery}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setSearchQuery(value);
                           setCurrentPage(0);
-                        }
-                      }}
-                    />
+                        }}
+                      />
+                      <i className="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    </div>
                   </div>
                 </div>
 
                 {/* Desktop Table */}
-                <div className="d-none d-md-block table-responsive">
+                <div className="hidden md:block overflow-x-auto">
                   {tableloading ? (
-                    <div className="text-center py-3">
-                      <ColorRing height="50" />
+                    <div className="flex justify-center py-12">
+                      <ColorRing height="50" width="50" />
                     </div>
                   ) : (
-                    <table className="table table-bordered">
+                    <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr>
-                          <th>INVOICE</th>
-                          <th>STATUS</th>
-                          <th>DATE</th>
-                          <th>VIEW</th>
-                          <th>AMOUNT</th>
+                        <tr className="bg-gray-50 border-b border-gray-100 text-xs uppercase tracking-wider text-gray-500 font-semibold">
+                          <th className="py-3 px-4 rounded-tl-lg">Invoice Details</th>
+                          <th className="py-3 px-4">Status</th>
+                          <th className="py-3 px-4">Dates</th>
+                          <th className="py-3 px-4 text-center">Actions</th>
+                          <th className="py-3 px-4 text-right rounded-tr-lg">Amount</th>
                         </tr>
                       </thead>
-                      <tbody>
-                        {console.log(invoices, "invoices")}
+                      <tbody className="divide-y divide-gray-50">
                         {Array.isArray(invoices) && invoices.length > 0 ? (
                           invoices.map((invoice, index) => (
-                            <tr key={index}>
-                              <td>
-                                <p className="fw-bold mb-0">{invoice.customername}</p>
-                                <p className="mb-0">{invoice.InvoiceNumber}</p>
-                                <p className="mb-0">Job: {invoice.job}</p>
+                            <tr key={index} className="hover:bg-gray-50 transition-colors">
+                              <td className="py-4 px-4">
+                                <p className="font-semibold text-gray-800 text-base">{invoice.customername}</p>
+                                <p className="text-sm text-gray-500 mt-1">{invoice.InvoiceNumber}</p>
+                                {invoice.job && <p className="text-xs text-gray-400 mt-0.5">Job: {invoice.job}</p>}
                               </td>
-                              <td>{getStatus(invoice)}</td>
-                              <td>
-                                <p className="mb-0">Issued: {formatCustomDate(invoice.date)}</p>
-                                <p className="mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
+                              <td className="py-4 px-4">{getStatus(invoice)}</td>
+                              <td className="py-4 px-4 text-sm text-gray-600">
+                                <p className="mb-1"><span className="text-gray-400 w-12 inline-block">Issued:</span> {formatCustomDate(invoice.date)}</p>
+                                <p><span className="text-gray-400 w-12 inline-block">Due:</span> {formatCustomDate(invoice.duedate)}</p>
                               </td>
-                              <td className="text-center">
-                                <button className="btn btn-link" onClick={() => handleViewClick(invoice)}>
+                              <td className="py-4 px-4 text-center">
+                                <button className="text-primary hover:text-blue-800 p-2 rounded-full hover:bg-blue-50 transition-colors" onClick={() => handleViewClick(invoice)} title="View Invoice">
                                   <i className="fa-solid fa-eye"></i>
                                 </button>
                               </td>
-                              <td><CurrencySign />{roundOff(invoice.total)}</td>
+                              <td className="py-4 px-4 text-right font-semibold text-gray-800">
+                                <CurrencySign />{roundOff(invoice.total)}
+                              </td>
                             </tr>
                           ))) : (
                           <tr>
-                            <td colSpan="5" className="text-center">No invoices found</td>
+                            <td colSpan="5" className="py-12 text-center text-gray-500">
+                              <div className="flex flex-col items-center">
+                                <i className="fas fa-file-invoice text-4xl mb-3 text-gray-300"></i>
+                                <p>No invoices found matching your criteria</p>
+                              </div>
+                            </td>
                           </tr>
                         )}
                       </tbody>
@@ -241,51 +247,48 @@ setTotalPages(json.totalPages);
                 </div>
 
                 {/* Mobile Card Layout */}
-                <div className="d-md-none">
+                <div className="md:hidden space-y-4 mt-4">
                   {Array.isArray(invoices) && invoices.length > 0 ? (
-
                     invoices.map((invoice, index) => (
-                      <div key={index} className="card mb-3 shadow-sm">
-                        <div className="card-body">
-                          <div className="d-flex justify-content-between align-items-start">
-                            <div>
-                              <p className="fw-bold mb-1">{invoice.customername}</p>
-                              <p className="small mb-1">{invoice.InvoiceNumber}</p>
-                              <p className="small mb-1">Job: {invoice.job}</p>
-                            </div>
-                            <button className="btn btn-link p-0" onClick={() => handleViewClick(invoice)}>
-                              <i className="fa-solid fa-eye"></i>
-                            </button>
+                      <div key={index} className="bg-white border border-gray-100 rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow relative">
+                        <div className="flex justify-between items-start mb-3">
+                          <div className="pr-8">
+                            <p className="font-bold text-gray-800">{invoice.customername}</p>
+                            <p className="text-sm text-gray-500">{invoice.InvoiceNumber}</p>
+                            {invoice.job && <p className="text-xs text-gray-400 mt-1">Job: {invoice.job}</p>}
                           </div>
-                          <div className="d-flex justify-content-between mt-2">
-                            <div>
-                              <p className="small mb-0">Issued: {formatCustomDate(invoice.date)}</p>
-                              <p className="small mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
-                            </div>
-                            <div className="text-end">
-                              <p className="fw-bold mb-0"><CurrencySign />{roundOff(invoice.total).toLocaleString('en-CA')}</p>
-                              {getStatus(invoice)}
-                            </div>
+                          <button className="absolute top-4 right-4 text-primary hover:bg-blue-50 p-2 rounded-full" onClick={() => handleViewClick(invoice)}>
+                            <i className="fa-solid fa-eye"></i>
+                          </button>
+                        </div>
+                        <div className="flex justify-between items-end border-t border-gray-50 pt-3 mt-3">
+                          <div className="text-xs text-gray-500 space-y-1">
+                            <p>Issued: {formatCustomDate(invoice.date)}</p>
+                            <p>Due: {formatCustomDate(invoice.duedate)}</p>
+                          </div>
+                          <div className="text-right flex flex-col items-end gap-2">
+                            <p className="font-bold text-gray-800 text-lg"><CurrencySign />{roundOff(invoice.total).toLocaleString('en-CA')}</p>
+                            {getStatus(invoice)}
                           </div>
                         </div>
                       </div>
                     ))
                   ) : (
-                    <tr>
-                      <td colSpan="5" className="text-center">No invoices found</td>
-                    </tr>
+                    <div className="py-8 text-center text-gray-500 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                      <p>No invoices found</p>
+                    </div>
                   )}
                 </div>
 
                 {/* Pagination */}
-                {!searchQuery && (
-                  <div className="d-flex justify-content-between mt-3 flex-wrap">
-                    <button type="button" className="btn btn-outline-primary" onClick={handlePrevPage} disabled={currentPage === 0}>
-                      Previous
+                {!searchQuery && totalPages > 0 && (
+                  <div className="flex justify-between items-center mt-6 pt-6 border-t border-gray-100 flex-wrap gap-4">
+                    <button type="button" className={`btn-secondary flex items-center gap-2 ${currentPage === 0 ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={handlePrevPage} disabled={currentPage === 0}>
+                      <i className="fas fa-chevron-left text-sm"></i> Previous
                     </button>
-                    <span className="align-self-center">Page {currentPage + 1} of {totalPages}</span>
-                    <button type="button" className="btn btn-outline-primary" onClick={handleNextPage} disabled={currentPage >= totalPages - 1}>
-                      Next
+                    <span className="text-sm font-medium text-gray-600 bg-gray-50 px-4 py-2 rounded-lg">Page {currentPage + 1} of {totalPages}</span>
+                    <button type="button" className={`btn-secondary flex items-center gap-2 ${currentPage >= totalPages - 1 ? 'opacity-50 cursor-not-allowed' : ''}`} onClick={handleNextPage} disabled={currentPage >= totalPages - 1}>
+                      Next <i className="fas fa-chevron-right text-sm"></i>
                     </button>
                   </div>
                 )}

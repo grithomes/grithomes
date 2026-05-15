@@ -35,7 +35,7 @@ export default function Dashboard() {
           let isTeamMember = localStorage.getItem('isTeamMember');
           const authToken = localStorage.getItem('authToken');
 
-            const response = await fetch('https://grithomes.onrender.com/api/clockin', {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/clockin`, {
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
@@ -76,7 +76,7 @@ export default function Dashboard() {
               let userEmail = localStorage.getItem('userEmail');
               let isTeamMember = localStorage.getItem('isTeamMember');
               const authToken = localStorage.getItem('authToken');
-              const response = await fetch('https://grithomes.onrender.com/api/clockout', {
+              const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/clockout`, {
                 method: 'POST',
                 headers: {
                   'Content-Type': 'application/json',
@@ -161,7 +161,7 @@ export default function Dashboard() {
             try {
               const userid = localStorage.getItem('userid');
               const authToken = localStorage.getItem('authToken');
-              const response = await fetch(`https://grithomes.onrender.com/api/userEntries/${userid}`, {
+              const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/userEntries/${userid}`, {
                 headers: {
                   'Authorization': authToken,
                 }
@@ -253,7 +253,7 @@ const GoToHistory = () => {
     <div>
       {
         loading?
-        <div className='row'>
+        <div className="flex flex-col md:flex-row">
           <ColorRing
         // width={200}
         loading={loading}
@@ -270,56 +270,56 @@ const GoToHistory = () => {
                     {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                   </div>
         <div className=''>
-          <div className='txt px-4 py-4'>
-            <h2 className='fs-35 fw-bold'>Dashboard</h2>
+          <div className='txt px-6 py-6'>
+            <h2 className='fs-35 font-semibold'>Dashboard</h2>
           </div>
-          <div className='row d-flex'>
-            <div className='col-12 col-sm-6 col-md-6 col-lg-4 '>
-              <div className='box1 rounded adminborder p-4 m-2'>
+          <div className='flex flex-wrap -mx-2 flex'>
+            <div className='w-full px-2 col-sm-6 w-full md:w-1/2 px-2 w-full lg:w-1/3 px-2 '>
+              <div className='card-standard rounded adminborder p-6 m-2'>
                 <p className='mb-0'>22-Oct-2023</p>
-                <p className='fs-25 fw-bold'>Clock In/Out</p>
-                <div className="d-flex">
+                <p className='fs-25 font-semibold'>Clock In/Out</p>
+                <div className="flex">
                 {isClockedIn ? (
                     <button className="btn btn-danger text-white" onClick={handleClockOut}>Stop</button>
                     ) : (
-                    <button className="btn btn-primary text-white mx-2" onClick={handleClockIn}>Start</button>
+                    <button className="btn-primary text-white mx-2" onClick={handleClockIn}>Start</button>
                     )}
                 </div>
 
-                <div className='pt-3'>
+                <div className='pt-4'>
                     <p className='mb-0'>Time</p>
-                    <p className='fs-3 fw-bold'>{totalTime}</p>
+                    <p className='text-3xl font-semibold'>{totalTime}</p>
                 </div>
               </div>
             </div>
-            <div className='col-12 col-sm-6 col-md-6 col-lg-4'>
-              <div className='box1 fw-bold rounded adminborder py-4 px-3 m-2'>
+            <div className='w-full px-2 col-sm-6 w-full md:w-1/2 px-2 w-full lg:w-1/3 px-2'>
+              <div className='card-standard font-semibold rounded adminborder py-6 px-6 m-2'>
                 <div>
                     <p className='mb-0'>Current month</p>
-                    <p className='fs-25 fw-bold text-danger'>{currentMonth}</p>
+                    <p className='fs-25 font-semibold text-danger'>{currentMonth}</p>
                 </div>
-                <div className='pt-3'>
+                <div className='pt-4'>
                     <p className='mb-0'>Total Time</p>
-                    <p className='fs-3 fw-bold'>{totalHours} hrs {totalMinutes} mins {totalSeconds} secs</p>
-                    {/* <p className='fs-3 fw-bold'>{totalMonthTime.hours} hrs {totalMonthTime.minutes} mins</p> */}
+                    <p className='text-3xl font-semibold'>{totalHours} hrs {totalMinutes} mins {totalSeconds} secs</p>
+                    {/* <p className='text-3xl font-semibold'>{totalMonthTime.hours} hrs {totalMonthTime.minutes} mins</p> */}
 
                 </div>
               </div>
             </div>
           </div>
 
-          <div className="row my-4">
-            <div className="col-lg-4 col-md-6 col-sm-6 col-7 me-auto">
-              <p className="h5 fw-bold">Current Month</p>
+          <div className="flex flex-wrap -mx-2 my-4">
+            <div className="w-full lg:w-1/3 px-2 w-full md:w-1/2 px-2 col-sm-6 col-7 me-auto">
+              <p className="h5 font-semibold">Current Month</p>
             </div>
-            <div className="col-lg-3 col-md-4 col-sm-4 col-5 text-right d-flex justify-content-end">
-              <button className="btn rounded-pill btnclr text-white fw-bold mb-2" onClick={GoToHistory}>
+            <div className="col-lg-3 w-full md:w-1/3 px-2 col-sm-4 col-5 text-right flex justify-end">
+              <button className="btn rounded-pill btnclr text-white font-semibold mb-2" onClick={GoToHistory}>
                 History
               </button>
             </div>
 
-            <div className="row px-0 table-responsive box1 rounded adminborder text-center">
-              <table class="table table-bordered">
+            <div className="flex flex-wrap -mx-2 px-0 table-responsive card-standard rounded adminborder text-center">
+              <table className="table table-bordered">
                   <thead>
                       <tr>
                           {/* <th scope="col">ID </th> */}
@@ -346,9 +346,9 @@ const GoToHistory = () => {
           </div>
 
             {userEntries.length > entriesPerPage && (
-              <div className="row mt-3">
-                <div className="col-12">
-                  <button onClick={handlePrevPage} className='me-2' disabled={currentPage === 0}>
+              <div className="flex flex-wrap -mx-2 mt-6">
+                <div className="w-full px-2">
+                  <button onClick={handlePrevPage} className='mr-2' disabled={currentPage === 0}>
                     Previous Page
                   </button>
                   <button

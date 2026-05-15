@@ -30,9 +30,9 @@ export default function Teamnavbar() {
     <div>
       <div className="sidebar-offcanvas pl-0" id="sidebar" role="navigation" style={{ backgroundColor: '#fff' }}>
         <header className="header d-xl-block menu" id="menu">
-          <div className="d-flex flex-column ">
-            <div className="text-center pt-5 pb-3">
-            <h1 className='text-center mb-5 fw-bold'>IN<span className='clrblue'>VOICE</span></h1>
+          <div className="flex flex-col ">
+            <div className="text-center pt-5 pb-4">
+            <h1 className='text-center mb-8 font-semibold'>IN<span className='clrblue'>VOICE</span></h1>
             </div>
 
             <nav className="sb-sidenav accordion sb-sidenav-dark text-black" id="sidenavAccordion">
@@ -41,13 +41,13 @@ export default function Teamnavbar() {
                   <ul>
                     <li>
                       <Link to="/Teammemberpanel/Teammenberdashboard" className={`nav-link scrollto icones text-black ${location.pathname == '/Teammemberpanel/Teammenberdashboard' ? 'active' : ''}`} >
-                        <i class="fa-solid fa-house me-2 dashclr"></i> <span>Dashboard</span>
+                        <i className="fa-solid fa-house mr-2 dashclr"></i> <span>Dashboard</span>
                       </Link>
                     </li>
                     
                       <li>
                         <a onClick={handleLogout} className=" pointer nav-link scrollto icones text-black">
-                          <i class="fa-solid fa-right-from-bracket me-2"></i>
+                          <i className="fa-solid fa-right-from-bracket mr-2"></i>
                           <span>Logout</span>
                         </a>
                       </li>

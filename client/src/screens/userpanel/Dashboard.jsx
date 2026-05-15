@@ -65,7 +65,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userid = localStorage.getItem("userid");
-      const response = await fetch(`https://grithomes.onrender.com/api/getsignupdata/${userid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getsignupdata/${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -88,7 +88,7 @@ export default function Dashboard() {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
       const response = await fetch(
-        `https://grithomes.onrender.com/api/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`,
+        `${import.meta.env.VITE_API_BASE_URL}/invoicedata/${userid}?page=${currentPage}&limit=${limit}&status=${filterStatus}`,
         { headers: { 'Authorization': authToken } }
       );
 
@@ -105,7 +105,7 @@ export default function Dashboard() {
       setTotalPages(json.totalPages);
 
       const transactionPromises = json.invoices.map(async (invoice) => {
-        const response = await fetch(`https://grithomes.onrender.com/api/gettransactiondata/${invoice._id}`, {
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/gettransactiondata/${invoice._id}`, {
           headers: { 'Authorization': authToken }
         });
         if (response.status === 401) {
@@ -130,7 +130,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/currentMonthReceivedAmount/${userid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/currentMonthReceivedAmount/${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -153,7 +153,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userId = localStorage.getItem('userid');
-      const response = await fetch(`https://grithomes.onrender.com/api/totalPaymentReceived/${userId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/totalPaymentReceived/${userId}`, {
         headers: { Authorization: authToken }
       });
       if (response.status === 401) {
@@ -174,7 +174,7 @@ export default function Dashboard() {
   const fetchTotalExpense = async () => {
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/expense`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/expense`, {
         headers: { Authorization: authToken }
       });
       if (response.status === 401) {
@@ -197,7 +197,7 @@ export default function Dashboard() {
     try {
       const authToken = localStorage.getItem('authToken');
       const userid = localStorage.getItem('userid');
-      const response = await fetch(`https://grithomes.onrender.com/api/overdueInvoices/${userid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/overdueInvoices/${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -218,7 +218,7 @@ export default function Dashboard() {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/all-invoices-by-financial-year?userid=${userid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/all-invoices-by-financial-year?userid=${userid}`, {
         headers: { 'Authorization': authToken }
       });
       if (response.status === 401) {
@@ -256,7 +256,7 @@ const currentFY = `${currentYear}`;
   const getStatus = (invoice) => {
     // If the invoice status is explicitly "Send," use it directly
     if (invoice.status === 'Send') {
-      return <span className="badge bg-primary"><i className="fa-solid fa-circle me-1"></i>Send</span>;
+      return <span className="bg-blue-100 text-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-blue-200"><i className="fa-solid fa-circle me-1"></i>Send</span>;
     }
 
     // Otherwise, calculate status based on transactions
@@ -264,13 +264,13 @@ const currentFY = `${currentYear}`;
     const totalPaidAmount = relatedTransactions.reduce((total, payment) => total + parseFloat(payment.paidamount), 0);
 
     if (totalPaidAmount === 0) {
-      return <span className="badge bg-secondary"><i className="fa-solid fa-circle me-1"></i>Saved</span>;
+      return <span className="bg-gray-100 text-gray-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-gray-200"><i className="fa-solid fa-circle me-1"></i>Saved</span>;
     } else if (totalPaidAmount > 0 && totalPaidAmount < invoice.total) {
-      return <span className="badge bg-warning"><i className="fa-solid fa-circle me-1"></i>Partially Paid</span>;
+      return <span className="badge-warning"><i className="fa-solid fa-circle me-1"></i>Partially Paid</span>;
     } else if (totalPaidAmount >= invoice.total) {
-      return <span className="badge bg-success"><i className="fa-solid fa-circle me-1"></i>Paid</span>;
+      return <span className="badge-success"><i className="fa-solid fa-circle me-1"></i>Paid</span>;
     }
-    return <span className="badge bg-danger"><i className="fa-solid fa-circle me-1"></i>Pending</span>;
+    return <span className="bg-red-100 text-red-800 text-xs font-semibold px-2.5 py-0.5 rounded border border-red-200"><i className="fa-solid fa-circle me-1"></i>Pending</span>;
   };
 
 
@@ -302,7 +302,7 @@ const currentFY = `${currentYear}`;
   return (
     <div>
       {loading ? (
-        <div className='row'>
+        <div className="flex flex-col md:flex-row">
           <ColorRing
             loading={loading}
             display="flex"
@@ -313,79 +313,95 @@ const currentFY = `${currentYear}`;
           />
         </div>
       ) : (
-        <div className=''>
-          <div className=''>
-            <div className='txt px-4 py-4'>
-              <h2 className='fs-35 fw-bold'>Dashboard</h2>
-              {signupdata.FirstName && <p>Hi, {signupdata.FirstName} ! 👋</p>}
+        <div className='w-full px-6 py-6 max-w-7xl mx-auto'>
+          <div className='flex flex-col md:flex-row justify-between md:items-center mb-6 pb-2 border-b border-borderLight'>
+            <div>
+              <h2 className='font-semibold mb-1 text-3xl text-textMain'>Overview</h2>
+              {signupdata.FirstName && <p className="text-textMuted font-medium">Welcome back, {signupdata.FirstName}! 👋</p>}
             </div>
-            <div className='row'>
-              <div className='col-12 col-sm-12 col-md-8 col-lg-8'>
-                <div className='box1 rounded adminborder p-4 m-2'>
-                  <p className='fs-6 fw-bold'>CREATE DOCUMENT</p>
-                  <div className="row">
-                    <div className="col-6">
-                      <div className='px-4 py-4 dashbox pointer' onClick={handleAddinvoiceClick}>
-                        <i className="fa-solid fa-receipt text-primary pe-3 fs-4"></i><span className='fs-6 fw-bold'>Create Invoice</span>
-                      </div>
-                    </div>
-                    <div className="col-6">
-                      <div className='px-4 py-4 dashbox pointer' onClick={handleAddestimateClick}>
-                        <i className="fa-solid fa-receipt text-primary pe-3 fs-4"></i><span className='fs-6 fw-bold'>Create Estimate</span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              <div className='col-12 col-sm-4 col-md-4 col-lg-4'>
-                <div className='box1 fw-bold rounded adminborder py-4 px-3 m-2'>
-                </div>
-              </div>
+            <div className="flex gap-3 mt-4 md:mt-0">
+               <button className="btn-primary flex items-center gap-2" onClick={handleAddinvoiceClick}>
+                 <i className="fa-solid fa-plus"></i> New Invoice
+               </button>
+               <button className="btn-secondary flex items-center gap-2" onClick={handleAddestimateClick}>
+                 <i className="fa-solid fa-file-invoice"></i> New Estimate
+               </button>
             </div>
-
-            <div className="row">
-              <div className='col-12 col-sm-4 col-md-4 col-lg-4'>
-                <div className='box1 rounded adminborder py-4 px-4 m-2'>
-                  <p className='fs-6 fw-bold'>CURRENT FINANCIAL YEAR ({currentFYData.financialYear || 'Loading...'})</p>
-
-                  <p className='fs-3 fw-bold'><CurrencySign />{roundOff(currentFYData.totalAmount).toLocaleString('en-CA')}</p>
-                  <div className='d-flex'>
-                    <div className='pe-2'>
-                      <p className='fs-6 m-0'>TOTAL EXPENSE</p>
-                      <p className='fs-6 fw-bold'><CurrencySign />{roundOff(totalExpense).toLocaleString('en-CA')}</p>
-                    </div>
-                    <div className='ps-2'>
-                      <p className='fs-6 m-0'>TOTAL PROFIT</p>
-                      <p className='fs-6 fw-bold'><CurrencySign />{roundOff(currentFYData.totalAmount - totalExpense).toLocaleString('en-CA')}</p>
-                    </div>
-                  </div>
-                  <div className='d-flex'>
-                    <p className='pe-3'><span className='text-primary'>Paid</span> <CurrencySign />{roundOff(currentFYData.totalAmount - currentFYData.totalDue).toLocaleString('en-CA')}</p>
-                    <p><span className='text-warning'>Unpaid</span> <CurrencySign />{roundOff(currentFYData.totalDue).toLocaleString('en-CA')}</p>
-                  </div>
-                  <div className='d-flex'>
-                    <p className='pe-3'><span className='text-danger'>Overdue </span>{overdueCount} <span className='pointer' onClick={handleOverdue}>Invoices</span></p>
-                  </div>
+          </div>
+          
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8'>
+            {/* Financial Year Card */}
+            <div className='card-standard h-full p-6 flex flex-col'>
+              <p className='text-sm font-semibold mb-4 text-primary uppercase tracking-wide'>
+                FINANCIAL YEAR ({currentFYData.financialYear || 'Loading...'})
+              </p>
+              <h3 className='font-bold mb-6 text-4xl text-textMain'>
+                <CurrencySign />{roundOff(currentFYData.totalAmount).toLocaleString('en-CA')}
+              </h3>
+              
+              <div className='flex justify-between mt-auto mb-5 pb-4 border-b border-borderLight'>
+                <div>
+                  <p className='text-textMuted text-xs mb-1 font-semibold'>TOTAL EXPENSE</p>
+                  <p className='font-semibold mb-0 text-red-500'><CurrencySign />{roundOff(totalExpense).toLocaleString('en-CA')}</p>
+                </div>
+                <div className="text-right">
+                  <p className='text-textMuted text-xs mb-1 font-semibold'>TOTAL PROFIT</p>
+                  <p className='font-semibold mb-0 text-green-500'><CurrencySign />{roundOff(currentFYData.totalAmount - totalExpense).toLocaleString('en-CA')}</p>
                 </div>
               </div>
-              <div className='col-12 col-sm-4 col-md-4 col-lg-4'>
-                <div className='box1 rounded adminborder py-4 px-4 m-2'>
-                  <p className='fs-6 fw-bold'>{currentMonth.toUpperCase()} INVOICE AMOUNT</p>
-                  <p className='fs-3 fw-bold'><CurrencySign /> {roundOff(curMonTotalAmount).toLocaleString('en-CA')}</p>
-                  <div className='d-flex'>
-                    <p className='pe-3'><span className='text-primary'>Paid</span> <CurrencySign />{roundOff(curMonPaidAmount).toLocaleString('en-CA')}</p>
-                    <p><span className='text-warning'>Unpaid</span> <CurrencySign />{roundOff(curMonUnpaidAmount).toLocaleString('en-CA')}</p>
-                  </div>
+
+              <div className='flex justify-between pt-1'>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                  <span className="text-textMuted text-sm">Paid <strong className="text-textMain"><CurrencySign />{roundOff(currentFYData.totalAmount - currentFYData.totalDue).toLocaleString('en-CA')}</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                  <span className="text-textMuted text-sm">Unpaid <strong className="text-textMain"><CurrencySign />{roundOff(currentFYData.totalDue).toLocaleString('en-CA')}</strong></span>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white my-5 p-3 box mx-2 mx-md-4">
+            {/* Current Month Card */}
+            <div className='card-standard h-full p-6 flex flex-col'>
+              <p className='text-sm font-semibold mb-4 text-primary uppercase tracking-wide'>
+                {currentMonth} INVOICE AMOUNT
+              </p>
+              <h3 className='font-bold mb-6 text-4xl text-textMain'>
+                <CurrencySign /> {roundOff(curMonTotalAmount).toLocaleString('en-CA')}
+              </h3>
+              
+              <div className='flex justify-between mt-auto pt-4 border-t border-borderLight'>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-green-500"></span>
+                  <span className="text-textMuted text-sm">Paid <strong className="text-textMain"><CurrencySign />{roundOff(curMonPaidAmount).toLocaleString('en-CA')}</strong></span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+                  <span className="text-textMuted text-sm">Unpaid <strong className="text-textMain"><CurrencySign />{roundOff(curMonUnpaidAmount).toLocaleString('en-CA')}</strong></span>
+                </div>
+              </div>
+            </div>
+
+            {/* Action Items Card */}
+            <div className='card-standard h-full p-6 flex flex-col justify-center text-white bg-gradient-to-br from-sidebar to-primary border-none'>
+               <div className="text-center">
+                  <i className="fa-solid fa-bell mb-4 text-4xl text-blue-200"></i>
+                  <h4 className="font-bold text-xl mb-2">{overdueCount} Overdue Invoices</h4>
+                  <p className="text-blue-100 text-sm">Requires immediate action.</p>
+                  <button className="bg-white text-primary font-semibold px-6 py-2 rounded-full mt-6 hover:bg-gray-50 transition-colors shadow-sm" onClick={handleOverdue}>
+                    Manage Overdue
+                  </button>
+               </div>
+            </div>
+          </div>
+
+          <div className="my-5 p-6 card-standard border-0 mx-2 mx-md-0">
               {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
               <hr />
-              <div className="row mb-3 g-2">
+              <div className="flex flex-wrap -mx-2 mb-6 g-2">
                 <div className="col-6 col-md-3">
-                  <select className="form-select" onChange={(e) => setFilterStatus(e.target.value)} value={filterStatus}>
+                  <select className="input-standard" onChange={(e) => setFilterStatus(e.target.value)} value={filterStatus}>
                     <option value="All">All</option>
                     <option value="Paid">Paid</option>
                     <option value="Partially Paid">Partially Paid</option>
@@ -396,7 +412,7 @@ const currentFY = `${currentYear}`;
               </div>
 
               {/* Desktop Table */}
-              <div className="d-none d-md-block table-responsive">
+              <div className="hidden md:block table-responsive">
                 <table className="table table-bordered">
                   <thead>
                     <tr>
@@ -412,7 +428,7 @@ const currentFY = `${currentYear}`;
                     invoices.map((invoice, index) => (
                       <tr key={index}>
                         <td>
-                          <p className="fw-bold mb-0">{invoice.customername}</p>
+                          <p className="font-semibold mb-0">{invoice.customername}</p>
                           <p className="mb-0">{invoice.InvoiceNumber}</p>
                           <p className="mb-0">Job: {invoice.job}</p>
                         </td>
@@ -441,25 +457,25 @@ const currentFY = `${currentYear}`;
               <div className="d-md-none">
                 {Array.isArray(invoices) && invoices.length > 0 ? (
                 invoices.map((invoice, index) => (
-                  <div key={index} className="card mb-3 shadow-sm">
+                  <div key={index} className="card-standard mb-6 shadow-sm">
                     <div className="card-body">
-                      <div className="d-flex justify-content-between align-items-start">
+                      <div className="flex justify-between items-start">
                         <div>
-                          <p className="fw-bold mb-1">{invoice.customername}</p>
-                          <p className="small mb-1">{invoice.InvoiceNumber}</p>
-                          <p className="small mb-1">Job: {invoice.job}</p>
+                          <p className="font-semibold mb-1">{invoice.customername}</p>
+                          <p className="text-sm mb-1">{invoice.InvoiceNumber}</p>
+                          <p className="text-sm mb-1">Job: {invoice.job}</p>
                         </div>
                         <button className="btn btn-link p-0" onClick={() => handleViewClick(invoice)}>
                           <i className="fa-solid fa-eye"></i>
                         </button>
                       </div>
-                      <div className="d-flex justify-content-between mt-2">
+                      <div className="flex justify-between mt-2">
                         <div>
-                          <p className="small mb-0">Issued: {formatCustomDate(invoice.date)}</p>
-                          <p className="small mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
+                          <p className="text-sm mb-0">Issued: {formatCustomDate(invoice.date)}</p>
+                          <p className="text-sm mb-0">Due: {formatCustomDate(invoice.duedate)}</p>
                         </div>
-                        <div className="text-end">
-                          <p className="fw-bold mb-0"><CurrencySign />{roundOff(invoice.total)}</p>
+                        <div className="text-right">
+                          <p className="font-semibold mb-0"><CurrencySign />{roundOff(invoice.total)}</p>
                           {getStatus(invoice)}
                         </div>
                       </div>
@@ -472,18 +488,17 @@ const currentFY = `${currentYear}`;
               </div>
 
               {/* Pagination */}
-              <div className="d-flex justify-content-between mt-3 flex-wrap">
-                <button className="btn btn-outline-primary" onClick={handlePrevPage} disabled={currentPage === 0}>
+              <div className="flex justify-between mt-6 flex-wrap">
+                <button className="btn-secondary" onClick={handlePrevPage} disabled={currentPage === 0}>
                   Previous
                 </button>
                 <span className="align-self-center">Page {currentPage + 1} of {totalPages}</span>
-                <button className="btn btn-outline-primary" onClick={handleNextPage} disabled={currentPage >= totalPages - 1}>
+                <button className="btn-secondary" onClick={handleNextPage} disabled={currentPage >= totalPages - 1}>
                   Next
                 </button>
               </div>
             </div>
           </div>
-        </div>
       )}
     </div>
   );

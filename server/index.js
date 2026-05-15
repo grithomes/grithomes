@@ -1,6 +1,7 @@
+require('dotenv').config();
 const express = require('express')
 const app = express()
-const port = 3001
+const port = process.env.PORT || 3001
 const mongoDB = require("./db")
 const nodemailer = require('nodemailer');
 const bodyParser = require('body-parser');
@@ -16,20 +17,19 @@ app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 job.start();
 
 app.use((req, res, next) => {
-  // res.setHeader("Access-Control-Allow-Origin", "https://restro-wbno.vercel.app");
-  // res.setHeader("Access-Control-Allow-Origin", "http://localhost:3000");
-  const corsWhitelist = [
+  const allowedOrigins = process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : [
     "https://grithomes.vercel.app",
     "https://www.grit.homes",
     "http://localhost:3000",
-    'http://localhost:5173'
-];
-if (corsWhitelist.indexOf(req.headers.origin) !== -1) {
+    "http://localhost:5173",
+    "http://localhost:5175"
+  ];
+  if (allowedOrigins.indexOf(req.headers.origin) !== -1) {
     res.setHeader('Access-Control-Allow-Origin', req.headers.origin);
     res.setHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization, Origin, X-Requested-With, Accept");
-}
-  
+  }
+
   next();
 });
 

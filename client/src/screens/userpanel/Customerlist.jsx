@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import Usernavbar from './Usernavbar';
+import Sidebar from './Sidebar';
 import { useNavigate } from 'react-router-dom';
 // import Nav from './Nav';
 import { format } from 'date-fns';
-import Usernav from './Usernav';
+
 import Alertauthtoken from '../../components/Alertauthtoken';
 import { ColorRing } from 'react-loader-spinner'
 import { ToastContainer, toast } from 'react-toastify';
@@ -25,18 +25,18 @@ export default function Customerlist() {
     }
     fetchdata();
   }, [])
-const handleFirstPage = () => {
-  setCurrentPage(0);
-};
+  const handleFirstPage = () => {
+    setCurrentPage(0);
+  };
 
-const handleLastPage = () => {
-  setCurrentPage(getPageCount() - 1);
-};
+  const handleLastPage = () => {
+    setCurrentPage(getPageCount() - 1);
+  };
 
-const handleEntriesChange = (e) => {
-  setEntriesPerPage(parseInt(e.target.value));
-  setCurrentPage(0); // Reset to first page
-};
+  const handleEntriesChange = (e) => {
+    setEntriesPerPage(parseInt(e.target.value));
+    setCurrentPage(0); // Reset to first page
+  };
 
   const handleAddClick = () => {
     navigate('/userpanel/Addcustomer');
@@ -58,7 +58,7 @@ const handleEntriesChange = (e) => {
     try {
       const userid = localStorage.getItem("userid");
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/customers/${userid}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/customers/${userid}`, {
         headers: {
           'Authorization': authToken,
         }
@@ -93,7 +93,7 @@ const handleEntriesChange = (e) => {
   const handleDeleteClick = async (customerId) => {
     try {
       const authToken = localStorage.getItem('authToken');
-      const response = await fetch(`https://grithomes.onrender.com/api/delcustomers/${customerId}`, {
+      const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/delcustomers/${customerId}`, {
         method: 'GET',
         headers: {
           'Authorization': authToken,
@@ -170,23 +170,23 @@ const handleEntriesChange = (e) => {
     }
   };
 
-const handleViewClick = (customer) => {
-  console.log(customer, "customers ....");
+  const handleViewClick = (customer) => {
+    console.log(customer, "customers ....");
 
-  const customerid = customer._id;
-  const customerEmails = customer.emails || [];
-  const primaryEmail = customerEmails[0] || null;
+    const customerid = customer._id;
+    const customerEmails = customer.emails || [];
+    const primaryEmail = customerEmails[0] || null;
 
-  navigate('/userpanel/Customerwiseinvoice', {
-    state: { customerid, customerEmails, customerEmail: primaryEmail },
-  });
-};
+    navigate('/userpanel/Customerwiseinvoice', {
+      state: { customerid, customerEmails, customerEmail: primaryEmail },
+    });
+  };
 
   return (
     <div className='bg'>
       {
         loading ?
-          <div className='row'>
+          <div className="flex flex-col md:flex-row">
             <ColorRing
               // width={200}
               loading={loading}
@@ -198,210 +198,161 @@ const handleViewClick = (customer) => {
               data-testid="loader"
             />
           </div> :
-          <div className='container-fluid'>
-            <div className="row">
-              <div className='col-lg-2 col-md-3 vh-100 b-shadow bg-white d-lg-block d-md-block d-none'>
-                <div  >
-                  <Usernavbar />
-                </div>
-              </div>
+          <div className='w-full '>
+            <div className="flex flex-col md:flex-row">
+                            <Sidebar />
+                            <div className="flex-1 w-full mx-auto px-4">
 
-              <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                <div className='d-lg-none d-md-none d-block mt-2'>
-                  <Usernav />
-                </div>
-                <div className='mt-4 mx-4'>
+                <div className='mt-6 mx-4'>
                   {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                 </div>
-                <div className="bg-white my-5 p-4 box mx-4">
-                  <div className='row py-2'>
-                    <div className="col-lg-4 col-md-6 col-sm-6 col-7 me-auto">
-                      <p className='h5 fw-bold'>Customers</p>
-                      <nav aria-label="breadcrumb">
-                        <ol class="breadcrumb mb-0">
-                          <li class="breadcrumb-item"><a href="/customerpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a></li>
-                          <li class="breadcrumb-item active" aria-current="page">Customers</li>
-                        </ol>
-                      </nav>
-                    </div>
-                    <div className="col-lg-3 col-md-4 col-sm-4 col-5 text-right">
-                      <button className='btn rounded-pill btnclr text-white fw-bold' onClick={handleAddClick}>+ Create</button>
-                    </div>
-                  </div><hr />
 
-                  <div className='row my-2'>
-                    <div className="col-lg-3 col-md-6 col-sm-6 col-12">
-                      <input
-                        type="text"
-                        className="form-control mb-2"
-                        placeholder="Search by name or email"
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                      />
+                <div className='flex flex-wrap items-center justify-between py-6 px-4 mb-6 bg-white shadow-sm rounded-xl border border-gray-100'>
+                  <div>
+                    <h1 className='text-3xl font-bold text-gray-800'>Customers</h1>
+                    <nav aria-label="breadcrumb">
+                      <ol className="flex text-sm text-gray-500 mt-2 space-x-2">
+                        <li><a href="/userpanel/Userdashboard" className='hover:text-primary transition-colors text-decoration-none'>Dashboard</a></li>
+                        <li><span className="mx-2">/</span></li>
+                        <li className="text-gray-800 font-semibold" aria-current="page">Customers</li>
+                      </ol>
+                    </nav>
+                  </div>
+                  <div className="mt-4 md:mt-0">
+                    <button className='btn-primary flex items-center gap-2' onClick={handleAddClick}>
+                      <i className="fa-solid fa-plus"></i> Create Customer
+                    </button>
+                  </div>
+                </div>
+
+                <div className="card-standard p-6">
+                  <div className='flex flex-col md:flex-row justify-between items-center mb-6 gap-4'>
+                    <div className="w-full md:w-1/3">
+                      <div className="relative">
+                        <i className="fa-solid fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                        <input
+                          type="text"
+                          className="input-standard pl-10"
+                          placeholder="Search by name or email..."
+                          value={searchQuery}
+                          onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                      </div>
                     </div>
                   </div>
 
-                  <div className="row px-2 table-responsive">
-                    <table class="table table-bordered">
+                  <div className="overflow-x-auto rounded-lg border border-gray-100">
+                    <table className="w-full text-left border-collapse">
                       <thead>
-                        <tr>
-                          <th scope="col">ID </th>
-                          <th scope="col">Customer </th>
-                          <th scope="col">Email </th>
-                          <th scope="col">Date</th>
-                          <th scope="col">Phone Number  </th>
-                          <th scope='col'>View</th>
-                          <th scope="col">Edit/Delete </th>
+                        <tr className="bg-gray-50/80 border-b border-gray-100 text-gray-600 text-sm tracking-wider uppercase">
+                          <th className="py-4 px-4 font-semibold w-16">ID</th>
+                          <th className="py-4 px-4 font-semibold">Customer</th>
+                          <th className="py-4 px-4 font-semibold">Email</th>
+                          <th className="py-4 px-4 font-semibold">Phone Number</th>
+                          <th className="py-4 px-4 font-semibold">Date</th>
+                          <th className="py-4 px-4 font-semibold text-center">View</th>
+                          <th className="py-4 px-4 font-semibold text-center">Actions</th>
                         </tr>
                       </thead>
-                      <tbody>
+                      <tbody className="divide-y divide-gray-50 text-gray-700">
                         {getCurrentPageCustomers().map((customer, index) => (
-                          <tr key={index}>
-                            <th scope="row">{currentPage * entriesPerPage + index + 1}</th>
-                            <td>{customer.name}</td>
-                            <td>
+                          <tr key={index} className="hover:bg-gray-50/50 transition-colors">
+                            <td className="py-3 px-4 font-medium text-gray-900">{currentPage * entriesPerPage + index + 1}</td>
+                            <td className="py-3 px-4 font-semibold text-gray-800">{customer.name}</td>
+                            <td className="py-3 px-4">
                               {customer.emails && customer.emails.length > 0
                                 ? customer.emails.map((email, idx) => (
-                                  <div key={idx}>{email}</div>
+                                  <div key={idx} className="text-sm">{email}</div>
                                 ))
-                                : '—'}
+                                : <span className="text-gray-400 italic">No email</span>}
                             </td>
-                            <td>{formatDate(customer.createdAt)}</td>
-                            <td>{customer.number}</td>
-                            <td className='text-center'>
-                              <a role='button' className='text-black text-center' onClick={() => handleViewClick(customer)}>
+                            <td className="py-3 px-4">{customer.number || '-'}</td>
+                            <td className="py-3 px-4">{formatDate(customer.createdAt)}</td>
+                            <td className='py-3 px-4 text-center'>
+                              <button className='p-2 text-gray-500 hover:text-primary transition-colors' onClick={() => handleViewClick(customer)} title="View Detail">
                                 <i className='fa-solid fa-eye'></i>
-                              </a>
+                              </button>
                             </td>
-                            <td>
-                              <div className="d-flex">
-                                <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={() => handleEditClick(customer)}>
-                                  <i className="fa-solid fa-pen"></i>
-                                </a>
-                                <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(customer._id)}>
+                            <td className="py-3 px-4 text-center">
+                              <div className="flex items-center justify-center gap-2">
+                                <button className="btn-secondary px-3 py-1.5 text-sm" onClick={() => handleEditClick(customer)}>
+                                  <i className="fa-solid fa-pen"></i> Edit
+                                </button>
+                                <button className="btn-secondary px-3 py-1.5 text-red-500 hover:text-red-700 hover:bg-red-50 text-sm" onClick={() => handleDeleteClick(customer._id)}>
                                   <i className="fas fa-trash"></i>
                                 </button>
                               </div>
                             </td>
                           </tr>
                         ))}
-                        {/* {filteredCustomers.map((customer, index) => (
-                                    <tr key={index}>
-                                        <th scope="row">{index + 1}</th>
-                                        <td>{customer.name}</td>
-                                        <td>{customer.email}</td>
-                                        <td>{formatDate(customer.createdAt)}</td>
-                                        <td>{customer.number}</td>
-                                        <td>
-                                            <div className="d-flex">
-                                                <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={() => handleEditClick(customer)}>
-                                                    <i className="fa-solid fa-pen"></i>
-                                                </a>
-                                                <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(customer._id)}>
-                                                    <i className="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                ))} */}
+                        {filteredCustomers.length === 0 && (
+                          <tr>
+                            <td colSpan="7" className="py-8 text-center text-gray-500">
+                              No customers found matching your search.
+                            </td>
+                          </tr>
+                        )}
                       </tbody>
-                      {/* <tbody>
-                                        {customers.map((customer, index) => (
-                                            <tr key={index}>
-                                                <th scope="row">{index + 1}</th>
-                                                <td>{customer.name}</td>
-                                                <td>{customer.email}</td>
-                                                <td>{formatDate(customer.createdAt)}</td>
-                                                <td>{customer.number}</td>
-                                                <td>
-                                                    <div className="d-flex">
-                                                        <a role='button' className="btn btn-success btn-sm me-2 text-white" onClick={ () => handleEditClick(customer)}>
-                                                                    <i className="fa-solid fa-pen"></i>
-                                                                </a>
-                                                                <button type="button" className="btn btn-danger btn-sm me-2" onClick={() => handleDeleteClick(customer._id)}>
-                                                                    <i className="fas fa-trash"></i>
-                                                                </button>
-                                                    </div>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody> */}
                     </table>
                   </div>
-                <div className='row mt-3'>
-  <div className='col-12 d-flex flex-wrap align-items-center justify-content-between'>
 
-    {/* Entries per page dropdown */}
-    <div className='mb-2 mb-md-0'>
-      <label className='me-2 fw-semibold'>Show</label>
-      <select value={entriesPerPage} onChange={handleEntriesChange} className='form-select d-inline w-auto'>
-        <option value={10}>10</option>
-        <option value={25}>25</option>
-        <option value={50}>50</option>
-      </select>
-      <span className='ms-2'>entries per page</span>
-    </div>
+                  {/* Pagination Controls */}
+                  {filteredCustomers.length > 0 && (
+                  <div className='flex flex-col md:flex-row items-center justify-between mt-6 gap-4 border-t border-gray-100 pt-6'>
+                    <div className='flex items-center text-sm text-gray-600'>
+                      <label className='mr-2 font-medium'>Show</label>
+                      <select value={entriesPerPage} onChange={handleEntriesChange} className='input-standard py-1 px-3 w-20 text-center mr-2'>
+                        <option value={10}>10</option>
+                        <option value={25}>25</option>
+                        <option value={50}>50</option>
+                      </select>
+                      <span>entries per page</span>
+                    </div>
 
-    {/* Page controls */}
-    <div className='d-flex align-items-center flex-wrap'>
+                    <div className='flex items-center gap-2'>
+                      <button
+                        className='px-3 py-1.5 text-sm border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                        onClick={handleFirstPage}
+                        disabled={currentPage === 0}
+                      >
+                        « First
+                      </button>
+                      <button
+                        className='px-3 py-1.5 text-sm border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                        onClick={handlePrevPage}
+                        disabled={currentPage === 0}
+                      >
+                        ‹ Prev
+                      </button>
 
-      <button
-        className='btn btn-outline-secondary btn-sm me-2'
-        onClick={handleFirstPage}
-        disabled={currentPage === 0}
-      >
-        « First
-      </button>
+                      <span className='px-4 py-1.5 text-sm font-medium text-gray-700 bg-gray-50 rounded-md border border-gray-100'>
+                        Page {currentPage + 1} of {getPageCount() || 1}
+                      </span>
 
-      <button
-        className='btn btn-outline-secondary btn-sm me-2'
-        onClick={handlePrevPage}
-        disabled={currentPage === 0}
-      >
-        ‹ Prev
-      </button>
+                      <button
+                        className='px-3 py-1.5 text-sm border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                        onClick={handleNextPage}
+                        disabled={(currentPage + 1) >= getPageCount()}
+                      >
+                        Next ›
+                      </button>
+                      <button
+                        className='px-3 py-1.5 text-sm border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors'
+                        onClick={handleLastPage}
+                        disabled={(currentPage + 1) >= getPageCount()}
+                      >
+                        Last »
+                      </button>
+                    </div>
+                  </div>
+                  )}
 
-      <div className='me-2'>
-        Page {currentPage + 1} of {getPageCount()}
-      </div>
-
-      <button
-        className='btn btn-outline-secondary btn-sm me-2'
-        onClick={handleNextPage}
-        disabled={(currentPage + 1) >= getPageCount()}
-      >
-        Next ›
-      </button>
-
-      <button
-        className='btn btn-outline-secondary btn-sm'
-        onClick={handleLastPage}
-        disabled={(currentPage + 1) >= getPageCount()}
-      >
-        Last »
-      </button>
-
-    </div>
-  </div>
-</div>
-<ToastContainer
-                  position="top-right"
-                  autoClose={3000}
-                  hideProgressBar={false}
-                  newestOnTop={false}
-                  closeOnClick
-                  rtl={false}
-                  pauseOnFocusLoss
-                  draggable
-                  pauseOnHover
-                  theme="light"
-                />
-
+                  <ToastContainer position="top-right" autoClose={3000} hideProgressBar={false} newestOnTop={false} closeOnClick rtl={false} pauseOnFocusLoss draggable pauseOnHover theme="light" />
                 </div>
               </div>
             </div>
           </div>
-          
+
       }
     </div>
   )

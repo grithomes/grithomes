@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import Usernavbar from './Usernavbar';
+import Sidebar from './Sidebar';
 import { CountrySelect, StateSelect, CitySelect } from '@davzon/react-country-state-city';
 import "@davzon/react-country-state-city/dist/react-country-state-city.css";
-import Usernav from './Usernav';
+
 import Alertauthtoken from '../../components/Alertauthtoken';
 import { ColorRing } from 'react-loader-spinner'
 
@@ -34,25 +34,25 @@ export default function Editcustomer() {
         }
         fetchCustomerData();
     }, [])
-const handleEmailChange = (index, value) => {
-  const updatedEmails = [...customer.emails];
-  updatedEmails[index] = value;
-  setcustomer(prev => ({ ...prev, emails: updatedEmails }));
-};
+    const handleEmailChange = (index, value) => {
+        const updatedEmails = [...customer.emails];
+        updatedEmails[index] = value;
+        setcustomer(prev => ({ ...prev, emails: updatedEmails }));
+    };
 
-const addEmailField = () => {
-  setcustomer(prev => ({ ...prev, emails: [...(prev.emails || []), ''] }));
-};
+    const addEmailField = () => {
+        setcustomer(prev => ({ ...prev, emails: [...(prev.emails || []), ''] }));
+    };
 
-const removeEmailField = (index) => {
-  const updatedEmails = [...customer.emails];
-  updatedEmails.splice(index, 1);
-  setcustomer(prev => ({ ...prev, emails: updatedEmails }));
-};
+    const removeEmailField = (index) => {
+        const updatedEmails = [...customer.emails];
+        updatedEmails.splice(index, 1);
+        setcustomer(prev => ({ ...prev, emails: updatedEmails }));
+    };
     const fetchCustomerData = async () => {
         try {
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/getcustomers/${customerId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/getcustomers/${customerId}`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -88,7 +88,7 @@ const removeEmailField = (index) => {
                 ...customer
             };
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`https://grithomes.onrender.com/api/updatecostomerdata/${customerId}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/updatecostomerdata/${customerId}`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -130,7 +130,7 @@ const removeEmailField = (index) => {
         <div className='bg'>
             {
                 loading ?
-                    <div className='row'>
+                    <div className="flex flex-col md:flex-row">
                         <ColorRing
                             // width={200}
                             loading={loading}
@@ -142,46 +142,44 @@ const removeEmailField = (index) => {
                             data-testid="loader"
                         />
                     </div> :
-                    <div className='container-fluid'>
-                        <div className="row">
-                            <div className='col-lg-2 col-md-3 vh-lg-100 vh-md-100 b-shadow bg-white d-lg-block d-md-block d-none'>
-                                <div  >
-                                    <Usernavbar />
-                                </div>
-                            </div>
-
-                            <div className="col-lg-10 col-md-9 col-12 mx-auto">
-                                <div className='d-lg-none d-md-none d-block mt-2'>
-                                    <Usernav />
-                                </div><div className='mt-4 mx-4'>
+                    <div className='w-full '>
+                        <div className="flex flex-col md:flex-row">
+                            <Sidebar />
+                            <div className="flex-1 w-full mx-auto px-4">
+                                <div className='mt-6 mx-4'>
                                     {alertMessage && <Alertauthtoken message={alertMessage} onClose={() => setAlertMessage('')} />}
                                 </div>
                                 <form>
-                                    <div className="bg-white my-5 p-4 box mx-4">
-                                        <div className='row'>
-                                            <p className='h5 fw-bold'>Edit Customer</p>
+                                    <div className='flex flex-wrap items-center justify-between py-6 px-4 mb-6 bg-white shadow-sm rounded-xl border border-gray-100 mx-4'>
+                                        <div>
+                                            <p className='text-3xl font-bold text-gray-800'>Edit Customer</p>
                                             <nav aria-label="breadcrumb">
-                                                <ol className="breadcrumb mb-0">
-                                                    <li className="breadcrumb-item">
-                                                        <a href="/userpanel/Userdashboard" className='txtclr text-decoration-none'>Dashboard</a>
-                                                    </li>
-                                                    <li className="breadcrumb-item">
-                                                        <a href="/userpanel/Customerlist" className='txtclr text-decoration-none'>Customer</a>
-                                                    </li>
-                                                    <li className="breadcrumb-item active" aria-current="page">Edit Customer</li>
+                                                <ol className="flex text-sm text-gray-500 mt-2 space-x-2">
+                                                    <li><a href="/userpanel/Userdashboard" className='hover:text-primary transition-colors text-decoration-none'>Dashboard</a></li>
+                                                    <li><span className="mx-2">/</span></li>
+                                                    <li><a href="/userpanel/Customerlist" className='hover:text-primary transition-colors text-decoration-none'>Customers</a></li>
+                                                    <li><span className="mx-2">/</span></li>
+                                                    <li className="text-gray-800 font-semibold" aria-current="page">Edit Customer</li>
                                                 </ol>
                                             </nav>
-                                        </div><hr />
+                                        </div>
+                                        <div className="mt-4 md:mt-0">
+                                            <button className='btn-primary' type="button" onClick={handleSaveClick}>Save Changes</button>
+                                        </div>
+                                    </div>
 
-                                        <div className="row">
-                                            <div className="col-12 col-sm-6 col-lg-4">
-                                                <div className="mb-3">
-                                                    <label htmlFor="exampleInputtext1" className="form-label">
+                                    <div className="card-standard p-6 mx-4 mb-8">
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                                            {/* Customer Name */}
+                                            <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                                                <div className="mb-4">
+                                                    <label htmlFor="exampleInputtext1" className="block text-sm font-medium text-gray-700 mb-1">
                                                         Customer Name
                                                     </label>
                                                     <input
                                                         type="text"
-                                                        className="form-control"
+                                                        className="input-standard"
                                                         name="name"
                                                         value={customer.name}
                                                         onChange={handleInputChange}
@@ -192,52 +190,17 @@ const removeEmailField = (index) => {
                                                 </div>
                                             </div>
 
-                                            <div className="col-12 col-sm-6 col-lg-4">
-  <div className="mb-3">
-    <label className="form-label">Contact Emails</label>
-    {customer.emails && customer.emails.map((email, index) => (
-      <div className="input-group mb-2" key={index}>
-        <input
-          type="email"
-          className="form-control"
-          name="emails"
-          value={email}
-          onChange={(e) => handleEmailChange(index, e.target.value)}
-          placeholder={`Contact Email #${index + 1}`}
-          required
-        />
-        <button
-          type="button"
-          className="btn btn-outline-danger"
-          onClick={() => removeEmailField(index)}
-          disabled={customer.emails.length === 1}
-        >
-          -
-        </button>
-        {index === customer.emails.length - 1 && (
-          <button
-            type="button"
-            className="btn btn-outline-primary"
-            onClick={addEmailField}
-          >
-            +
-          </button>
-        )}
-      </div>
-    ))}
-  </div>
-</div>
-
-                                            <div className="col-12 col-sm-6 col-lg-4">
-                                                <div className="mb-3">
-                                                    <label htmlFor="Number" className="form-label">
+                                            {/* Phone Number */}
+                                            <div className="col-span-1 md:col-span-2 lg:col-span-1">
+                                                <div className="mb-4">
+                                                    <label htmlFor="Number" className="block text-sm font-medium text-gray-700 mb-1">
                                                         Phone Number
                                                     </label>
                                                     <input
                                                         type="number"
                                                         name="number"
                                                         value={customer.number}
-                                                        className="form-control"
+                                                        className="input-standard"
                                                         onChange={handleInputChange}
                                                         placeholder="Phone Number"
                                                         id="phonenumber"
@@ -246,27 +209,55 @@ const removeEmailField = (index) => {
                                                 </div>
                                             </div>
 
-                                            <div className="col-12 col-sm-12 col-lg-12">
-                                                <div className="mb-3">
-                                                    <label htmlFor="information" className="form-label">
-                                                        Additional Information
-                                                    </label>
-                                                    <textarea
-                                                        type="text"
-                                                        className="form-control"
-                                                        value={customer.information}
-                                                        name="information"
-                                                        onChange={handleInputChange}
-                                                        placeholder="Information"
-                                                        id="information"
-                                                        required
-                                                    />
+                                            {/* Contact Emails */}
+                                            <div className="col-span-1 md:col-span-2">
+                                                <div className="mb-4">
+                                                    <label className="block text-sm font-medium text-gray-700 mb-1">Contact Emails</label>
+                                                    <div className="space-y-3">
+                                                        {customer.emails && customer.emails.map((email, index) => (
+                                                            <div className="flex items-center gap-2" key={index}>
+                                                                <input
+                                                                    type="email"
+                                                                    className="input-standard flex-1"
+                                                                    name="emails"
+                                                                    value={email}
+                                                                    onChange={(e) => handleEmailChange(index, e.target.value)}
+                                                                    placeholder={`Contact Email #${index + 1}`}
+                                                                    required
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="px-3 py-2 text-red-600 bg-red-50 hover:bg-red-100 rounded-md border border-red-200 transition-colors disabled:opacity-50"
+                                                                    onClick={() => removeEmailField(index)}
+                                                                    disabled={customer.emails.length === 1}
+                                                                    title="Remove Email"
+                                                                >
+                                                                    <i className="fa-solid fa-minus"></i>
+                                                                </button>
+                                                                {index === customer.emails.length - 1 && (
+                                                                    <button
+                                                                        type="button"
+                                                                        className="px-3 py-2 text-green-600 bg-green-50 hover:bg-green-100 rounded-md border border-green-200 transition-colors"
+                                                                        onClick={addEmailField}
+                                                                        title="Add Another Email"
+                                                                    >
+                                                                        <i className="fa-solid fa-plus"></i>
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
                                                 </div>
                                             </div>
 
-                                            <div className="col-12 col-sm-6 col-lg-6">
-                                                <div className="mb-3">
-                                                    <label htmlFor="Address1" className="form-label">
+                                            <div className="col-span-1 md:col-span-2 border-t border-gray-100 pt-6 mt-2">
+                                                <h3 className="text-lg font-bold text-gray-800 mb-4">Location Details</h3>
+                                            </div>
+
+                                            {/* Address 1 */}
+                                            <div className="col-span-1">
+                                                <div className="mb-4">
+                                                    <label htmlFor="Address1" className="block text-sm font-medium text-gray-700 mb-1">
                                                         Address 1
                                                     </label>
                                                     <input
@@ -274,7 +265,7 @@ const removeEmailField = (index) => {
                                                         name="address1"
                                                         value={customer.address1}
                                                         onChange={handleInputChange}
-                                                        className="form-control"
+                                                        className="input-standard"
                                                         placeholder="Address 1"
                                                         id="Address1"
                                                         required
@@ -282,9 +273,10 @@ const removeEmailField = (index) => {
                                                 </div>
                                             </div>
 
-                                            <div className="col-12 col-sm-6 col-lg-6">
-                                                <div className="mb-3">
-                                                    <label htmlFor="Address2" className="form-label">
+                                            {/* Address 2 */}
+                                            <div className="col-span-1">
+                                                <div className="mb-4">
+                                                    <label htmlFor="Address2" className="block text-sm font-medium text-gray-700 mb-1">
                                                         Address 2
                                                     </label>
                                                     <input
@@ -292,7 +284,7 @@ const removeEmailField = (index) => {
                                                         name="address2"
                                                         value={customer.address2}
                                                         onChange={handleInputChange}
-                                                        className="form-control"
+                                                        className="input-standard"
                                                         placeholder="Address 2"
                                                         id="Address2"
                                                         required
@@ -300,9 +292,10 @@ const removeEmailField = (index) => {
                                                 </div>
                                             </div>
 
-                                            <div className="col-12 col-sm-6 col-lg-6">
-                                                <div className="mb-3">
-                                                    <label htmlFor="Country" className="form-label">Country</label>
+                                            {/* Country */}
+                                            <div className="col-span-1">
+                                                <div className="mb-4 country-select-container">
+                                                    <label htmlFor="Country" className="block text-sm font-medium text-gray-700 mb-1">Country</label>
                                                     <CountrySelect
                                                         name="country"
                                                         defaultValue={customer.countrydata != '' ? JSON.parse(customer.countrydata) : null}
@@ -314,14 +307,15 @@ const removeEmailField = (index) => {
                                                                 countrydata: JSON.stringify(val),
                                                             }));
                                                         }}
-
+                                                        className="w-full"
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="col-12 col-sm-6 col-lg-6">
-                                                <div className="mb-3">
-                                                    <label htmlFor="State" className="form-label">State</label>
+                                            {/* State */}
+                                            <div className="col-span-1">
+                                                <div className="mb-4 country-select-container">
+                                                    <label htmlFor="State" className="block text-sm font-medium text-gray-700 mb-1">State</label>
                                                     <StateSelect
                                                         name="state"
                                                         countryid={customer.countryid != 0 ? customer.countryid : 0}
@@ -331,13 +325,15 @@ const removeEmailField = (index) => {
                                                             setcustomer({ ...customer, stateid: val.id });
                                                             setcustomer({ ...customer, statedata: JSON.stringify(val) });
                                                         }}
+                                                        className="w-full"
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="col-12 col-sm-6 col-lg-6">
-                                                <div className="mb-3">
-                                                    <label htmlFor="City" className="form-label">City</label>
+                                            {/* City */}
+                                            <div className="col-span-1">
+                                                <div className="mb-4 country-select-container">
+                                                    <label htmlFor="City" className="block text-sm font-medium text-gray-700 mb-1">City</label>
                                                     <CitySelect
                                                         countryid={customer ? customer.countryid : 0}
                                                         stateid={customer ? customer.stateid : 0}
@@ -348,29 +344,50 @@ const removeEmailField = (index) => {
                                                             setcustomer({ ...customer, citydata: JSON.stringify(val) });
                                                         }}
                                                         placeHolder="Select City"
+                                                        className="w-full"
                                                     />
                                                 </div>
                                             </div>
 
-                                            <div className="col-12 col-sm-6 col-lg-6">
-                                                <div className="mb-3">
-                                                    <label htmlFor="post" className="form-label">
-                                                        Post
+                                            {/* Post Code */}
+                                            <div className="col-span-1">
+                                                <div className="mb-4">
+                                                    <label htmlFor="post" className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Post Code
                                                     </label>
                                                     <input
                                                         type="text"
                                                         name="post"
                                                         value={customer.post}
                                                         onChange={handleInputChange}
-                                                        className="form-control"
-                                                        placeholder="post"
+                                                        className="input-standard"
+                                                        placeholder="Post Code"
                                                         id="post"
                                                         required
                                                     />
                                                 </div>
                                             </div>
+
+                                            {/* Additional Information */}
+                                            <div className="col-span-1 md:col-span-2">
+                                                <div className="mb-4">
+                                                    <label htmlFor="information" className="block text-sm font-medium text-gray-700 mb-1">
+                                                        Additional Information
+                                                    </label>
+                                                    <textarea
+                                                        className="input-standard"
+                                                        value={customer.information}
+                                                        name="information"
+                                                        onChange={handleInputChange}
+                                                        placeholder="Information"
+                                                        id="information"
+                                                        required
+                                                        rows="4"
+                                                    />
+                                                </div>
+                                            </div>
+
                                         </div>
-                                        <button type="button" className='btn btnclr text-white me-2' onClick={handleSaveClick}>Save</button>
                                     </div>
                                 </form>
                             </div>

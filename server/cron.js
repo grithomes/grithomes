@@ -1,14 +1,14 @@
 const cron = require('cron');
-const https = require('https');
+const http = require('http');
 
-const backendUrl = 'https://grithomes.onrender.com';
+const backendUrl = 'http://localhost:3001';
 
 const job = new cron.CronJob('*/14 * * * *', function () {
   // This function will be executed every 14 minutes.
   console.log('Restarting server');
 
-  // Perform an HTTPS GET request to hit the backend API.
-  https.get(backendUrl, (res) => {
+  // Perform an HTTP GET request to hit the backend API.
+  http.get(backendUrl, (res) => {
     if (res.statusCode === 200) {
       console.log('Server restarted');
     } else {
