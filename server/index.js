@@ -48,6 +48,9 @@ app.use('/api', require("./Routes/DisplayData"));
 app.use('/api', require("./Routes/OrderData"));
 app.use('/api', require("./Routes/TestApi"));
 app.use('/api', require("./Routes/ForgotPassword"));
+app.use('/api', require("./Routes/InventoryRoute"));
+app.use('/api', require("./Routes/NotesRoute"));
+app.use('/api', require("./Routes/JobRoute"));
 
 app.listen(port, () => {
   console.log(`Example app listening on port ${port}`)

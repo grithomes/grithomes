@@ -15,6 +15,13 @@ import Editcustomer from './screens/userpanel/Editcustomer';
 import Itemlist from './screens/userpanel/Itemlist';
 import Additem from './screens/userpanel/Additem';
 import Edititem from './screens/userpanel/Edititem';
+import InventoryList from './screens/userpanel/InventoryList';
+import Addinventory from './screens/userpanel/Addinventory';
+import JobsList from './screens/userpanel/JobList';
+import JobDetail from './screens/userpanel/JobDetail';
+import TeamMyJobs from './screens/Teammemberpanel/MyJobs';
+import TeamJobDetail from './screens/Teammemberpanel/JobDetail';
+import Editinventory from './screens/userpanel/Editinventory';
 import Editteam from './screens/userpanel/Editteam';
 import Createinvoice from './screens/userpanel/Createinvoice';
 import Invoicedetail from './screens/userpanel/Invoicedetail';
@@ -36,6 +43,8 @@ import Customersigninvoice from './screens/userpanel/Customersigninvoice';
 import Signature from './screens/userpanel/Signature';
 import Completedocument from './screens/userpanel/Completedocument';
 import Category from './screens/userpanel/Expense/Category';
+import UserNotes from './screens/userpanel/Notes';
+import TeamNotes from './screens/Teammemberpanel/Notes';
 // import { InvoiceProvider } from './components/InvoiceContext';
 import {
   BrowserRouter as Router,
@@ -67,6 +76,11 @@ function App() {
             <Route exact path='/userpanel/Itemlist' element={<Itemlist/>} />
             <Route exact path='/userpanel/Additem' element={<Additem/>} />
             <Route exact path='/userpanel/Edititem' element={<Edititem/>} />
+            <Route exact path='/userpanel/InventoryList' element={<InventoryList/>} />
+            <Route exact path='/userpanel/Addinventory' element={<Addinventory/>} />
+            <Route exact path='/userpanel/JobsList' element={<JobsList/>} />
+            <Route exact path='/userpanel/JobDetail/:jobId' element={<JobDetail/>} />
+            <Route exact path='/userpanel/Editinventory' element={<Editinventory/>} />
             <Route exact path='/userpanel/Createinvoice' element={<Createinvoice/>} />
             <Route exact path='/userpanel/Invoicedetail' element={<Invoicedetail/>} />
             <Route exact path='/userpanel/Invoice' element={<Invoice/>} />
@@ -91,6 +105,10 @@ function App() {
             <Route exact path='/Timeschemahistory' element={<Timeschemahistory/>} />
             <Route exact path='/Teammemberpanel/Teammenberdashboard' element={<Teammenberdashboard/>} />
             <Route exact path='/Teammemberpanel/History' element={<Teamhistory/>} />
+            <Route exact path='/Teammemberpanel/MyJobs' element={<TeamMyJobs/>} />
+            <Route exact path='/Teammemberpanel/JobDetail/:jobId' element={<TeamJobDetail/>} />
+            <Route exact path='/userpanel/Notes' element={<UserNotes/>} />
+            <Route exact path='/Teammemberpanel/Notes' element={<TeamNotes/>} />
           </Routes>
         </div>
       </Router>

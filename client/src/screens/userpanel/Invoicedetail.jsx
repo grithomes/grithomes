@@ -881,6 +881,8 @@ export default function Invoicedetail() {
 
     } catch (error) {
       console.error('Error adding payment:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -2313,7 +2315,7 @@ thead{
           <div className="modal-content border-0 shadow-2xl rounded-3xl overflow-hidden bg-white/95 backdrop-blur-xl">
             <div className="modal-header border-slate-100 p-6 md:p-8 bg-slate-50/50">
               <h2 className="modal-title text-xl font-black text-slate-900 uppercase tracking-tight" id="markPaidLabel">Record Payment</h2>
-              <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              <button type="button" id="closebutton" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div className="modal-body p-8 space-y-6">
               <div className="space-y-4">

@@ -164,6 +164,33 @@ export default function Sidebar() {
             </li>
             <li>
               <Link
+                to="/userpanel/InventoryList"
+                onClick={() => setIsSidebarOpen(false)}
+                className={`flex text-textMuted items-center px-4 py-2.5 rounded-std text-sm font-medium transition-colors ${['/userpanel/InventoryList', '/userpanel/Addinventory', '/userpanel/Editinventory'].includes(location.pathname) ? 'bg-primary text-white shadow-soft' : 'text-textMain hover:bg-gray-100'}`}
+              >
+                <i className={`fas fa-boxes-stacked w-5 mr-3 ${['/userpanel/InventoryList', '/userpanel/Addinventory', '/userpanel/Editinventory'].includes(location.pathname) ? 'text-white' : 'text-gray-400 opacity-70'}`}></i> Inventory
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/userpanel/Notes"
+                onClick={() => setIsSidebarOpen(false)}
+                className={`flex text-textMuted items-center px-4 py-2.5 rounded-std text-sm font-medium transition-colors ${location.pathname === '/userpanel/Notes' ? 'bg-primary text-white shadow-soft' : 'text-textMain hover:bg-gray-100'}`}
+              >
+                <i className={`fas fa-note-sticky w-5 mr-3 ${location.pathname === '/userpanel/Notes' ? 'text-white' : 'text-gray-400 opacity-70'}`}></i> Notes
+              </Link>
+            </li>
+            <li>
+              <Link
+                to="/userpanel/JobsList"
+                onClick={() => setIsSidebarOpen(false)}
+                className={`flex text-textMuted items-center px-4 py-2.5 rounded-std text-sm font-medium transition-colors ${['/userpanel/JobsList', '/userpanel/JobDetail'].some(path => location.pathname.includes(path)) ? 'bg-primary text-white shadow-soft' : 'text-textMain hover:bg-gray-100'}`}
+              >
+                <i className={`fas fa-briefcase w-5 mr-3 ${['/userpanel/JobsList', '/userpanel/JobDetail'].some(path => location.pathname.includes(path)) ? 'text-white' : 'text-gray-400 opacity-70'}`}></i> Jobs
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/userpanel/Team"
                 onClick={() => setIsSidebarOpen(false)}
                 className={`flex text-textMuted items-center px-4 py-2.5 rounded-std text-sm font-medium transition-colors ${['/userpanel/Team', '/userpanel/Addteam', '/userpanel/Editteam', '/userpanel/Timeview', '/Timeschemahistory'].includes(location.pathname) ? 'bg-primary text-white shadow-soft' : 'text-textMain hover:bg-gray-100'}`}

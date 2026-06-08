@@ -44,6 +44,16 @@ export default function Teamnavbar() {
                         <i className="fa-solid fa-house mr-2 dashclr"></i> <span>Dashboard</span>
                       </Link>
                     </li>
+                    <li>
+                      <Link to="/Teammemberpanel/Notes" className={`nav-link scrollto icones text-black ${location.pathname == '/Teammemberpanel/Notes' ? 'active' : ''}`} >
+                        <i className="fa-solid fa-note-sticky mr-2 dashclr"></i> <span>Notes</span>
+                      </Link>
+                    </li>
+                    <li>
+                      <Link to="/Teammemberpanel/MyJobs" className={`nav-link scrollto icones text-black ${['/Teammemberpanel/MyJobs', '/Teammemberpanel/JobDetail'].some(path => location.pathname.includes(path)) ? 'active' : ''}`} >
+                        <i className="fa-solid fa-briefcase mr-2 dashclr"></i> <span>My Jobs</span>
+                      </Link>
+                    </li>
                     
                       <li>
                         <a onClick={handleLogout} className=" pointer nav-link scrollto icones text-black">
