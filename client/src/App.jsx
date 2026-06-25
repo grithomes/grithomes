@@ -45,6 +45,7 @@ import Completedocument from './screens/userpanel/Completedocument';
 import Category from './screens/userpanel/Expense/Category';
 import UserNotes from './screens/userpanel/Notes';
 import TeamNotes from './screens/Teammemberpanel/Notes';
+import EmailSystem from './screens/userpanel/EmailSystem';
 // import { InvoiceProvider } from './components/InvoiceContext';
 import {
   BrowserRouter as Router,
@@ -109,6 +110,7 @@ function App() {
             <Route exact path='/Teammemberpanel/JobDetail/:jobId' element={<TeamJobDetail/>} />
             <Route exact path='/userpanel/Notes' element={<UserNotes/>} />
             <Route exact path='/Teammemberpanel/Notes' element={<TeamNotes/>} />
+            <Route exact path='/userpanel/EmailSystem' element={<EmailSystem/>} />
           </Routes>
         </div>
       </Router>

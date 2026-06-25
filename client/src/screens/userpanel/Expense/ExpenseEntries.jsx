@@ -81,7 +81,7 @@ export default function ExpenseEntries() {
         try {
             const userid = localStorage.getItem("userid");
             const authToken = localStorage.getItem('authToken');
-            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/invoicedata/${userid}`, {
+            const response = await fetch(`${import.meta.env.VITE_API_BASE_URL}/invoicedata/${userid}?limit=200`, {
                 headers: {
                     'Authorization': authToken,
                 }
@@ -94,11 +94,12 @@ export default function ExpenseEntries() {
                 return; // Stop further execution
             } else {
                 const json = await response.json();
-                if (Array.isArray(json)) {
+                if (json && Array.isArray(json.invoices)) {
+                    const sortedInvoices = json.invoices.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    setInvoices(sortedInvoices);
+                } else if (Array.isArray(json)) {
                     const sortedInvoices = json.sort((a, b) => new Date(b.date) - new Date(a.date));
                     setInvoices(sortedInvoices);
-                    // console.log(sortedInvoices,"sortedInvoices");
-
                 }
                 setLoading(false);
             }
@@ -117,9 +118,14 @@ export default function ExpenseEntries() {
         try {
             const response = await fetch(apiURL);
             const data = await response.json();
-            console.log(data, "sdsds sdsd");
-
-            setExpenseEntries(data);
+            
+            // Sort descending by expenseDate (or createdAt)
+            if (Array.isArray(data)) {
+                const sortedData = data.sort((a, b) => new Date(b.createdAt || b.expenseDate) - new Date(a.createdAt || a.expenseDate));
+                setExpenseEntries(sortedData);
+            } else {
+                setExpenseEntries(data);
+            }
         } catch (error) {
             console.error('Error fetching expense entries:', error);
         } finally {

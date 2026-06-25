@@ -155,6 +155,15 @@ export default function Sidebar() {
             </li>
             <li>
               <Link
+                to="/userpanel/EmailSystem"
+                onClick={() => setIsSidebarOpen(false)}
+                className={`flex text-textMuted items-center px-4 py-2.5 rounded-std text-sm font-medium transition-colors ${['/userpanel/EmailSystem'].includes(location.pathname) ? 'bg-primary text-white shadow-soft' : 'text-textMain hover:bg-gray-100'}`}
+              >
+                <i className={`fa-solid fa-envelope mr-3 flex items-center justify-center w-5 text-lg ${['/userpanel/EmailSystem'].includes(location.pathname) ? 'text-white' : 'text-gray-400'}`}></i> Email System
+              </Link>
+            </li>
+            <li>
+              <Link
                 to="/userpanel/Itemlist"
                 onClick={() => setIsSidebarOpen(false)}
                 className={`flex text-textMuted items-center px-4 py-2.5 rounded-std text-sm font-medium transition-colors ${['/userpanel/Itemlist', '/userpanel/Additem', '/userpanel/Edititem'].includes(location.pathname) ? 'bg-primary text-white shadow-soft' : 'text-textMain hover:bg-gray-100'}`}

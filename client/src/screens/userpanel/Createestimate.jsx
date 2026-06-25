@@ -1354,185 +1354,203 @@ export default function Createestimate() {
                     {/* add customer */}
                     <form onSubmit={(e) => e.preventDefault()}>
                         <div className="modal fade" id="exampleModal1" tabIndex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-                            <div className="modal-dialog modal-lg">
-                                <div className="modal-content">
-                                    <div className="modal-header">
-                                        <h1 className="modal-title text-xl" id="exampleModalLabel">Add Customer</h1>
-                                        <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
-                                    <div className="modal-body">
-                                        <div className="flex flex-col md:flex-row">
-
-                                            {/* Customer Name */}
-                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/3 px-2 mb-6">
-                                                <label className="form-label">Customer Name</label>
-                                                <input
-                                                    type="text"
-                                                    className="input-standard"
-                                                    name="name"
-                                                    value={credentials.name}
-                                                    onChange={onchangeaddcustomer}
-                                                    placeholder="Customer Name"
-                                                    required
-                                                />
+                            <div className="modal-dialog modal-xl">
+                                <div className="modal-content border-0 shadow-lg rounded-xl overflow-hidden">
+                                    <div className="modal-header bg-gray-50 border-b border-gray-200 py-4 px-6">
+                                        <div className="flex items-center gap-3">
+                                            <div className="bg-primary/10 p-2 rounded-lg text-primary">
+                                                <i className="fa-solid fa-user-plus"></i>
                                             </div>
-
-                                            {/* Emails */}
-                                            <div className="w-full px-2 col-sm-6 w-full lg:w-2/3 px-2 mb-6">
-                                                <label className="form-label">Contact Emails</label>
-                                                {credentials.emails.map((email, index) => (
-                                                    <div className="input-group mb-2" key={index}>
+                                            <h1 className="modal-title text-xl font-bold text-gray-800" id="exampleModalLabel">Add New Customer</h1>
+                                        </div>
+                                        <button type="button" className="btn-close focus:outline-none" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div className="modal-body p-6 bg-gray-50/50">
+                                        <div className="flex flex-wrap -mx-3">
+                                            
+                                            {/* Left Column: Contact Info */}
+                                            <div className="w-full lg:w-1/2 px-3 mb-6">
+                                                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 h-full">
+                                                    <h3 className="text-md font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-100">
+                                                        <i className="fa-regular fa-address-card mr-2 text-primary"></i>Contact Details
+                                                    </h3>
+                                                    
+                                                    <div className="mb-4">
+                                                        <label className="form-label text-sm font-medium text-gray-600">Customer Name <span className="text-red-500">*</span></label>
                                                         <input
-                                                            type="email"
-                                                            className="input-standard"
-                                                            value={email}
-                                                            onChange={(e) => handleEmailChange(index, e.target.value)}
-                                                            placeholder={`Contact Email #${index + 1}`}
+                                                            type="text"
+                                                            className="input-standard focus:ring-2 focus:ring-primary/20"
+                                                            name="name"
+                                                            value={credentials.name}
+                                                            onChange={onchangeaddcustomer}
+                                                            placeholder="e.g. John Doe"
                                                             required
                                                         />
-                                                        <button
-                                                            type="button"
-                                                            className="btn btn-outline-danger"
-                                                            onClick={() => removeEmailField(index)}
-                                                            disabled={credentials.emails.length === 1}
-                                                        >
-                                                            -
-                                                        </button>
-                                                        {index === credentials.emails.length - 1 && (
-                                                            <button
-                                                                type="button"
-                                                                className="btn-secondary"
-                                                                onClick={addEmailField}
-                                                            >
-                                                                +
-                                                            </button>
-                                                        )}
                                                     </div>
-                                                ))}
+
+                                                    <div className="mb-4">
+                                                        <label className="form-label text-sm font-medium text-gray-600">Phone Number</label>
+                                                        <input
+                                                            type="text"
+                                                            name="number"
+                                                            value={credentials.number}
+                                                            onChange={onchangeaddcustomer}
+                                                            className="input-standard focus:ring-2 focus:ring-primary/20"
+                                                            placeholder="+1 (555) 000-0000"
+                                                        />
+                                                    </div>
+
+                                                    <div className="mb-2">
+                                                        <label className="form-label text-sm font-medium text-gray-600">Email Addresses <span className="text-red-500">*</span></label>
+                                                        {credentials.emails.map((email, index) => (
+                                                            <div className="flex gap-2 mb-3" key={index}>
+                                                                <input
+                                                                    type="email"
+                                                                    className="input-standard flex-1 focus:ring-2 focus:ring-primary/20"
+                                                                    value={email}
+                                                                    onChange={(e) => handleEmailChange(index, e.target.value)}
+                                                                    placeholder={`contact${index > 0 ? index + 1 : ''}@example.com`}
+                                                                    required
+                                                                />
+                                                                <button
+                                                                    type="button"
+                                                                    className="btn btn-outline-danger px-3 rounded-lg flex items-center justify-center transition-colors"
+                                                                    onClick={() => removeEmailField(index)}
+                                                                    disabled={credentials.emails.length === 1}
+                                                                    title="Remove Email"
+                                                                >
+                                                                    <i className="fa-solid fa-trash-can"></i>
+                                                                </button>
+                                                                {index === credentials.emails.length - 1 && (
+                                                                    <button
+                                                                        type="button"
+                                                                        className="btn-secondary px-3 rounded-lg flex items-center justify-center transition-colors"
+                                                                        onClick={addEmailField}
+                                                                        title="Add another email"
+                                                                    >
+                                                                        <i className="fa-solid fa-plus"></i>
+                                                                    </button>
+                                                                )}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </div>
                                             </div>
 
-                                            {/* Phone Number */}
-                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/3 px-2 mb-6">
-                                                <label className="form-label">Phone Number</label>
-                                                <input
-                                                    type="text"
-                                                    name="number"
-                                                    value={credentials.number}
-                                                    onChange={onchangeaddcustomer}
-                                                    className="input-standard"
-                                                    placeholder="Phone Number"
-                                                />
-                                            </div>
+                                            {/* Right Column: Location & Other */}
+                                            <div className="w-full lg:w-1/2 px-3 mb-6">
+                                                <div className="bg-white p-5 rounded-xl shadow-sm border border-gray-100 h-full">
+                                                    <h3 className="text-md font-semibold text-gray-700 mb-4 pb-2 border-b border-gray-100">
+                                                        <i className="fa-solid fa-map-location-dot mr-2 text-primary"></i>Address & Info
+                                                    </h3>
 
-                                            {/* Additional Information */}
-                                            <div className="w-full px-2 mb-6">
-                                                <label className="form-label">Additional Information</label>
-                                                <textarea
-                                                    name="information"
-                                                    value={credentials.information}
-                                                    onChange={onchangeaddcustomer}
-                                                    className="input-standard"
-                                                    placeholder="Information"
-                                                />
-                                            </div>
+                                                    <div className="flex flex-wrap -mx-2">
+                                                        <div className="w-full px-2 mb-4">
+                                                            <label className="form-label text-sm font-medium text-gray-600">Address Line 1</label>
+                                                            <input
+                                                                type="text"
+                                                                name="address1"
+                                                                value={credentials.address1}
+                                                                onChange={onchangeaddcustomer}
+                                                                className="input-standard focus:ring-2 focus:ring-primary/20"
+                                                                placeholder="Street address, P.O. box"
+                                                            />
+                                                        </div>
+                                                        <div className="w-full px-2 mb-4">
+                                                            <label className="form-label text-sm font-medium text-gray-600">Address Line 2 (Optional)</label>
+                                                            <input
+                                                                type="text"
+                                                                name="address2"
+                                                                value={credentials.address2}
+                                                                onChange={onchangeaddcustomer}
+                                                                className="input-standard focus:ring-2 focus:ring-primary/20"
+                                                                placeholder="Apt, suite, unit, building, floor, etc."
+                                                            />
+                                                        </div>
 
-                                            {/* Address 1 & 2 */}
-                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
-                                                <label className="form-label">Address 1</label>
-                                                <input
-                                                    type="text"
-                                                    name="address1"
-                                                    value={credentials.address1}
-                                                    onChange={onchangeaddcustomer}
-                                                    className="input-standard"
-                                                    placeholder="Address 1"
-                                                />
-                                            </div>
+                                                        <div className="w-full sm:w-1/2 px-2 mb-4">
+                                                            <label className="form-label text-sm font-medium text-gray-600">Country</label>
+                                                            <CountrySelect
+                                                                name="country"
+                                                                value={credentials.countryid}
+                                                                onChange={(val) => {
+                                                                    setcountryid(val.id);
+                                                                    setcountry(val.name);
+                                                                    setCredentials({ ...credentials, countrydata: JSON.stringify(val) });
+                                                                }}
+                                                                valueType="short"
+                                                                className="input-standard w-full"
+                                                                placeHolder="Select Country"
+                                                            />
+                                                        </div>
+                                                        <div className="w-full sm:w-1/2 px-2 mb-4">
+                                                            <label className="form-label text-sm font-medium text-gray-600">State / Province</label>
+                                                            <StateSelect
+                                                                name="state"
+                                                                countryid={countryid}
+                                                                onChange={(val) => {
+                                                                    setstateid(val.id);
+                                                                    setstate(val.name);
+                                                                    setCredentials({ ...credentials, statedata: JSON.stringify(val) });
+                                                                }}
+                                                                placeHolder="Select State"
+                                                            />
+                                                        </div>
 
-                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
-                                                <label className="form-label">Address 2</label>
-                                                <input
-                                                    type="text"
-                                                    name="address2"
-                                                    value={credentials.address2}
-                                                    onChange={onchangeaddcustomer}
-                                                    className="input-standard"
-                                                    placeholder="Address 2"
-                                                />
-                                            </div>
+                                                        <div className="w-full sm:w-1/2 px-2 mb-4">
+                                                            <label className="form-label text-sm font-medium text-gray-600">City</label>
+                                                            <CitySelect
+                                                                countryid={countryid}
+                                                                stateid={stateid}
+                                                                onChange={(val) => {
+                                                                    setcityid(val.id);
+                                                                    setcity(val.name);
+                                                                    setCredentials({ ...credentials, citydata: JSON.stringify(val) });
+                                                                }}
+                                                                placeHolder="Select City"
+                                                            />
+                                                        </div>
+                                                        <div className="w-full sm:w-1/2 px-2 mb-4">
+                                                            <label className="form-label text-sm font-medium text-gray-600">Postal / Zip Code</label>
+                                                            <input
+                                                                type="text"
+                                                                name="post"
+                                                                value={credentials.post}
+                                                                onChange={onchangeaddcustomer}
+                                                                className="input-standard focus:ring-2 focus:ring-primary/20"
+                                                                placeholder="e.g. 90210"
+                                                            />
+                                                        </div>
 
-                                            {/* Country */}
-                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
-                                                <label className="form-label">Country</label>
-                                                <CountrySelect
-                                                    name="country"
-                                                    value={credentials.countryid}
-                                                    onChange={(val) => {
-                                                        setcountryid(val.id);
-                                                        setcountry(val.name);
-                                                        setCredentials({ ...credentials, countrydata: JSON.stringify(val) });
-                                                    }}
-                                                    valueType="short"
-                                                    className="input-standard"
-                                                    placeHolder="Select Country"
-                                                />
+                                                        <div className="w-full px-2 mb-2">
+                                                            <label className="form-label text-sm font-medium text-gray-600">Additional Notes</label>
+                                                            <textarea
+                                                                name="information"
+                                                                value={credentials.information}
+                                                                onChange={onchangeaddcustomer}
+                                                                className="input-standard focus:ring-2 focus:ring-primary/20"
+                                                                placeholder="Any other details..."
+                                                                rows="2"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-
-                                            {/* State */}
-                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
-                                                <label className="form-label">State</label>
-                                                <StateSelect
-                                                    name="state"
-                                                    countryid={countryid}
-                                                    onChange={(val) => {
-                                                        setstateid(val.id);
-                                                        setstate(val.name);
-                                                        setCredentials({ ...credentials, statedata: JSON.stringify(val) });
-                                                    }}
-                                                    placeHolder="Select State"
-                                                />
-                                            </div>
-
-                                            {/* City */}
-                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
-                                                <label className="form-label">City</label>
-                                                <CitySelect
-                                                    countryid={countryid}
-                                                    stateid={stateid}
-                                                    onChange={(val) => {
-                                                        setcityid(val.id);
-                                                        setcity(val.name);
-                                                        setCredentials({ ...credentials, citydata: JSON.stringify(val) });
-                                                    }}
-                                                    placeHolder="Select City"
-                                                />
-                                            </div>
-
-                                            {/* Post Code */}
-                                            <div className="w-full px-2 col-sm-6 w-full lg:w-1/2 px-2 mb-6">
-                                                <label className="form-label">Post Code</label>
-                                                <input
-                                                    type="text"
-                                                    name="post"
-                                                    value={credentials.post}
-                                                    onChange={onchangeaddcustomer}
-                                                    className="input-standard"
-                                                    placeholder="Post Code"
-                                                />
-                                            </div>
-
                                         </div>
                                     </div>
 
-                                    <div className="modal-footer">
-                                        <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <div className="modal-footer bg-gray-50 border-t border-gray-200 py-4 px-6 flex justify-end gap-3">
+                                        <button type="button" className="px-5 py-2.5 rounded-lg font-medium text-gray-700 bg-white border border-gray-300 hover:bg-gray-50 transition-colors shadow-sm" data-bs-dismiss="modal">
+                                            Cancel
+                                        </button>
                                         <button
                                             type="button"
-                                            className="btn-primary"
+                                            className="px-5 py-2.5 rounded-lg font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm flex items-center gap-2"
                                             onClick={handleAddCustomer}
                                             data-bs-dismiss="modal"
                                         >
-                                            Add Customer
+                                            <i className="fa-solid fa-check"></i>
+                                            Save Customer
                                         </button>
                                     </div>
                                 </div>
